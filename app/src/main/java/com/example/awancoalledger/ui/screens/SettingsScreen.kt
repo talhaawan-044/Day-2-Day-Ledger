@@ -1,0 +1,1200 @@
+package com.example.awancoalledger.ui.screens
+
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.*
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.example.awancoalledger.data.*
+import com.example.awancoalledger.ui.components.*
+import com.example.awancoalledger.ui.theme.*
+import com.example.awancoalledger.viewmodel.LedgerViewModel
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SettingsScreen(
+        viewModel: LedgerViewModel,
+        onNavigateToReminders: () -> Unit = {},
+        onNavigateToVehicleTracker: () -> Unit = {}
+) {
+    val haptic = LocalHapticFeedback.current
+    val context = LocalContext.current
+
+    val reminders by viewModel.allReminders.collectAsState(initial = emptyList())
+    val activeRemindersCount = reminders.count { !it.isCompleted }
+
+    val bizName by viewModel.businessName.collectAsState(initial = "")
+    val ownerName by viewModel.ownerName.collectAsState(initial = "")
+    val phone by viewModel.businessPhone.collectAsState(initial = "")
+    val address by viewModel.businessAddress.collectAsState(initial = "")
+    val appLock by viewModel.isAppLockEnabled.collectAsState(initial = false)
+    val biometrics by viewModel.isBiometricsEnabled.collectAsState(initial = false)
+    val darkMode by viewModel.isDarkMode.collectAsState(initial = true)
+    val logoUri by viewModel.companyLogoUri.collectAsState(initial = null)
+    val signatureUri by viewModel.signatureUri.collectAsState(initial = null)
+    val oilInterval by viewModel.oilChangeInterval.collectAsState()
+
+    val isAnonymous by viewModel.isAnonymous.collectAsState(initial = true)
+    val showConflictDialog by viewModel.showConflictDialog.collectAsState()
+
+    // Launchers
+    val logoPicker =
+            rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+                uri?.let { viewModel.updateCompanyLogoUri(context, it) }
+            }
+
+    val signaturePicker =
+            rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+                uri?.let { viewModel.updateSignatureUri(context, it) }
+            }
+
+    val user by viewModel.currentUser.collectAsState(initial = null)
+    var showRestoreWarning by remember { mutableStateOf(false) }
+
+    val googleSignInLauncher =
+            rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.StartActivityForResult()
+            ) { result ->
+                val task =
+                        com.google.android.gms.auth.api.signin.GoogleSignIn
+                                .getSignedInAccountFromIntent(result.data)
+                try {
+                    val account =
+                            task.getResult(
+                                    com.google.android.gms.common.api.ApiException::class.java
+                            )
+                    val idToken = account.idToken ?: return@rememberLauncherForActivityResult
+                    val credential =
+                            com.google.firebase.auth.GoogleAuthProvider.getCredential(idToken, null)
+
+                    if (isAnonymous) {
+                        viewModel.linkAccount(credential) { success, error ->
+                            if (success) {
+                                Toast.makeText(
+                                                context,
+                                                "Account Linked Successfully!",
+                                                Toast.LENGTH_SHORT
+                                        )
+                                        .show()
+                            } else if (error != "COLLISION") {
+                                Toast.makeText(
+                                                context,
+                                                "Linking Failed: $error",
+                                                Toast.LENGTH_SHORT
+                                        )
+                                        .show()
+                            }
+                        }
+                    } else {
+                        viewModel.signInWithFirebase(credential) { success, isNewUser ->
+                            if (success) {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                if (isNewUser) {
+                                    viewModel.confirmLogin(true)
+                                    Toast.makeText(
+                                                    context,
+                                                    "Cloud Sync Enabled!",
+                                                    Toast.LENGTH_SHORT
+                                            )
+                                            .show()
+                                } else {
+                                    viewModel.confirmLogin(false)
+                                }
+                            } else {
+                                Toast.makeText(context, "Sign In Failed", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(context, "Error: ${e.localizedMessage}", Toast.LENGTH_LONG)
+                            .show()
+                }
+            }
+
+    val restoreLauncher =
+            rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+                uri?.let {
+                    viewModel.restoreDatabase(
+                            context = context,
+                            uri = it,
+                            onSuccess = {
+                                Toast.makeText(context, "Restore Successful!", Toast.LENGTH_SHORT)
+                                        .show()
+                            },
+                            onError = { error ->
+                                Toast.makeText(context, "Restore Failed: $error", Toast.LENGTH_LONG)
+                                        .show()
+                            }
+                    )
+                }
+            }
+
+    // State for Modals
+    var editingField by remember { mutableStateOf<Pair<String, String>?>(null) }
+    var showPinKeypad by remember { mutableStateOf(false) }
+    var showBackupsModal by remember { mutableStateOf(false) }
+    var showLoginDialog by remember { mutableStateOf(false) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
+    var lastClickTime by remember { mutableLongStateOf(0L) }
+
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        Column(
+                modifier =
+                        Modifier.fillMaxSize()
+                                .statusBarsPadding()
+                                .verticalScroll(rememberScrollState())
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            Text(
+                    "Settings",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 34.sp,
+                    fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Profile Header (Premium Card)
+            ProfileHeader(ownerName, bizName)
+
+            Spacer(modifier = Modifier.height(28.dp))
+
+            // Sections
+            SettingsSection(title = "CLOUD ACCOUNT") {
+                if (user == null || isAnonymous) {
+                    PremiumAccountCard(
+                            title = "Guest Mode",
+                            subtitle = "Back up your data to the cloud",
+                            icon = Icons.Default.CloudUpload,
+                            color = PrimaryBlue,
+                            onClick = { showLoginDialog = true }
+                    )
+                } else {
+                    PremiumAccountCard(
+                            title = user?.displayName ?: user?.email ?: "Account Sync Active",
+                            subtitle = user?.email ?: "Your data is secured in the cloud",
+                            icon = Icons.Default.CloudDone,
+                            color = PrimaryBlue,
+                            isLoggedIn = true,
+                            onLogout = { showLogoutDialog = true }
+                    )
+                }
+            }
+
+            if (showLogoutDialog) {
+                IOSAlertDialog(
+                        title = "Sign Out",
+                        message =
+                                "Are you sure you want to sign out? Your data will remain safely in the cloud, but you won't be able to sync until you sign back in.",
+                        onDismissRequest = { showLogoutDialog = false },
+                        buttons = {
+                            IOSDialogButton(text = "Cancel", onClick = { showLogoutDialog = false })
+                            IOSDialogButton(
+                                    text = "Sign Out",
+                                    onClick = {
+                                        showLogoutDialog = false
+                                        viewModel.signOut(context)
+                                    },
+                                    color = ErrorRed,
+                                    fontWeight = FontWeight.Bold,
+                                    isLast = true
+                            )
+                        }
+                )
+            }
+
+            SettingsSection(title = "INTERNAL TOOLS") {
+                SettingsRow(
+                        Icons.Default.Notifications,
+                        "Reminders Manager",
+                        "$activeRemindersCount Active",
+                        color = iOSOrange,
+                        isLast = true
+                ) {
+                    val currentTime = System.currentTimeMillis()
+                    if (currentTime - lastClickTime > 1000) {
+                        lastClickTime = currentTime
+                        onNavigateToReminders()
+                    }
+                }
+                SettingsRow(
+                        Icons.Default.DirectionsCar,
+                        "Vehicle Tracker",
+                        "Mileage & Service",
+                        color = PrimaryBlue,
+                        isLast = true
+                ) {
+                    val currentTime = System.currentTimeMillis()
+                    if (currentTime - lastClickTime > 1000) {
+                        lastClickTime = currentTime
+                        onNavigateToVehicleTracker()
+                    }
+                }
+            }
+
+            SettingsSection(title = "BUSINESS PROFILE") {
+                SettingsRow(Icons.Default.Business, "Business Name", bizName, color = PrimaryBlue) {
+                    editingField = "Business Name" to bizName
+                }
+                SettingsRow(Icons.Default.Person, "Owner Name", ownerName, color = iOSOrange) {
+                    editingField = "Owner Name" to ownerName
+                }
+                SettingsRow(Icons.Default.Phone, "Phone", phone, color = SuccessGreen) {
+                    editingField = "Phone" to phone
+                }
+                val isLogoUploading by viewModel.isLogoUploading.collectAsState()
+                val isSignatureUploading by viewModel.isSignatureUploading.collectAsState()
+
+                SettingsRow(
+                        Icons.Default.Image,
+                        "Company Logo",
+                        color = ErrorRed,
+                        control = {
+                            if (logoUri != null || isLogoUploading) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        AsyncImage(
+                                                model = logoUri,
+                                                contentDescription = null,
+                                                modifier =
+                                                        Modifier.size(40.dp)
+                                                                .clip(RoundedCornerShape(6.dp))
+                                                                .background(
+                                                                        MaterialTheme.colorScheme
+                                                                                .surfaceVariant
+                                                                )
+                                                                .padding(2.dp)
+                                                                .clickable {
+                                                                    logoPicker.launch(
+                                                                            PickVisualMediaRequest(
+                                                                                    ActivityResultContracts
+                                                                                            .PickVisualMedia
+                                                                                            .ImageOnly
+                                                                            )
+                                                                    )
+                                                                },
+                                                contentScale = ContentScale.Fit,
+                                                alpha = if (isLogoUploading) 0.5f else 1f
+                                        )
+                                        if (isLogoUploading) {
+                                            CircularProgressIndicator(
+                                                    modifier = Modifier.size(20.dp),
+                                                    strokeWidth = 2.dp,
+                                                    color = PrimaryBlue
+                                            )
+                                        }
+                                    }
+                                    Spacer(Modifier.width(12.dp))
+                                    Surface(
+                                            onClick = {
+                                                viewModel.updateCompanyLogoUri(context, null)
+                                            },
+                                            modifier = Modifier.size(36.dp),
+                                            shape = CircleShape,
+                                            color = ErrorRed.copy(alpha = 0.1f)
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                    Icons.Default.Delete,
+                                                    contentDescription = "Delete",
+                                                    tint = ErrorRed,
+                                                    modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            } else {
+                                Text(
+                                        "Upload",
+                                        color = PrimaryBlue,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                ) {
+                    if (logoUri == null && !isLogoUploading)
+                            logoPicker.launch(
+                                    PickVisualMediaRequest(
+                                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                                    )
+                            )
+                }
+                SettingsRow(
+                        Icons.Default.Edit,
+                        "Signature",
+                        color = iOSPurple,
+                        isLast = true,
+                        control = {
+                            if (signatureUri != null || isSignatureUploading) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        AsyncImage(
+                                                model = signatureUri,
+                                                contentDescription = null,
+                                                modifier =
+                                                        Modifier.size(40.dp)
+                                                                .clip(RoundedCornerShape(6.dp))
+                                                                .background(
+                                                                        MaterialTheme.colorScheme
+                                                                                .surfaceVariant
+                                                                )
+                                                                .padding(2.dp)
+                                                                .clickable {
+                                                                    signaturePicker.launch(
+                                                                            PickVisualMediaRequest(
+                                                                                    ActivityResultContracts
+                                                                                            .PickVisualMedia
+                                                                                            .ImageOnly
+                                                                            )
+                                                                    )
+                                                                },
+                                                contentScale = ContentScale.Fit,
+                                                alpha = if (isSignatureUploading) 0.5f else 1f
+                                        )
+                                        if (isSignatureUploading) {
+                                            CircularProgressIndicator(
+                                                    modifier = Modifier.size(20.dp),
+                                                    strokeWidth = 2.dp,
+                                                    color = PrimaryBlue
+                                            )
+                                        }
+                                    }
+                                    Spacer(Modifier.width(12.dp))
+                                    Surface(
+                                            onClick = {
+                                                viewModel.updateSignatureUri(context, null)
+                                            },
+                                            modifier = Modifier.size(36.dp),
+                                            shape = CircleShape,
+                                            color = ErrorRed.copy(alpha = 0.1f)
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                    Icons.Default.Delete,
+                                                    contentDescription = "Delete",
+                                                    tint = ErrorRed,
+                                                    modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            } else {
+                                Text(
+                                        "Upload",
+                                        color = PrimaryBlue,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                ) {
+                    if (signatureUri == null && !isSignatureUploading)
+                            signaturePicker.launch(
+                                    PickVisualMediaRequest(
+                                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                                    )
+                            )
+                }
+            }
+
+            SettingsSection(title = "PRIVACY & SECURITY") {
+                SettingsToggleRow(Icons.Default.Lock, "App Lock", appLock, color = PrimaryBlue) {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    if (it) showPinKeypad = true else viewModel.toggleAppLock(false)
+                }
+                if (appLock) {
+                    SettingsToggleRow(
+                            Icons.Default.Fingerprint,
+                            "Touch ID / Face ID",
+                            biometrics,
+                            color = SuccessGreen
+                    ) {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        viewModel.toggleBiometrics(it)
+                    }
+                    SettingsRow(
+                            Icons.Default.Security,
+                            "Change PIN",
+                            "****",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            isLast = true
+                    ) { showPinKeypad = true }
+                }
+            }
+
+            SettingsSection(title = "PREFERENCES") {
+                SettingsToggleRow(
+                        Icons.Default.DarkMode,
+                        "Dark Mode",
+                        darkMode,
+                        color = iOSPurple
+                ) {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    viewModel.toggleDarkMode(it)
+                }
+                SettingsRow(
+                        Icons.Default.SettingsSuggest,
+                        "Oil Change Interval",
+                        "${oilInterval} km",
+                        color = iOSOrange,
+                        isLast = true
+                ) { editingField = "Oil Interval" to oilInterval.toString() }
+            }
+
+            SettingsSection(title = "DATA MANAGEMENT") {
+                SettingsRow(
+                        Icons.Default.History,
+                        "Auto-Backups",
+                        "View Snapshots",
+                        color = iOSOrange
+                ) { showBackupsModal = true }
+                SettingsRow(Icons.Default.CloudDownload, "Manual Export", color = PrimaryBlue) {
+                    viewModel.shareBackup(context) { error ->
+                        Toast.makeText(context, "Export Failed: $error", Toast.LENGTH_LONG).show()
+                    }
+                }
+                SettingsRow(
+                        Icons.Default.Upload,
+                        "Restore Data",
+                        color = ErrorRed,
+                        textColor = ErrorRed,
+                        isLast = true
+                ) { restoreLauncher.launch(arrayOf("application/json", "*/*")) }
+            }
+
+            Spacer(modifier = Modifier.height(100.dp))
+        }
+
+        // Modals
+        if (editingField != null) {
+            EditFieldDialog(editingField!!, onDismiss = { editingField = null }) {
+                when (editingField!!.first) {
+                    "Business Name" -> viewModel.updateBusinessName(it)
+                    "Owner Name" -> viewModel.updateOwnerName(it)
+                    "Phone" -> viewModel.updateBusinessPhone(it)
+                    "Oil Interval" -> viewModel.updateOilChangeInterval(it.toIntOrNull() ?: 3000)
+                }
+                editingField = null
+            }
+        }
+
+        if (showPinKeypad) {
+            PinKeypadModal(onDismiss = { showPinKeypad = false }) { pin ->
+                viewModel.setPinAndEnable(pin)
+                showPinKeypad = false
+            }
+        }
+
+        if (showBackupsModal) {
+            AutoBackupsModal(viewModel = viewModel, onDismiss = { showBackupsModal = false })
+        }
+
+        if (showLoginDialog) {
+            LoginDialog(
+                    viewModel = viewModel,
+                    onDismiss = { showLoginDialog = false },
+                    onGoogleSignIn = {
+                        showLoginDialog = false
+                        googleSignInLauncher.launch(
+                                viewModel.getGoogleSignInClient(context).signInIntent
+                        )
+                    },
+                    onAuthSuccess = { isNewUser ->
+                        if (isNewUser) {
+                            viewModel.confirmLogin(true)
+                            Toast.makeText(context, "Cloud Sync Enabled!", Toast.LENGTH_SHORT)
+                                    .show()
+                        } else {
+                            showRestoreWarning = true
+                        }
+                    }
+            )
+        }
+
+        if (showRestoreWarning) {
+            IOSAlertDialog(
+                    onDismissRequest = { showRestoreWarning = false },
+                    title = "Restore Cloud Data?",
+                    message =
+                            "We found existing data on the cloud. This will REPLACE all guest data on this device with your cloud backup. A restart will be required.",
+                    buttons = {
+                        IOSDialogButton(text = "Cancel", onClick = { showRestoreWarning = false })
+                        IOSDialogButton(
+                                text = "Restore",
+                                fontWeight = FontWeight.Bold,
+                                isLast = true,
+                                onClick = {
+                                    showRestoreWarning = false
+                                    viewModel.confirmLogin(false)
+                                    Toast.makeText(
+                                                    context,
+                                                    "Restoring from Cloud...",
+                                                    Toast.LENGTH_SHORT
+                                            )
+                                            .show()
+                                }
+                        )
+                    }
+            )
+        }
+
+        if (showConflictDialog) {
+            IOSAlertDialog(
+                    onDismissRequest = { viewModel.handleCollisionCancel() },
+                    title = "Account Already Exists",
+                    message =
+                            "This Google account already has backed-up data. Do you want to Erase Guest Data & Restore Cloud Data or Cancel?",
+                    buttons = {
+                        IOSDialogButton(
+                                text = "Cancel",
+                                onClick = { viewModel.handleCollisionCancel() }
+                        )
+                        IOSDialogButton(
+                                text = "Restore Cloud Data",
+                                color = ErrorRed,
+                                fontWeight = FontWeight.Bold,
+                                isLast = true,
+                                onClick = {
+                                    viewModel.handleCollisionRestore(context) {
+                                        Toast.makeText(
+                                                        context,
+                                                        "Data Restored from Cloud!",
+                                                        Toast.LENGTH_SHORT
+                                                )
+                                                .show()
+                                    }
+                                }
+                        )
+                    }
+            )
+        }
+    }
+}
+
+@Composable
+fun ProfileHeader(owner: String, biz: String) {
+    Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(24.dp),
+            shadowElevation = 2.dp
+    ) {
+        Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                    modifier =
+                            Modifier.size(64.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                            Brush.linearGradient(listOf(PrimaryBlue, iOSPurple))
+                                    ),
+                    contentAlignment = Alignment.Center
+            ) {
+                Text(
+                        owner.take(1).uppercase(),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(
+                        owner.uppercase(),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Black
+                )
+                Text(
+                        biz,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) {
+    Column(modifier = Modifier.padding(bottom = 24.dp)) {
+        Text(
+                title,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
+                letterSpacing = 1.sp
+        )
+        Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(22.dp)
+        ) { Column { content() } }
+    }
+}
+
+@Composable
+fun SettingsRow(
+        icon: ImageVector,
+        title: String,
+        value: String? = null,
+        color: Color,
+        isLast: Boolean = false,
+        textColor: Color = MaterialTheme.colorScheme.onSurface,
+        control: @Composable (() -> Unit)? = null,
+        onClick: () -> Unit
+) {
+    val haptic = LocalHapticFeedback.current
+    Column {
+        Row(
+                modifier =
+                        Modifier.fillMaxWidth()
+                                .clickable {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    onClick()
+                                }
+                                .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                    modifier =
+                            Modifier.size(32.dp).clip(RoundedCornerShape(8.dp)).background(color),
+                    contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                        icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(18.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(title, color = textColor, fontSize = 17.sp, modifier = Modifier.weight(1f))
+
+            if (control != null) {
+                control()
+            } else {
+                if (value != null) {
+                    Text(
+                            value,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 17.sp,
+                            modifier = Modifier.padding(end = 8.dp)
+                    )
+                }
+                Icon(
+                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = Color.LightGray,
+                        modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+        if (!isLast) {
+            HorizontalDivider(
+                    modifier = Modifier.padding(start = 64.dp),
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+            )
+        }
+    }
+}
+
+@Composable
+fun SettingsToggleRow(
+        icon: ImageVector,
+        title: String,
+        checked: Boolean,
+        color: Color,
+        isLast: Boolean = false,
+        onCheckedChange: (Boolean) -> Unit
+) {
+    Column {
+        Row(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                    modifier =
+                            Modifier.size(32.dp).clip(RoundedCornerShape(8.dp)).background(color),
+                    contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                        icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(18.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                    title,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 17.sp,
+                    modifier = Modifier.weight(1f)
+            )
+            Switch(
+                    checked = checked,
+                    onCheckedChange = onCheckedChange,
+                    colors =
+                            SwitchDefaults.colors(
+                                    checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                                    checkedTrackColor = SuccessGreen
+                            )
+            )
+        }
+        if (!isLast) {
+            HorizontalDivider(
+                    modifier = Modifier.padding(start = 64.dp),
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+            )
+        }
+    }
+}
+
+@Composable
+fun PinKeypadModal(onDismiss: () -> Unit, onComplete: (String) -> Unit) {
+    var pin by remember { mutableStateOf("") }
+
+    Box(
+            modifier =
+                    Modifier.fillMaxSize()
+                            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.5f))
+                            .clickable { onDismiss() },
+            contentAlignment = Alignment.Center
+    ) {
+        Surface(
+                modifier = Modifier.width(320.dp).clickable(enabled = false) {},
+                shape = RoundedCornerShape(32.dp),
+                color = MaterialTheme.colorScheme.surface
+        ) {
+            Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("Set New PIN", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Dots
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    repeat(4) { index ->
+                        Box(
+                                modifier =
+                                        Modifier.size(16.dp)
+                                                .clip(CircleShape)
+                                                .background(
+                                                        if (pin.length > index) PrimaryBlue
+                                                        else Color.LightGray.copy(alpha = 0.3f)
+                                                )
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Keypad
+                val keys = listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "DEL")
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    keys.chunked(3).forEach { rowKeys ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            rowKeys.forEach { key ->
+                                if (key.isEmpty()) {
+                                    Spacer(modifier = Modifier.size(64.dp))
+                                } else {
+                                    Surface(
+                                            onClick = {
+                                                if (key == "DEL") {
+                                                    if (pin.isNotEmpty()) pin = pin.dropLast(1)
+                                                } else if (pin.length < 4) {
+                                                    pin += key
+                                                    if (pin.length == 4) onComplete(pin)
+                                                }
+                                            },
+                                            modifier = Modifier.size(64.dp),
+                                            shape = CircleShape,
+                                            color = MaterialTheme.colorScheme.surfaceVariant
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            if (key == "DEL") {
+                                                Icon(
+                                                        Icons.Default.Backspace,
+                                                        contentDescription = null,
+                                                        modifier = Modifier.size(24.dp)
+                                                )
+                                            } else {
+                                                Text(key, fontSize = 24.sp)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                TextButton(onClick = onDismiss, modifier = Modifier.padding(top = 16.dp)) {
+                    Text("Cancel", color = PrimaryBlue)
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AutoBackupsModal(viewModel: LedgerViewModel, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val snapshots by viewModel.autoSnapshots.collectAsState()
+    var snapshotToRestore by remember { mutableStateOf<File?>(null) }
+    var isCreating by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) { viewModel.refreshSnapshots(context) }
+
+    ModalBottomSheet(
+            onDismissRequest = onDismiss,
+            containerColor = MaterialTheme.colorScheme.surface,
+            dragHandle = {
+                BottomSheetDefaults.DragHandle(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                )
+            }
+    ) {
+        Column(modifier = Modifier.padding(16.dp).fillMaxWidth().padding(bottom = 32.dp)) {
+            Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Auto-Snapshots", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                IconButton(
+                        onClick = {
+                            isCreating = true
+                            viewModel.createManualSnapshot(context) { success ->
+                                isCreating = false
+                                if (success)
+                                        Toast.makeText(
+                                                        context,
+                                                        "Snapshot Created",
+                                                        Toast.LENGTH_SHORT
+                                                )
+                                                .show()
+                            }
+                        },
+                        enabled = !isCreating
+                ) {
+                    if (isCreating)
+                            CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    strokeWidth = 2.dp
+                            )
+                    else
+                            Icon(
+                                    Icons.Default.AddAPhoto,
+                                    contentDescription = "Manual Snapshot",
+                                    tint = PrimaryBlue
+                            )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                    "Full database backups are saved every 6 hours. You can also create one manually.",
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+
+            if (snapshots.isEmpty()) {
+                Box(
+                        modifier = Modifier.fillMaxWidth().height(150.dp),
+                        contentAlignment = Alignment.Center
+                ) { Text("No snapshots found", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            } else {
+                LazyColumn(modifier = Modifier.heightIn(max = 400.dp)) {
+                    items(snapshots) { file ->
+                        val dateStr =
+                                SimpleDateFormat("MMM dd, hh:mm a", Locale.getDefault())
+                                        .format(Date(file.lastModified()))
+                        val sizeStr = "${file.length() / 1024} KB"
+                        val isManual = file.name.startsWith("manual")
+
+                        Surface(
+                                onClick = { snapshotToRestore = file },
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                        ) {
+                            Row(
+                                    modifier = Modifier.padding(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                        modifier =
+                                                Modifier.size(40.dp)
+                                                        .clip(CircleShape)
+                                                        .background(
+                                                                (if (isManual) iOSOrange
+                                                                        else PrimaryBlue)
+                                                                        .copy(alpha = 0.2f)
+                                                        ),
+                                        contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                            if (isManual) Icons.Default.Person
+                                            else Icons.Default.AutoMode,
+                                            null,
+                                            tint = if (isManual) iOSOrange else PrimaryBlue,
+                                            modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(dateStr, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                                    Text(
+                                            if (isManual) "Manual Snapshot • $sizeStr"
+                                            else "Scheduled Snapshot • $sizeStr",
+                                            fontSize = 12.sp,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                Icon(Icons.Default.Restore, null, tint = SuccessGreen)
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+            Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors =
+                            ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.onSurface
+                            )
+            ) { Text("Done") }
+        }
+
+        if (snapshotToRestore != null) {
+            IOSAlertDialog(
+                    onDismissRequest = { snapshotToRestore = null },
+                    title = "Restore Snapshot?",
+                    message =
+                            "This will replace all current app data with the data from this snapshot. This action cannot be undone.",
+                    buttons = {
+                        IOSDialogButton(text = "Cancel", onClick = { snapshotToRestore = null })
+                        IOSDialogButton(
+                                text = "Restore",
+                                color = ErrorRed,
+                                fontWeight = FontWeight.Bold,
+                                isLast = true,
+                                onClick = {
+                                    viewModel.restoreSnapshot(
+                                            context,
+                                            snapshotToRestore!!,
+                                            onSuccess = {
+                                                Toast.makeText(
+                                                                context,
+                                                                "Database Restored!",
+                                                                Toast.LENGTH_SHORT
+                                                        )
+                                                        .show()
+                                                onDismiss()
+                                            },
+                                            onError = { error ->
+                                                Toast.makeText(
+                                                                context,
+                                                                "Restore Failed: $error",
+                                                                Toast.LENGTH_LONG
+                                                        )
+                                                        .show()
+                                            }
+                                    )
+                                    snapshotToRestore = null
+                                }
+                        )
+                    }
+            )
+        }
+    }
+}
+
+@Composable
+fun EditFieldDialog(field: Pair<String, String>, onDismiss: () -> Unit, onSave: (String) -> Unit) {
+    var value by remember { mutableStateOf(field.second) }
+    IOSAlertDialog(
+            onDismissRequest = onDismiss,
+            title = "Edit ${field.first}",
+            content = {
+                PremiumInput(
+                        label = field.first,
+                        value = value,
+                        onValueChange = { value = it },
+                        keyboardType =
+                                if (field.first == "Phone" || field.first == "Oil Interval")
+                                        androidx.compose.ui.text.input.KeyboardType.Number
+                                else androidx.compose.ui.text.input.KeyboardType.Text
+                )
+            },
+            buttons = {
+                IOSDialogButton(text = "Cancel", onClick = onDismiss)
+                IOSDialogButton(
+                        text = "Save",
+                        fontWeight = FontWeight.Bold,
+                        isLast = true,
+                        onClick = { onSave(value) }
+                )
+            }
+    )
+}
+
+@Composable
+fun PremiumAccountCard(
+        title: String,
+        subtitle: String,
+        icon: ImageVector,
+        color: Color,
+        isLoggedIn: Boolean = false,
+        onClick: () -> Unit = {},
+        onLogout: () -> Unit = {}
+) {
+    val haptic = LocalHapticFeedback.current
+
+    // Gradient for Logged In state (Emerald/Teal)
+    val syncGradient = listOf(Color(0xFF007AFF), Color(0xFF007AFF))
+
+    Surface(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            color = Color.Transparent,
+            shape = RoundedCornerShape(28.dp),
+            shadowElevation = 8.dp
+    ) {
+        Column(modifier = Modifier.background(color).padding(24.dp)) {
+            Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+            ) {
+                // Profile Avatar / Icon with outer glow
+                Box(
+                        modifier =
+                                Modifier.size(64.dp)
+                                        .clip(RoundedCornerShape(20.dp))
+                                        .background(Color.White.copy(alpha = 0.2f)),
+                        contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                            icon,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(32.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(20.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                            title,
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 22.sp,
+                            color = Color.White,
+                            letterSpacing = (-0.5).sp
+                    )
+                    Text(
+                            subtitle,
+                            fontSize = 14.sp,
+                            color = Color.White.copy(alpha = 0.8f),
+                            lineHeight = 20.sp
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(28.dp))
+
+            if (isLoggedIn) {
+                Button(
+                        onClick = onLogout,
+                        modifier = Modifier.fillMaxWidth().height(54.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors =
+                                ButtonDefaults.buttonColors(
+                                        containerColor = Color.White.copy(alpha = 0.2f),
+                                        contentColor = Color.White
+                                ),
+                        elevation = ButtonDefaults.buttonElevation(0.dp),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.3f))
+                ) {
+                    Icon(
+                            Icons.Default.Logout,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(10.dp))
+                    Text("Sign Out of Sync", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                }
+            } else {
+                Button(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onClick()
+                        },
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                        shape = RoundedCornerShape(18.dp),
+                        colors =
+                                ButtonDefaults.buttonColors(
+                                        containerColor = Color.White,
+                                        contentColor = PrimaryBlue
+                                ),
+                        elevation =
+                                ButtonDefaults.buttonElevation(
+                                        defaultElevation = 4.dp,
+                                        pressedElevation = 8.dp
+                                )
+                ) {
+                    Icon(
+                            Icons.AutoMirrored.Filled.Login,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                            "Connect Cloud Account",
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 16.sp
+                    )
+                }
+            }
+        }
+    }
+}

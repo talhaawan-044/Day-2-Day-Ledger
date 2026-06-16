@@ -1,0 +1,133 @@
+package com.example.awancoalledger.data
+
+import kotlinx.coroutines.flow.Flow
+import com.example.awancoalledger.utils.BackupData
+
+class LedgerRepository(private val ledgerDao: LedgerDao) {
+
+    // Parties
+    fun getAllParties(): Flow<List<Party>> = ledgerDao.getAllParties()
+    fun getAllPartiesWithDetails(): Flow<List<PartyWithDetails>> = ledgerDao.getAllPartiesWithDetails()
+    fun getPartyWithDetails(partyId: Int): Flow<PartyWithDetails?> = ledgerDao.getPartyWithDetails(partyId)
+    suspend fun getPartyById(id: Int): Party? = ledgerDao.getPartyById(id)
+    suspend fun upsertParty(party: Party) = ledgerDao.upsertParty(party)
+    suspend fun deleteParty(party: Party) = ledgerDao.deleteParty(party)
+
+    // Ledger Entries
+    fun getEntriesForParty(partyId: Int): Flow<List<LedgerEntry>> = ledgerDao.getEntriesForParty(partyId)
+    fun getRecentEntries(): Flow<List<LedgerEntry>> = ledgerDao.getRecentEntries()
+    suspend fun insertEntry(entry: LedgerEntry) = ledgerDao.insertEntry(entry)
+    suspend fun deleteEntry(entry: LedgerEntry) = ledgerDao.deleteEntry(entry)
+
+    // Payments
+    fun getPaymentsForParty(partyId: Int): Flow<List<Payment>> = ledgerDao.getPaymentsForParty(partyId)
+    suspend fun insertPayment(payment: Payment) = ledgerDao.insertPayment(payment)
+    suspend fun deletePayment(payment: Payment) = ledgerDao.deletePayment(payment)
+
+    // Expenses
+    fun getAllExpenses(): Flow<List<Expense>> = ledgerDao.getAllExpenses()
+    suspend fun insertExpense(expense: Expense) = ledgerDao.insertExpense(expense)
+    suspend fun deleteExpense(expense: Expense) = ledgerDao.deleteExpense(expense)
+
+    // Reminder Lists
+    fun getAllReminderLists(): Flow<List<ReminderList>> = ledgerDao.getAllReminderLists()
+    suspend fun insertReminderList(list: ReminderList): Long = ledgerDao.insertReminderList(list)
+    suspend fun deleteReminderList(list: ReminderList) = ledgerDao.deleteReminderList(list)
+
+    // Reminders
+    fun getAllReminders(): Flow<List<Reminder>> = ledgerDao.getAllReminders()
+    fun getActiveReminders(): Flow<List<Reminder>> = ledgerDao.getActiveReminders()
+    fun getCompletedReminders(): Flow<List<Reminder>> = ledgerDao.getCompletedReminders()
+    fun getRemindersForList(listId: Int): Flow<List<Reminder>> = ledgerDao.getRemindersForList(listId)
+    fun getSubtasks(parentId: Int): Flow<List<Reminder>> = ledgerDao.getSubtasks(parentId)
+    suspend fun getReminderById(id: Int): Reminder? = ledgerDao.getReminderById(id)
+    suspend fun insertReminder(reminder: Reminder): Long = ledgerDao.insertReminder(reminder)
+    suspend fun deleteReminder(reminder: Reminder) = ledgerDao.deleteReminder(reminder)
+    suspend fun completeReminder(reminder: Reminder, scheduler: com.example.awancoalledger.utils.ReminderScheduler) {
+        val updated = reminder.copy(isCompleted = true)
+        ledgerDao.insertReminder(updated)
+        scheduler.cancel(updated)
+    }
+
+    // Stocks
+    fun getAllStocks(): Flow<List<Stock>> = ledgerDao.getAllStocks()
+    suspend fun getStockByMineName(mineName: String): Stock? = ledgerDao.getStockByMineName(mineName)
+    suspend fun getStockById(id: Int): Stock? = ledgerDao.getStockById(id)
+    suspend fun insertStock(stock: Stock): Long = ledgerDao.insertStock(stock)
+    suspend fun updateStock(stock: Stock) = ledgerDao.updateStock(stock)
+    suspend fun deleteStock(stock: Stock) = ledgerDao.deleteStock(stock)
+
+    // Stock Entries
+    fun getEntriesForStock(stockId: Int): Flow<List<StockEntry>> = ledgerDao.getEntriesForStock(stockId)
+    suspend fun insertStockEntry(entry: StockEntry) = ledgerDao.insertStockEntry(entry)
+    suspend fun deleteStockEntry(entry: StockEntry) = ledgerDao.deleteStockEntry(entry)
+
+    // Notes
+    fun getAllNotes(): Flow<List<Note>> = ledgerDao.getAllNotes()
+    fun getNotesInFolder(folderId: Int): Flow<List<Note>> = ledgerDao.getNotesInFolder(folderId)
+    suspend fun insertNote(note: Note): Long = ledgerDao.insertNote(note)
+    suspend fun updateNote(note: Note) = ledgerDao.updateNote(note)
+    suspend fun deleteNote(note: Note) = ledgerDao.deleteNote(note)
+
+    // Folders
+    fun getAllFolders(): Flow<List<Folder>> = ledgerDao.getAllFolders()
+    suspend fun insertFolder(folder: Folder): Long = ledgerDao.insertFolder(folder)
+    suspend fun deleteFolder(folder: Folder) = ledgerDao.deleteFolder(folder)
+
+    // Backup
+    suspend fun getBackupData(): BackupData {
+        return BackupData(
+            parties = ledgerDao.getAllPartiesList(),
+            entries = ledgerDao.getAllEntriesList(),
+            payments = ledgerDao.getAllPaymentsList(),
+            expenses = ledgerDao.getAllExpensesList(),
+            reminderLists = ledgerDao.getAllReminderListsList(),
+            reminders = ledgerDao.getAllRemindersList(),
+            stocks = ledgerDao.getAllStocksList(),
+            stockEntries = ledgerDao.getAllStockEntriesList(),
+            notes = ledgerDao.getAllNotesList(),
+            folders = ledgerDao.getAllFoldersList(),
+            fuelEntries = ledgerDao.getAllFuelEntriesList(),
+            maintenanceEntries = ledgerDao.getAllMaintenanceEntriesList(),
+            vehicles = ledgerDao.getAllVehiclesList()
+        )
+    }
+
+    @androidx.room.Transaction
+    suspend fun restoreData(data: BackupData) {
+        ledgerDao.clearAllData()
+        data.parties.forEach { ledgerDao.upsertParty(it) }
+        data.entries.forEach { ledgerDao.insertEntry(it) }
+        data.payments.forEach { ledgerDao.insertPayment(it) }
+        data.expenses.forEach { ledgerDao.insertExpense(it) }
+        data.reminderLists.forEach { ledgerDao.insertReminderList(it) }
+        data.reminders.forEach { ledgerDao.insertReminder(it) }
+        data.stocks.forEach { ledgerDao.insertStock(it) }
+        data.stockEntries.forEach { ledgerDao.insertStockEntry(it) }
+        data.notes.forEach { ledgerDao.insertNote(it) }
+        data.folders.forEach { ledgerDao.insertFolder(it) }
+        data.fuelEntries.forEach { ledgerDao.insertFuelEntry(it) }
+        data.maintenanceEntries.forEach { ledgerDao.insertMaintenanceEntry(it) }
+        data.vehicles.forEach { ledgerDao.insertVehicle(it) }
+    }
+
+    // Vehicle Tracking
+    fun getAllFuelEntries(): Flow<List<FuelEntry>> = ledgerDao.getAllFuelEntries()
+    suspend fun insertFuelEntry(entry: FuelEntry) = ledgerDao.insertFuelEntry(entry)
+    suspend fun deleteFuelEntry(entry: FuelEntry) = ledgerDao.deleteFuelEntry(entry)
+
+    fun getAllMaintenanceEntries(): Flow<List<MaintenanceEntry>> = ledgerDao.getAllMaintenanceEntries()
+    suspend fun insertMaintenanceEntry(entry: MaintenanceEntry) = ledgerDao.insertMaintenanceEntry(entry)
+    suspend fun deleteMaintenanceEntry(entry: MaintenanceEntry) = ledgerDao.deleteMaintenanceEntry(entry)
+
+    // Vehicles
+    fun getAllVehicles(): Flow<List<Vehicle>> = ledgerDao.getAllVehicles()
+    suspend fun insertVehicle(vehicle: Vehicle): Long = ledgerDao.insertVehicle(vehicle)
+    suspend fun deleteVehicle(vehicle: Vehicle) = ledgerDao.deleteVehicle(vehicle)
+    fun getFuelEntriesForVehicle(vehicleId: Int): Flow<List<FuelEntry>> = ledgerDao.getFuelEntriesForVehicle(vehicleId)
+    fun getMaintenanceEntriesForVehicle(vehicleId: Int): Flow<List<MaintenanceEntry>> = ledgerDao.getMaintenanceEntriesForVehicle(vehicleId)
+
+    suspend fun clearAllData() {
+        ledgerDao.clearAllData()
+    }
+}
