@@ -1,200 +1,151 @@
 # Day 2 Day Ledger
 
-<div align="center">
-  <img src="https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android" />
-  <img src="https://img.shields.io/badge/Language-Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin" />
-  <img src="https://img.shields.io/badge/UI-Jetpack_Compose-4285F4?style=for-the-badge&logo=android&logoColor=white" alt="Jetpack Compose" />
-  <img src="https://img.shields.io/badge/Database-Room_&_Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Database" />
-  <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="License" />
-</div>
+![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
+![Kotlin](https://img.shields.io/badge/Kotlin-0095D5?style=for-the-badge&logo=kotlin&logoColor=white)
+![Jetpack Compose](https://img.shields.io/badge/Compose-4285F4?style=for-the-badge&logo=android&logoColor=white)
+![Room Database](https://img.shields.io/badge/Room-Local_Storage-green?style=for-the-badge)
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
 
-<br/>
+Day 2 Day Ledger is a comprehensive, local-first business management application designed primarily for operations involving extensive inventory tracking (such as coal mines), financial ledgers, and vehicle fleet management. Built with modern Android development practices, it leverages Kotlin and Jetpack Compose to deliver a robust, highly responsive user interface while ensuring data persistence through Room Database and seamless cloud backups via Firebase.
 
-> A robust, production-grade Android application designed to facilitate comprehensive financial tracking and inventory management for individuals and small-to-medium enterprises.
-
----
+This application is engineered for business owners who require a reliable tool to track daily financial operations, manage supplier and buyer networks, monitor inventory metrics, and organize critical business notes.
 
 ## Table of Contents
-1. [Core Philosophy](#core-philosophy)
-2. [Key Features](#key-features)
-3. [Technical Architecture](#technical-architecture)
-4. [Security & Authentication](#security--authentication)
-5. [Setup & Installation](#setup--installation)
-6. [Data Synchronization](#data-synchronization)
-7. [Contributing Guidelines](#contributing-guidelines)
-8. [License](#license)
+- [Core Features](#core-features)
+- [Application Interface](#application-interface)
+- [Technical Architecture](#technical-architecture)
+- [Data Privacy & Security](#data-privacy--security)
+- [Data Export & Backup](#data-export--backup)
+- [Installation & Setup](#installation--setup)
+- [Project Structure](#project-structure)
+- [Contributing](#contributing)
+- [License](#license)
 
----
+## Core Features
 
-## Core Philosophy
+### 1. Financial Ledger & Contacts Management
+The backbone of the application is a fully-featured financial ledger that tracks net market credit, receivables, and payables. 
+- **Parties Module:** Manage a comprehensive list of contacts, categorized as Buyers or Suppliers.
+- **Financial Insights:** Access real-time insights into total incoming revenue, monthly operating expenses, and overall balances.
+- **Transaction History:** Maintain a precise, immutable record of all financial transactions associated with specific parties.
 
-The Day 2 Day Ledger is built on three foundational pillars:
-- **Scalability**: Designed to handle growing datasets without performance degradation.
-- **Maintainability**: Strictly adhering to Clean Architecture principles for a highly readable and testable codebase.
-- **Data Security**: Prioritizing offline-first local persistence combined with secure cloud synchronization.
+### 2. Inventory & Stock Management
+Specifically tailored for industrial use cases such as coal mining and logistics.
+- **Coal Mine Initialization:** Set up dedicated repositories for different coal mines or material types.
+- **Volume Tracking:** Log initial weights and track subsequent additions or reductions in tons.
+- **Stock Filtering:** Quickly search and filter through multiple active mines to determine current resource availability.
 
----
+### 3. Vehicle Tracker (Garage)
+A dedicated module for logistics and fleet management.
+- **Vehicle Profiles:** Add new vehicles specifying nicknames, plate numbers, and vehicle types (Truck, Car).
+- **Odometer Tracking:** Monitor the initial and current odometer readings in kilometers.
+- **Maintenance Intervals:** Configure custom service intervals (e.g., oil changes every 4000 km) and receive notifications when a vehicle is due for maintenance.
 
-## Key Features
+### 4. Expense Tracking
+Categorize and monitor daily business expenditures to maintain strict budget controls.
+- **Categorization:** Predefined categories such as Food, Transport, and Business expenses.
+- **Detailed Logging:** Attach dates, amounts, and optional descriptive notes to every expense entry.
+- **Time-bound Reporting:** View expenses filtered by recent transactions or specific periods.
 
-The application provides a meticulously organized system for managing daily operations.
+### 5. Notes & Folders
+An integrated rich-text editor designed for maintaining operational notes, meeting minutes, and internal memos.
+- **Folder Organization:** Group notes into logically structured folders.
+- **Rich Editing:** A robust editor screen that supports comprehensive text formatting.
 
-### 1. Advanced Ledger Management
-| Capability | Description |
-| :--- | :--- |
-| **Tracking** | Monitor payables and receivables across multiple parties. |
-| **Granularity** | Log transactions with timestamps, related inventory items, and supplementary notes. |
-| **Transaction Types** | Native support for standard accounting paradigms (Credit, Debit, Adjustments). |
+### 6. Reminders & Alarms
+A built-in scheduling system ensuring critical business tasks are never missed.
+- **Alarm Sound Manager:** Native integration with Android's alarm system for high-priority alerts.
+- **Scheduled Notifications:** Leverage the internal `ReminderScheduler` and `NotificationHelper` to set custom triggers.
 
-### 2. Inventory and Stock Tracking
-| Capability | Description |
-| :--- | :--- |
-| **Cataloging** | Maintain a detailed catalog of stock items with base configurations. |
-| **Real-time Valuation** | Track quantities, unit prices, and overall stock valuation instantly. |
-| **Movement Logging** | Support for complex stock movements (incoming shipments, outgoing sales). |
+## Application Interface
 
-### 3. Party and Contact Management
-Maintain a robust directory of all business associates (suppliers, customers, contractors). Each profile acts as a centralized hub for their contact information, complete financial history, and outstanding balances.
+The application features a dark-themed, modern interface built entirely with Jetpack Compose. Below is an overview of the core application screens.
 
-### 4. Professional Export Mechanisms
-Generate highly-formatted, native reports directly on the device for immediate sharing.
-- **PDF Documents**: Utilize native Android `PdfDocument` APIs for pixel-perfect printing.
-- **Excel Spreadsheets**: Leverage Apache POI for structured `XLSX` generation.
+### Dashboard & Settings
+| Home Dashboard | Settings Overview | Privacy & Preferences |
+|:---:|:---:|:---:|
+| <img src="Screenshots/Home_Dashboard_Screen.jpg" width="250"> | <img src="Screenshots/Settings_Top_Screen.jpg" width="250"> | <img src="Screenshots/Settings_Bottom_Screen.jpg" width="250"> |
 
-### 5. Secure Offline-First Architecture
-Function flawlessly in entirely disconnected environments. Using a sophisticated local Room database layer, all data is instantly accessible. When network connectivity is established, a background engine seamlessly coordinates with the remote cloud database.
+### Contacts & Finances
+| Contacts & Parties | Add New Party | Expenses Tracker |
+|:---:|:---:|:---:|
+| <img src="Screenshots/Contacts_Parties_Screen.jpg" width="250"> | <img src="Screenshots/Add_Party_BottomSheet.jpg" width="250"> | <img src="Screenshots/Expenses_Screen.jpg" width="250"> |
 
-### 6. Vehicle and Fleet Tracking
-An integrated logistics module for tracking vehicle expenses, maintenance logs, and dispatch histories, keeping logistical operations financially transparent.
+### Inventory & Operations
+| Inventory Dashboard | Initialize Mine | Notes & Folders |
+|:---:|:---:|:---:|
+| <img src="Screenshots/Inventory_Stock_Screen.jpg" width="250"> | <img src="Screenshots/Inventory_Stock_Screen.jpg" width="250"> | <img src="Screenshots/Notes_Folders_Screen.jpg" width="250"> |
 
----
+### Fleet Management
+| Garage Overview | Add Vehicle Details | Add Expense Details |
+|:---:|:---:|:---:|
+| <img src="Screenshots/Garage_Vehicle_Screen.jpg" width="250"> | <img src="Screenshots/Add_Vehicle_BottomSheet.jpg" width="250"> | <img src="Screenshots/Add_Expense_BottomSheet.jpg" width="250"> |
 
 ## Technical Architecture
 
-Constructed following the principles of Clean Architecture and the Model-View-ViewModel (MVVM) pattern.
+The application is built utilizing modern Android architecture components to ensure scalability, testability, and a seamless user experience.
 
-### Technology Stack
-Below is a breakdown of the primary technologies utilized within the project.
+- **Design Pattern:** Model-View-ViewModel (MVVM) architecture ensures a clean separation of concerns.
+- **UI Framework:** 100% Jetpack Compose for declarative UI development. State hoisting and unidirectional data flow are strictly implemented.
+- **Concurrency:** Kotlin Coroutines and `Flow` (specifically `StateFlow` and `SharedFlow`) are utilized for asynchronous data streams and reactive UI updates.
+- **Local Persistence:** Room Database serves as the single source of truth, providing offline-first capabilities.
+- **Background Processing:** `WorkManager` (e.g., `BackupWorker.kt`) handles deferred, guaranteed background tasks such as remote synchronization.
+- **Dependency Injection:** Dagger Hilt is implemented for scalable dependency management.
 
-| Domain | Technology / Library |
-| :--- | :--- |
-| **Language** | Kotlin (Version 2.0+) |
-| **User Interface** | Jetpack Compose (Material Design 3) |
-| **Local Persistence** | Room Database (SQLite abstraction) |
-| **Cloud Infrastructure** | Firebase (Auth, Firestore, Storage) |
-| **Concurrency** | Kotlin Coroutines, StateFlow |
-| **Export Engines** | Apache POI, Android `PdfDocument` |
-| **Background Tasks** | Android WorkManager |
+## Data Privacy & Security
 
-<details>
-<summary><b>Click to expand: Directory Structure</b></summary>
+Given the sensitive nature of financial and business data, the application implements stringent security protocols:
 
-The project strictly follows a feature-by-feature directory structure within the main module.
+- **Local-First Architecture:** All primary data operations are executed locally on the device, minimizing network exposure.
+- **Application Lock:** A robust lock screen restricts access to authorized users.
+- **Biometric Authentication:** Integration with Android's BiometricPrompt supports TouchID and FaceID.
+- **PIN Protection:** Fallback custom PIN configuration available in the privacy settings.
+- **Guest Mode:** Safe data exploration utilizing isolated guest instances.
+
+## Data Export & Backup
+
+The application provides extensive utilities (`utils/ExportUtils.kt`, `utils/XlsxWriter.kt`) for data portability and backup:
+
+- **PDF Generation:** Native rendering of reports to PDF documents utilizing the Android `PdfDocument` framework.
+- **Excel Export:** Generation of `.xlsx` spreadsheet files utilizing Apache POI for deep data analysis.
+- **Cloud Backup:** Manual and automated backup snapshots utilizing Firebase services for secure, remote data storage.
+- **Data Restoration:** Seamless recovery capabilities from existing snapshots.
+
+## Installation & Setup
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/yourusername/Day-2-Day-Ledger.git
+   ```
+2. **Open in Android Studio:**
+   Navigate to `File > Open` and select the cloned directory.
+3. **Configure Firebase:**
+   - Create a new project in the Firebase Console.
+   - Register the Android app and download the `google-services.json` file.
+   - Place the `google-services.json` file in the `app/` directory.
+   - *Note: `google-services.json` is explicitly ignored by `.gitignore` to prevent credential leakage.*
+4. **Build and Run:**
+   Sync the project with Gradle files and deploy to an emulator or physical device.
+
+## Project Structure
 
 ```text
 app/src/main/java/com/example/awancoalledger/
-├── data/
-│   ├── local/          (Room DAOs, Entities, and Database Configuration)
-│   ├── remote/         (Firebase Firestore interfaces and models)
-│   ├── repository/     (Single source of truth data mediation)
-│   └── sync/           (Background synchronization logic)
 ├── ui/
-│   ├── components/     (Reusable Jetpack Compose UI elements)
-│   ├── screens/        (Full-screen Compose destinations)
-│   └── theme/          (Color palettes, typography, styling tokens)
-├── viewmodel/          (State holders and UI logic coordinators)
-├── model/              (Domain-level data classes and enumerations)
-└── utils/              (Helper functions, extensions, and export logic)
-```
-</details>
-
----
-
-## Security & Authentication
-
-Data integrity and user privacy are paramount.
-
-- **Cloud Verification**: Utilizes Firebase Authentication to verify user identities.
-- **Local Biometrics**: Supports on-device biometric authentication (fingerprint/facial recognition) to secure access to sensitive financial data.
-- **Tenant Isolation**: Remote data transmitted to Firestore is secured via robust security rules ensuring users can only access their specific tenant's data.
-
----
-
-## Setup & Installation
-
-To build and run the application from source, follow these rigorous configuration steps.
-
-### Prerequisites
-1. Android Studio (Ladybug or newer recommended).
-2. Java Development Kit (JDK) 21.
-3. A Google account to provision a Firebase project.
-
-### Step 1: Clone the Repository
-Begin by cloning the source code to your local development environment using Git.
-```bash
-git clone https://github.com/yourusername/Day-2-Day-Ledger.git
-cd Day-2-Day-Ledger
+│   ├── screens/       # Jetpack Compose UI Screens (e.g., LedgerDetailScreen.kt, InventoryScreen.kt)
+│   ├── components/    # Reusable UI widgets
+│   └── theme/         # Color palettes, typography, and shape definitions
+├── viewmodel/         # Business logic and state management (e.g., LedgerViewModel.kt)
+├── utils/             # Helper classes (e.g., ExportUtils, DataExchangeUtils, AlarmSoundManager)
+├── workers/           # WorkManager definitions (e.g., BackupWorker.kt)
+└── data/              # Room DAOs, Entities, and Repository implementations
 ```
 
-### Step 2: Configure Firebase Services
-This repository does not include the proprietary `google-services.json` configuration file, as it contains private API keys and identifiers.
+## Contributing
 
-1. Navigate to the Firebase Console (https://console.firebase.google.com/).
-2. Create a new Firebase Project.
-3. Register a new Android application within the project using the package name `com.example.awancoalledger`.
-4. Download the generated `google-services.json` file.
-5. Place the `google-services.json` file directly into the `app/` directory of the cloned repository.
-
-*Note: The `.gitignore` file is configured to prevent accidental commits of this sensitive file.*
-
-### Step 3: Enable Firebase Features
-Within your new Firebase project console, ensure the following services are enabled:
-- **Authentication**: Enable the Email/Password sign-in provider.
-- **Firestore Database**: Create a new Firestore database in production mode.
-- **Firebase Storage**: Initialize the storage bucket for handling media and attachments.
-
-### Step 4: Build and Deploy
-1. Open the project in Android Studio.
-2. Allow the Gradle sync process to complete.
-3. Select an Android Virtual Device (AVD) or connect a physical device.
-4. Execute `./gradlew installDebug` from the terminal (or click Run).
-
----
-
-## Data Synchronization
-
-The application utilizes a sophisticated local-first synchronization strategy.
-
-1. **Local Writes**: All reads and writes are performed immediately against the local Room database, ensuring zero-latency UI interactions.
-2. **Background Queue**: A continuous synchronization manager monitors local changes and queues them for remote transmission to Firestore.
-3. **Offline Caching**: If the device loses internet connectivity, operations are safely cached locally.
-4. **Conflict Resolution**: Upon network restoration, the WorkManager orchestrates a reliable synchronization pass, resolving any potential data conflicts using timestamp-based reconciliation.
-
----
-
-## Contributing Guidelines
-
-Contributions are highly encouraged, provided they adhere to the project's strict quality standards.
-
-1. **Fork the Repository**: Create your own fork of the main repository.
-2. **Create a Feature Branch**: Branch off from `main`.
-    ```bash
-    git checkout -b feature/advanced-analytics
-    ```
-3. **Adhere to Architecture**: Ensure new features maintain the separation between the UI layer, ViewModel layer, and Data layer. Unidirectional Data Flow (UDF) is strictly enforced.
-4. **Formatting**: Format all Kotlin code according to the standard ktlint rules.
-5. **Commit Messages**: Write clear, concise, and descriptive commit messages explaining the rationale behind the changes.
-6. **Pull Requests**: Submit a pull request detailing the changes. All pull requests will be rigorously reviewed before merging.
-
----
+While this project is primarily maintained for personal business operations, contributions that enhance the architecture, add significant features, or resolve critical bugs are welcome. Please ensure that any pull requests adhere to the existing MVVM structure and include appropriate Compose previews.
 
 ## License
 
-This project is licensed under the MIT License. You are free to use, modify, and distribute this software in accordance with the terms of the license.
-
-Copyright (c) 2026. All rights reserved.
-
-<br/>
-<p align="center">
-  <i>Developed with precision for daily financial operations.</i>
-</p>
+Copyright © 2026. All rights reserved. 
+This software and associated documentation files are proprietary and confidential. Unauthorized copying, distribution, or modification of this project, via any medium, is strictly prohibited.
