@@ -17,3 +17,8 @@ local.properties
 # Custom ignores
 *.apk
 .kotlin/
+
+# Signing keys
+*.jks
+*.keystore
+keystore.properties
