@@ -3,21 +3,19 @@ package com.example.awancoalledger.ui.screens
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Backspace
-import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -27,10 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.awancoalledger.ui.theme.*
-import com.example.awancoalledger.ui.components.MeshGradientBackground
 import kotlinx.coroutines.delay
-import java.text.SimpleDateFormat
-import java.util.*
 
 @Composable
 fun LockScreen(
@@ -44,21 +39,6 @@ fun LockScreen(
     val haptic = LocalHapticFeedback.current
     val shakeOffset = remember { Animatable(0f) }
     
-    val timeStr = remember { mutableStateOf("") }
-    val dateStr = remember { mutableStateOf("") }
-
-    // Update time every minute
-    LaunchedEffect(Unit) {
-        val timeFmt = SimpleDateFormat("HH:mm", Locale.getDefault())
-        val dateFmt = SimpleDateFormat("EEEE, MMMM d", Locale.getDefault())
-        while(true) {
-            val now = Date()
-            timeStr.value = timeFmt.format(now)
-            dateStr.value = dateFmt.format(now)
-            delay(1000)
-        }
-    }
-
     LaunchedEffect(isError) {
         if (isError) {
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -80,17 +60,11 @@ fun LockScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-        MeshGradientBackground()
-        
-        // Background Dim/Blur Overlay
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.45f))
-                .blur(40.dp)
-        )
-
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -98,66 +72,45 @@ fun LockScreen(
                 .padding(horizontal = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(60.dp))
+            Spacer(modifier = Modifier.height(100.dp))
 
-            // iOS Style Lock Icon & Status
             Icon(
                 imageVector = Icons.Default.Lock,
                 contentDescription = null,
-                tint = Color.White.copy(alpha = 0.9f),
-                modifier = Modifier.size(28.dp)
+                tint = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.size(24.dp)
             )
             
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            // Time & Date (Large iOS Style)
             Text(
-                text = timeStr.value,
-                fontSize = 92.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.White,
-                letterSpacing = (-2).sp,
-                modifier = Modifier.graphicsLayer {
-                    alpha = 0.95f
-                }
+                text = if (isError) "Incorrect Passcode" else "Enter Passcode",
+                color = if (isError) ErrorRed else MaterialTheme.colorScheme.onBackground,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Medium,
+                letterSpacing = 0.5.sp
             )
-            Text(
-                text = dateStr.value.uppercase(),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White.copy(alpha = 0.7f),
-                letterSpacing = 1.sp
-            )
+            
+            Spacer(modifier = Modifier.height(40.dp))
 
-            Spacer(modifier = Modifier.weight(1f))
-
-            // PIN Dots with error shake
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
+            // PIN Dots
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(24.dp),
                 modifier = Modifier.offset(x = shakeOffset.value.dp)
             ) {
-                Text(
-                    text = if (isError) "Incorrect PIN" else "Enter PIN",
-                    color = if (isError) ErrorRed else Color.White.copy(alpha = 0.7f),
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                    repeat(4) { index ->
-                        PinDot(filled = index < pin.length, isError = isError)
-                    }
+                repeat(4) { index ->
+                    PinDot(filled = index < pin.length, isError = isError)
                 }
             }
 
-            Spacer(modifier = Modifier.height(60.dp))
+            Spacer(modifier = Modifier.weight(1f))
 
             // Keypad
             val numbers = listOf(
-                listOf("1", "2", "3"),
-                listOf("4", "5", "6"),
-                listOf("7", "8", "9"),
-                listOf("bio", "0", "back")
+                listOf("1" to "", "2" to "A B C", "3" to "D E F"),
+                listOf("4" to "G H I", "5" to "J K L", "6" to "M N O"),
+                listOf("7" to "P Q R S", "8" to "T U V", "9" to "W X Y Z"),
+                listOf("bio" to "", "0" to "", "back" to "")
             )
 
             Column(
@@ -170,7 +123,7 @@ fun LockScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterHorizontally)
                     ) {
-                        row.forEach { digit ->
+                        row.forEach { (digit, letters) ->
                             when (digit) {
                                 "bio" -> {
                                     KeypadButton(
@@ -189,12 +142,14 @@ fun LockScreen(
                                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                             }
                                         },
-                                        isFunctional = true
+                                        isFunctional = true,
+                                        enabled = pin.isNotEmpty()
                                     )
                                 }
                                 else -> {
                                     KeypadButton(
                                         text = digit,
+                                        subText = letters.takeIf { it.isNotEmpty() },
                                         onClick = {
                                             if (pin.length < 4) {
                                                 pin += digit
@@ -214,77 +169,73 @@ fun LockScreen(
                 }
             }
             
-            Spacer(modifier = Modifier.height(40.dp))
-            
-            Text(
-                text = "Securely logged in as $ownerName",
-                color = Color.White.copy(alpha = 0.4f),
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Medium
-            )
-            
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(60.dp))
         }
     }
 }
 
 @Composable
 fun PinDot(filled: Boolean, isError: Boolean) {
-    val scale by animateFloatAsState(
-        targetValue = if (filled) 1.2f else 1.0f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "scale"
-    )
-    
-    val color by animateColorAsState(
-        targetValue = when {
-            isError -> ErrorRed
-            filled -> Color.White
-            else -> Color.White.copy(alpha = 0.2f)
-        },
-        label = "color"
-    )
+    val borderColor = if (isError) ErrorRed else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
+    val fillColor = if (isError) ErrorRed else MaterialTheme.colorScheme.onBackground
 
     Box(
         modifier = Modifier
             .size(14.dp)
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
             .clip(CircleShape)
-            .background(color)
+            .border(1.5.dp, borderColor, CircleShape)
+            .background(if (filled) fillColor else Color.Transparent)
     )
 }
 
 @Composable
 fun KeypadButton(
     text: String? = null,
+    subText: String? = null,
     icon: ImageVector? = null,
     isFunctional: Boolean = false,
     enabled: Boolean = true,
     onClick: () -> Unit
 ) {
+    val bgColor = if (isFunctional) Color.Transparent else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.12f)
+    val contentColor = MaterialTheme.colorScheme.onBackground.copy(alpha = if (enabled) 1f else 0.3f)
+
     Surface(
         onClick = if (enabled) onClick else ({}),
         modifier = Modifier.size(76.dp),
-        color = if (isFunctional) Color.Transparent else Color.White.copy(alpha = if (enabled) 0.12f else 0.05f),
+        color = bgColor,
         shape = CircleShape,
         enabled = enabled
     ) {
         Box(contentAlignment = Alignment.Center) {
             if (text != null) {
-                Text(
-                    text = text,
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = Color.White.copy(alpha = if (enabled) 1f else 0.3f)
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = text,
+                        fontSize = 36.sp,
+                        fontWeight = FontWeight.Light,
+                        color = contentColor,
+                        modifier = Modifier.offset(y = if (subText != null) 4.dp else 0.dp)
+                    )
+                    if (subText != null) {
+                        Text(
+                            text = subText,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = contentColor,
+                            letterSpacing = 1.sp,
+                            modifier = Modifier.offset(y = (-4).dp)
+                        )
+                    }
+                }
             } else if (icon != null) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = Color.White.copy(alpha = if (enabled) 1f else 0.2f),
+                    tint = contentColor,
                     modifier = Modifier.size(28.dp)
                 )
             }
