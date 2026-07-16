@@ -8,16 +8,16 @@ import kotlinx.coroutines.flow.callbackFlow
 class SettingsRepository(context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences("awan_ledger_settings", Context.MODE_PRIVATE)
 
-    fun getBusinessName(): String = prefs.getString("biz_name", "Awan Coal Traders") ?: "Awan Coal Traders"
+    fun getBusinessName(): String = prefs.getString("biz_name", "") ?: ""
     fun setBusinessName(value: String) = prefs.edit().putString("biz_name", value).apply()
 
-    fun getOwnerName(): String = prefs.getString("owner_name", "Talha Awan") ?: "Talha Awan"
+    fun getOwnerName(): String = prefs.getString("owner_name", "") ?: ""
     fun setOwnerName(value: String) = prefs.edit().putString("owner_name", value).apply()
 
-    fun getBusinessPhone(): String = prefs.getString("biz_phone", "+92 300 1234567") ?: "+92 300 1234567"
+    fun getBusinessPhone(): String = prefs.getString("biz_phone", "") ?: ""
     fun setBusinessPhone(value: String) = prefs.edit().putString("biz_phone", value).apply()
 
-    fun getBusinessAddress(): String = prefs.getString("biz_address", "Quetta, Baluchistan") ?: "Quetta, Baluchistan"
+    fun getBusinessAddress(): String = prefs.getString("biz_address", "") ?: ""
     fun setBusinessAddress(value: String) = prefs.edit().putString("biz_address", value).apply()
 
     fun getDefaultCountryCode(): String = prefs.getString("default_country_code", "+92") ?: "+92"
@@ -31,6 +31,9 @@ class SettingsRepository(context: Context) {
 
     fun isDarkMode(): Boolean = prefs.getBoolean("dark_mode", true)
     fun setDarkMode(value: Boolean) = prefs.edit().putBoolean("dark_mode", value).apply()
+
+    fun isFrostedGlassEnabled(): Boolean = prefs.getBoolean("frosted_glass", true)
+    fun setFrostedGlassEnabled(value: Boolean) = prefs.edit().putBoolean("frosted_glass", value).apply()
 
     fun getAppPin(): String = prefs.getString("app_pin", "1234") ?: "1234"
     fun setAppPin(value: String) = prefs.edit().putString("app_pin", value).apply()
@@ -52,6 +55,18 @@ class SettingsRepository(context: Context) {
             .remove("company_logo_uri")
             .remove("signature_uri")
             .apply()
+    }
+
+    fun getDockItems(): List<String> {
+        val saved = prefs.getString("dock_items", null)
+        if (saved != null) {
+            return saved.split(",")
+        }
+        return listOf("parties", "expenses", "inventory")
+    }
+
+    fun setDockItems(items: List<String>) {
+        prefs.edit().putString("dock_items", items.joinToString(",")).apply()
     }
 
     fun getSettingsFlow(): kotlinx.coroutines.flow.Flow<Unit> = kotlinx.coroutines.flow.callbackFlow {

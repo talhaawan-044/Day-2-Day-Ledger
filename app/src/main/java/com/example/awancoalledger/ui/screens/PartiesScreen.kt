@@ -69,11 +69,11 @@ fun PartiesScreen(viewModel: LedgerViewModel, onNavigateToLedger: (Int) -> Unit)
                                 .statusBarsPadding()
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            Text(
-                    "Contacts",
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontSize = 34.sp,
-                    fontWeight = FontWeight.Bold
+            val backDispatcher = androidx.activity.compose.LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+            com.example.awancoalledger.ui.components.ScreenHeader(
+                title = "Contacts",
+                onBack = { backDispatcher?.onBackPressed() },
+                modifier = Modifier.padding(horizontal = 0.dp) // already inside padded Column
             )
             Spacer(modifier = Modifier.height(16.dp))
             PremiumInput(
@@ -220,10 +220,14 @@ fun PartiesScreen(viewModel: LedgerViewModel, onNavigateToLedger: (Int) -> Unit)
                             }
 
             if (filteredAndSortedParties.isEmpty()) {
-                Box(
-                        modifier = Modifier.fillMaxWidth().weight(1f),
-                        contentAlignment = Alignment.Center
-                ) { Text("No contacts found", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                com.example.awancoalledger.ui.components.EmptyStateCard(
+                    icon = Icons.Default.Contacts,
+                    title = if (searchQuery.isNotEmpty()) "No Results" else "No Contacts Yet",
+                    description = if (searchQuery.isNotEmpty()) "No contacts match \"$searchQuery\"." else "Add your first contact to start tracking.",
+                    actionText = if (searchQuery.isEmpty()) "Add Contact" else null,
+                    onAction = if (searchQuery.isEmpty()) { { showAddPartySheet = true } } else null,
+                    modifier = Modifier.weight(1f)
+                )
             } else {
                 if (isGridView) {
                     LazyVerticalGrid(

@@ -31,7 +31,8 @@ import androidx.compose.runtime.setValue
 fun FoldersScreen(
     viewModel: LedgerViewModel,
     onNavigateToFolder: (String) -> Unit,
-    onNavigateToEditor: (Int?) -> Unit
+    onNavigateToEditor: (Int?) -> Unit,
+    onBack: () -> Unit
 ) {
     val folders by viewModel.allFolders.collectAsState()
     val allNotes by viewModel.allNotes.collectAsState()
@@ -48,43 +49,25 @@ fun FoldersScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.background)
                     .statusBarsPadding()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .padding(horizontal = 16.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    TextButton(onClick = { isEditMode = !isEditMode }) {
-                        Text(if (isEditMode) "Done" else "Edit", color = PrimaryBlue, fontWeight = FontWeight.Bold)
+                ScreenHeader(
+                    title = "Folders",
+                    onBack = onBack,
+                    actions = {
+                        IconButton(onClick = { showAddFolderDialog = true }) {
+                            Icon(Icons.Default.CreateNewFolder, contentDescription = "New Folder", tint = PrimaryBlue)
+                        }
+                        IconButton(onClick = { onNavigateToEditor(null) }) {
+                            Icon(Icons.Default.EditNote, contentDescription = "New Note", tint = PrimaryBlue)
+                        }
+                        TextButton(onClick = { isEditMode = !isEditMode }) {
+                            Text(if (isEditMode) "Done" else "Edit", color = PrimaryBlue, fontWeight = FontWeight.Bold)
+                        }
                     }
-                }
-                Text(
-                    "Folders",
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = 34.sp,
-                    fontWeight = FontWeight.Bold
                 )
-            }
-        },
-        bottomBar = {
-            BottomAppBar(
-                containerColor = Color.Transparent,
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                modifier = Modifier.navigationBarsPadding()
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = { showAddFolderDialog = true }) {
-                        Icon(Icons.Default.CreateNewFolder, null, tint = PrimaryBlue, modifier = Modifier.size(28.dp))
-                    }
-                    IconButton(onClick = { onNavigateToEditor(null) }) {
-                        Icon(Icons.Default.EditNote, null, tint = PrimaryBlue, modifier = Modifier.size(32.dp))
-                    }
-                }
             }
         }
     ) { padding ->

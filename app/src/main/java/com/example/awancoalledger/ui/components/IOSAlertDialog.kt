@@ -41,9 +41,9 @@ fun IOSAlertDialog(
                 modifier = Modifier
                     .width(280.dp)
                     .clickable(enabled = false) { },
-                shape = RoundedCornerShape(14.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                tonalElevation = 8.dp
+                shape = RoundedCornerShape(18.dp),
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                tonalElevation = 0.dp
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -78,12 +78,12 @@ fun IOSAlertDialog(
 
                     Spacer(modifier = Modifier.height(20.dp))
                     
-                    HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), thickness = 0.5.dp)
                     
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(44.dp),
+                            .height(48.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         buttons()
@@ -119,8 +119,9 @@ fun RowScope.IOSDialogButton(
     
     if (!isLast) {
         VerticalDivider(
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-            modifier = Modifier.fillMaxHeight()
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f),
+            modifier = Modifier.fillMaxHeight(),
+            thickness = 0.5.dp
         )
     }
 }

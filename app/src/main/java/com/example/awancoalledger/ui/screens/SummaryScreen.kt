@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -266,6 +267,8 @@ fun HomeHeader(
     val greetIcon = if (isDaytime) Icons.Default.WbSunny else Icons.Default.NightsStay
     val iconTint = if (isDaytime) iOSOrange else iOSPurple
 
+    val haptic = LocalHapticFeedback.current
+    val backDispatcher = androidx.activity.compose.LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -342,12 +345,11 @@ fun SyncBadge(status: SyncStatus, onClick: () -> Unit) {
 
     Surface(
             onClick = onClick,
-            color = color.copy(alpha = 0.12f),
-            shape = RoundedCornerShape(20.dp),
-            border = BorderStroke(1.dp, color.copy(alpha = 0.25f))
+            color = MaterialTheme.colorScheme.surface,
+            shape = CircleShape
     ) {
         Row(
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -356,17 +358,15 @@ fun SyncBadge(status: SyncStatus, onClick: () -> Unit) {
                     tint = color,
                     modifier =
                             Modifier.size(14.dp).graphicsLayer {
-                                // ✅ Only rotate when actually syncing
                                 if (status == SyncStatus.Syncing) rotationZ = rotation
                             }
             )
             Spacer(Modifier.width(6.dp))
             Text(
-                    label.uppercase(),
-                    color = color,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 0.5.sp
+                    label,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold
             )
         }
     }
@@ -931,16 +931,27 @@ fun QuickStatsRow(
 fun QuickStatChip(modifier: Modifier, label: String, value: Int, icon: ImageVector, color: Color, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
-        modifier = modifier,
-        color = color.copy(alpha = 0.09f),
-        shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, color.copy(alpha = 0.18f))
+        modifier = modifier.height(100.dp),
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(24.dp)
     ) {
-        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(18.dp))
-            Spacer(Modifier.height(4.dp))
-            Text("$value", color = color, fontSize = 18.sp, fontWeight = FontWeight.Black)
-            Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+        Column(
+            modifier = Modifier.padding(16.dp), 
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .background(color.copy(alpha = 0.15f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(18.dp))
+            }
+            Column {
+                Text("$value", color = MaterialTheme.colorScheme.onSurface, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+            }
         }
     }
 }

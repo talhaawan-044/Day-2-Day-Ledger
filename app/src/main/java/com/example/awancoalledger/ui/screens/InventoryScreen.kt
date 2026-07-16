@@ -51,12 +51,11 @@ fun InventoryScreen(viewModel: LedgerViewModel, onNavigateToStockDetail: (Int) -
                             Modifier.background(MaterialTheme.colorScheme.background)
                                     .statusBarsPadding()
             ) {
-                Text(
-                        "Stock",
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                val backDispatcher = androidx.activity.compose.LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+                com.example.awancoalledger.ui.components.ScreenHeader(
+                    title = "Stock",
+                    onBack = { backDispatcher?.onBackPressed() },
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
 
                 Row(
@@ -196,7 +195,14 @@ fun InventoryScreen(viewModel: LedgerViewModel, onNavigateToStockDetail: (Int) -
             }
 
             // Main Content Area
-            if (isGridView) {
+            if (filteredStocks.isEmpty()) {
+                com.example.awancoalledger.ui.components.EmptyStateCard(
+                    icon = Icons.Default.Inventory2,
+                    title = if (searchQuery.isNotEmpty()) "No Results" else "Inventory Empty",
+                    description = if (searchQuery.isNotEmpty()) "No inventory items match \"$searchQuery\"." else "Tap 'Add New Mine' to create your first inventory item.",
+                    modifier = Modifier.weight(1f)
+                )
+            } else if (isGridView) {
                 LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
                         modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
@@ -207,6 +213,7 @@ fun InventoryScreen(viewModel: LedgerViewModel, onNavigateToStockDetail: (Int) -
                     items(filteredStocks, key = { it.id }) { stock ->
                         StockGridCard(
                                 stock,
+                                
                                 onClick = {
                                     haptic.performHapticFeedback(
                                             androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -227,6 +234,7 @@ fun InventoryScreen(viewModel: LedgerViewModel, onNavigateToStockDetail: (Int) -
                     items(filteredStocks, key = { it.id }) { stock ->
                         StockListCard(
                                 stock,
+                                
                                 onClick = {
                                     haptic.performHapticFeedback(
                                             androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -253,10 +261,10 @@ fun InventoryScreen(viewModel: LedgerViewModel, onNavigateToStockDetail: (Int) -
 }
 
 @Composable
-fun StockListCard(stock: Stock, onClick: () -> Unit) {
+fun StockListCard(stock: Stock, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Surface(
             onClick = onClick,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
+            modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
             shape = RoundedCornerShape(28.dp),
             color = MaterialTheme.colorScheme.surfaceVariant,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
@@ -318,10 +326,10 @@ fun StockListCard(stock: Stock, onClick: () -> Unit) {
 }
 
 @Composable
-fun StockGridCard(stock: Stock, onClick: () -> Unit) {
+fun StockGridCard(stock: Stock, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Surface(
             onClick = onClick,
-            modifier = Modifier.fillMaxWidth().height(160.dp),
+            modifier = modifier.fillMaxWidth().height(160.dp),
             color = MaterialTheme.colorScheme.surfaceVariant,
             shape = RoundedCornerShape(20.dp)
     ) {

@@ -64,30 +64,22 @@ fun ExpensesScreen(viewModel: LedgerViewModel) {
                                 .verticalScroll(rememberScrollState())
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            // iOS Style Large Header
-            Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                        "Expenses",
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontSize = 34.sp,
-                        fontWeight = FontWeight.Bold
-                )
-
-                // Export Button (Triggers Bottom Sheet)
-                IconButton(
+            val backDispatcher = androidx.activity.compose.LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+            com.example.awancoalledger.ui.components.ScreenHeader(
+                title = "Expenses",
+                onBack = { backDispatcher?.onBackPressed() },
+                actions = {
+                    IconButton(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             showExportSheet = true
                         },
                         modifier = Modifier.background(PrimaryBlue.copy(alpha = 0.1f), CircleShape)
-                ) {
-                    Icon(Icons.Default.IosShare, contentDescription = "Export", tint = PrimaryBlue)
+                    ) {
+                        Icon(Icons.Default.IosShare, contentDescription = "Export", tint = PrimaryBlue)
+                    }
                 }
-            }
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -176,19 +168,18 @@ fun ExpensesScreen(viewModel: LedgerViewModel) {
                                     .background(MaterialTheme.colorScheme.surface)
             ) {
                 if (displayExpenses.isEmpty()) {
-                    Box(
-                            modifier = Modifier.fillMaxWidth().height(120.dp),
-                            contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                                "No expenses in this period",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                    com.example.awancoalledger.ui.components.EmptyStateCard(
+                        icon = Icons.Default.Payments,
+                        title = "No Expenses Found",
+                        description = "There are no recorded expenses in this period.",
+                        actionText = "Add Expense",
+                        onAction = { showAddDialog = true }
+                    )
                 } else {
                     displayExpenses.sortedByDescending { it.date }.forEachIndexed { index, expense
                         ->
                         SwipeableItem(
+                                
                                 onEdit = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     editingExpense = expense

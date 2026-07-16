@@ -35,7 +35,7 @@ import java.util.*
 @Composable
 fun LockScreen(
     onUnlock: (String) -> Boolean,
-    ownerName: String = "Talha Awan",
+    ownerName: String = "",
     biometricEnabled: Boolean = false,
     onBiometricTrigger: () -> Unit = {}
 ) {

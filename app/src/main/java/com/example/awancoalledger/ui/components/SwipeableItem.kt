@@ -44,7 +44,7 @@ fun SwipeableItem(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(12.dp),
-    backgroundColor: Color = Color.Transparent,
+    backgroundColor: Color = MaterialTheme.colorScheme.surface,
     content: @Composable () -> Unit
 ) {
     val density = LocalDensity.current
@@ -126,7 +126,7 @@ fun SwipeableItem(
                     )
                 }
                 .anchoredDraggable(state, Orientation.Horizontal)
-                .background(Color.Transparent)
+                .background(backgroundColor)
         ) {
             content()
         }

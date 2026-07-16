@@ -78,29 +78,20 @@ fun VehicleTrackerScreen(viewModel: LedgerViewModel, onNavigateBack: () -> Unit)
         Column(modifier = Modifier.fillMaxSize()) {
             // --- iOS Premium Header ---
             Box(modifier = Modifier.fillMaxWidth().statusBarsPadding()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBackIos,
-                            contentDescription = "Back",
-                            modifier = Modifier.size(20.dp),
-                            tint = PrimaryBlue
-                        )
+                com.example.awancoalledger.ui.components.ScreenHeader(
+                    title = "Garage",
+                    onBack = { onNavigateBack() },
+                    actions = {
+                        IconButton(onClick = { showAddVehicle = true }) {
+                            Icon(
+                                imageVector = Icons.Default.AddCircle,
+                                contentDescription = null,
+                                modifier = Modifier.size(28.dp),
+                                tint = PrimaryBlue
+                            )
+                        }
                     }
-                    Text("Garage", fontSize = 32.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                    
-                    IconButton(onClick = { showAddVehicle = true }) {
-                        Icon(
-                            imageVector = Icons.Default.AddCircle,
-                            contentDescription = null,
-                            modifier = Modifier.size(28.dp),
-                            tint = PrimaryBlue
-                        )
-                    }
-                }
+                )
             }
 
             LazyColumn(
@@ -155,14 +146,11 @@ fun VehicleTrackerScreen(viewModel: LedgerViewModel, onNavigateBack: () -> Unit)
 
                 if (vehicles.isEmpty() || pagerState.currentPage >= vehicles.size) {
                     item {
-                        Box(modifier = Modifier.fillMaxWidth().padding(top = 40.dp), contentAlignment = Alignment.Center) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(Icons.Default.DirectionsCar, null, modifier = Modifier.size(100.dp), tint = MaterialTheme.colorScheme.surfaceVariant)
-                                Spacer(Modifier.height(16.dp))
-                                Text("No Vehicle Selected", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text("Add a vehicle to start tracking logs", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
-                            }
-                        }
+                        com.example.awancoalledger.ui.components.EmptyStateCard(
+                            icon = Icons.Default.DirectionsCar,
+                            title = "No Vehicle Selected",
+                            description = "Add a vehicle to start tracking logs"
+                        )
                     }
                 } else {
                     item {
@@ -270,9 +258,11 @@ fun VehicleTrackerScreen(viewModel: LedgerViewModel, onNavigateBack: () -> Unit)
                     
                     if (filteredEntries.isEmpty()) {
                         item {
-                            Box(modifier = Modifier.fillMaxWidth().padding(40.dp), contentAlignment = Alignment.Center) {
-                                Text("No logs found for this vehicle", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
+                            com.example.awancoalledger.ui.components.EmptyStateCard(
+                                icon = Icons.Default.History,
+                                title = "No Logs Found",
+                                description = "No fuel or maintenance logs found for this vehicle."
+                            )
                         }
                     } else {
                         // Group by Month Year

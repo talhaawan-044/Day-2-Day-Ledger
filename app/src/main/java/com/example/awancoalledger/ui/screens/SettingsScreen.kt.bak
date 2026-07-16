@@ -55,7 +55,8 @@ enum class SettingsCategory(val title: String, val icon: androidx.compose.ui.gra
 @Composable
 fun SettingsScreen(
         viewModel: LedgerViewModel,
-        onNavigateToShortcut: (String) -> Unit = {}
+        onNavigateToReminders: () -> Unit = {},
+        onNavigateToVehicleTracker: () -> Unit = {}
 ) {
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
@@ -71,7 +72,6 @@ fun SettingsScreen(
     val appLock by viewModel.isAppLockEnabled.collectAsState(initial = false)
     val biometrics by viewModel.isBiometricsEnabled.collectAsState(initial = false)
     val darkMode by viewModel.isDarkMode.collectAsState(initial = true)
-    val frostedGlass by viewModel.isFrostedGlassEnabled.collectAsState(initial = true)
     val logoUri by viewModel.companyLogoUri.collectAsState(initial = null)
     val signatureUri by viewModel.signatureUri.collectAsState(initial = null)
     val oilInterval by viewModel.oilChangeInterval.collectAsState()
@@ -196,11 +196,11 @@ fun SettingsScreen(
                                 .verticalScroll(rememberScrollState())
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            val backDispatcher = androidx.activity.compose.LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-            com.example.awancoalledger.ui.components.ScreenHeader(
-                title = "Settings",
-                onBack = { backDispatcher?.onBackPressed() },
-                modifier = Modifier.padding(horizontal = 0.dp) // already padded in parent
+            Text(
+                    "Settings",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 34.sp,
+                    fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -210,49 +210,6 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(28.dp))
 
             // Sections
-            if (currentCategory == null) {
-                val allModules = listOf(
-                    com.example.awancoalledger.NavTab("Contacts", "parties", androidx.compose.material.icons.Icons.Default.People),
-                    com.example.awancoalledger.NavTab("Expenses", "expenses", androidx.compose.material.icons.Icons.Default.Payments),
-                    com.example.awancoalledger.NavTab("Inventory", "inventory", androidx.compose.material.icons.Icons.Default.Layers),
-                    com.example.awancoalledger.NavTab("Notes", "notes", androidx.compose.material.icons.Icons.Default.Description),
-                    com.example.awancoalledger.NavTab("Vehicles", "vehicle_tracker", androidx.compose.material.icons.Icons.Default.DirectionsCar)
-                )
-                val unusedModules = allModules.filter { it.route !in dockItems }
-                if (unusedModules.isNotEmpty()) {
-                    SettingsSection(title = "SHORTCUTS") {
-                        unusedModules.forEachIndexed { index, tab ->
-                            SettingsRow(icon = tab.icon, title = tab.title, value = "Access " + tab.title, color = PrimaryBlue, isLast = index == unusedModules.size - 1) {
-                                val currentTime = System.currentTimeMillis()
-                                if (currentTime - lastClickTime > 1000) {
-                                    lastClickTime = currentTime
-                                    onNavigateToShortcut(tab.route)
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                SettingsSection(title = "CATEGORIES") {
-                    SettingsCategory.values().forEachIndexed { index, category ->
-                        SettingsRow(icon = category.icon, title = category.title, value = category.subtitle, color = category.color, isLast = index == SettingsCategory.values().size - 1) {
-                            currentCategory = category
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(40.dp))
-            } else {
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)) {
-                    Surface(onClick = { currentCategory = null }, shape = androidx.compose.foundation.shape.CircleShape, color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.size(40.dp)) {
-                        Box(contentAlignment = Alignment.Center) {
-                            androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Default.ArrowBack, contentDescription = "Back")
-                        }
-                    }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text(currentCategory!!.title, color = MaterialTheme.colorScheme.onBackground, fontSize = 28.sp, fontWeight = FontWeight.Bold)
-                }
-                when(currentCategory!!) {
-                    SettingsCategory.CLOUD_ACCOUNT -> {
             SettingsSection(title = "CLOUD ACCOUNT") {
                 if (user == null || isAnonymous) {
                     PremiumAccountCard(
@@ -296,9 +253,35 @@ fun SettingsScreen(
                 )
             }
 
-
+            SettingsSection(title = "INTERNAL TOOLS") {
+                /* SettingsRow(
+                        Icons.Default.Notifications,
+                        "Reminders Manager",
+                        "$activeRemindersCount Active",
+                        color = iOSOrange,
+                        isLast = true
+                ) {
+                    val currentTime = System.currentTimeMillis()
+                    if (currentTime - lastClickTime > 1000) {
+                        lastClickTime = currentTime
+                        onNavigateToReminders()
                     }
-                    SettingsCategory.BUSINESS_PROFILE -> {
+                } */
+                SettingsRow(
+                        Icons.Default.DirectionsCar,
+                        "Vehicle Tracker",
+                        "Mileage & Service",
+                        color = PrimaryBlue,
+                        isLast = true
+                ) {
+                    val currentTime = System.currentTimeMillis()
+                    if (currentTime - lastClickTime > 1000) {
+                        lastClickTime = currentTime
+                        onNavigateToVehicleTracker()
+                    }
+                }
+            }
+
             SettingsSection(title = "BUSINESS PROFILE") {
                 SettingsRow(Icons.Default.Business, "Business Name", bizName, color = PrimaryBlue) {
                     editingField = "Business Name" to bizName
@@ -473,8 +456,6 @@ fun SettingsScreen(
                 }
             }
 
-                    }
-                    SettingsCategory.PRIVACY_SECURITY -> {
             SettingsSection(title = "PRIVACY & SECURITY") {
                 SettingsToggleRow(Icons.Default.Lock, "App Lock", appLock, color = PrimaryBlue) {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -500,17 +481,7 @@ fun SettingsScreen(
                 }
             }
 
-                    }
-                    SettingsCategory.PREFERENCES -> {
             SettingsSection(title = "PREFERENCES") {
-                SettingsRow(
-                        androidx.compose.material.icons.Icons.Default.ViewCarousel,
-                        "Customize Dock",
-                        "Rearrange bottom tabs",
-                        color = SuccessGreen
-                ) {
-                    showDockCustomizationModal = true
-                }
                 SettingsToggleRow(
                         Icons.Default.DarkMode,
                         "Dark Mode",
@@ -519,15 +490,6 @@ fun SettingsScreen(
                 ) {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     viewModel.toggleDarkMode(it)
-                }
-                SettingsToggleRow(
-                        androidx.compose.material.icons.Icons.Default.BlurOn,
-                        "Frosted Glass (iOS Blur)",
-                        frostedGlass,
-                        color = PrimaryBlue
-                ) {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    viewModel.toggleFrostedGlass(it)
                 }
                 SettingsRow(
                         Icons.Default.SettingsSuggest,
@@ -538,8 +500,6 @@ fun SettingsScreen(
                 ) { editingField = "Oil Interval" to oilInterval.toString() }
             }
 
-                    }
-                    SettingsCategory.DATA_MANAGEMENT -> {
             SettingsSection(title = "DATA MANAGEMENT") {
                 SettingsRow(
                         Icons.Default.History,
@@ -561,9 +521,6 @@ fun SettingsScreen(
                 ) { restoreLauncher.launch(arrayOf("application/json", "*/*")) }
             }
 
-                    }
-                }
-            }
             Spacer(modifier = Modifier.height(100.dp))
         }
 
@@ -589,14 +546,6 @@ fun SettingsScreen(
 
         if (showBackupsModal) {
             AutoBackupsModal(viewModel = viewModel, onDismiss = { showBackupsModal = false })
-        }
-
-        if (showDockCustomizationModal) {
-            DockCustomizationDialog(
-                currentItems = dockItems,
-                onDismiss = { showDockCustomizationModal = false },
-                onSave = { selected -> viewModel.updateDockItems(selected) }
-            )
         }
 
         if (showLoginDialog) {
@@ -1347,241 +1296,4 @@ fun CountrySelectionModal(
             }
         }
     }
-}
-
-@Composable
-fun DockCustomizationDialog(
-    currentItems: List<String>,
-    onDismiss: () -> Unit,
-    onSave: (List<String>) -> Unit
-) {
-    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
-    val allTabs = listOf(
-        com.example.awancoalledger.NavTab("Contacts", "parties", androidx.compose.material.icons.Icons.Default.People),
-        com.example.awancoalledger.NavTab("Expenses", "expenses", androidx.compose.material.icons.Icons.Default.Payments),
-        com.example.awancoalledger.NavTab("Inventory", "inventory", androidx.compose.material.icons.Icons.Default.Layers),
-        com.example.awancoalledger.NavTab("Notes", "notes", androidx.compose.material.icons.Icons.Default.Description),
-        com.example.awancoalledger.NavTab("Vehicles", "vehicle_tracker", androidx.compose.material.icons.Icons.Default.DirectionsCar)
-    )
-    
-    var selectedItems by remember { mutableStateOf(currentItems) }
-
-    com.example.awancoalledger.ui.components.IOSAlertDialog(
-        onDismissRequest = onDismiss,
-        title = "Customize Dock",
-        message = "Select exactly 3 shortcuts.",
-        content = {
-            val selectedTabs = selectedItems.mapNotNull { route -> allTabs.find { it.route == route } }
-            val unselectedTabs = allTabs.filter { !selectedItems.contains(it.route) }
-            
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 420.dp)
-            ) {
-                // IN DOCK SECTION
-                Text(
-                    text = "IN DOCK",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                    modifier = Modifier.padding(start = 16.dp, bottom = 6.dp)
-                )
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
-                ) {
-                    selectedTabs.forEachIndexed { index, tab ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            // Remove button
-                            androidx.compose.material3.IconButton(
-                                onClick = {
-                                    haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                                    if (selectedItems.size > 1) {
-                                        selectedItems = selectedItems - tab.route
-                                    }
-                                },
-                                modifier = Modifier.size(24.dp)
-                            ) {
-                                androidx.compose.material3.Icon(
-                                    androidx.compose.material.icons.Icons.Default.RemoveCircle,
-                                    contentDescription = "Remove",
-                                    tint = com.example.awancoalledger.ui.theme.ErrorRed
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(16.dp))
-                            androidx.compose.material3.Icon(
-                                tab.icon, 
-                                contentDescription = null, 
-                                tint = com.example.awancoalledger.ui.theme.PrimaryBlue, 
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Text(
-                                tab.title, 
-                                modifier = Modifier.weight(1f), 
-                                color = MaterialTheme.colorScheme.onSurface, 
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 16.sp
-                            )
-                            // Up/Down Arrows for reordering
-                            if (index > 0) {
-                                androidx.compose.foundation.layout.Box(
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                        .clip(androidx.compose.foundation.shape.CircleShape)
-                                        .clickable {
-                                            haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                                            val newList = selectedItems.toMutableList()
-                                            val temp = newList[index]
-                                            newList[index] = newList[index - 1]
-                                            newList[index - 1] = temp
-                                            selectedItems = newList
-                                        },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    androidx.compose.material3.Icon(
-                                        androidx.compose.material.icons.Icons.Default.KeyboardArrowUp,
-                                        contentDescription = "Move Up",
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            } else {
-                                Spacer(modifier = Modifier.width(32.dp))
-                            }
-                            if (index < selectedTabs.size - 1) {
-                                androidx.compose.foundation.layout.Box(
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                        .clip(androidx.compose.foundation.shape.CircleShape)
-                                        .clickable {
-                                            haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                                            val newList = selectedItems.toMutableList()
-                                            val temp = newList[index]
-                                            newList[index] = newList[index + 1]
-                                            newList[index + 1] = temp
-                                            selectedItems = newList
-                                        },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    androidx.compose.material3.Icon(
-                                        androidx.compose.material.icons.Icons.Default.KeyboardArrowDown,
-                                        contentDescription = "Move Down",
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            } else {
-                                Spacer(modifier = Modifier.width(32.dp))
-                            }
-                        }
-                        if (index < selectedTabs.size - 1) {
-                            androidx.compose.material3.HorizontalDivider(
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                                thickness = 0.5.dp,
-                                modifier = Modifier.padding(start = 56.dp)
-                            )
-                        }
-                    }
-                }
-                
-                Spacer(modifier = Modifier.height(24.dp))
-                
-                // MORE SHORTCUTS SECTION
-                Text(
-                    text = "MORE SHORTCUTS",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                    modifier = Modifier.padding(start = 16.dp, bottom = 6.dp)
-                )
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
-                ) {
-                    if (unselectedTabs.isEmpty()) {
-                        Text(
-                            "All shortcuts are in dock",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                            modifier = Modifier.padding(16.dp),
-                            fontSize = 14.sp
-                        )
-                    } else {
-                        unselectedTabs.forEachIndexed { index, tab ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                // Add button
-                                androidx.compose.material3.IconButton(
-                                    onClick = {
-                                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                                        if (selectedItems.size < 3) {
-                                            selectedItems = selectedItems + tab.route
-                                        }
-                                    },
-                                    modifier = Modifier.size(24.dp),
-                                    enabled = selectedItems.size < 3
-                                ) {
-                                    androidx.compose.material3.Icon(
-                                        androidx.compose.material.icons.Icons.Default.AddCircle,
-                                        contentDescription = "Add",
-                                        tint = if (selectedItems.size < 3) com.example.awancoalledger.ui.theme.SuccessGreen else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha=0.3f)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.width(16.dp))
-                                androidx.compose.material3.Icon(
-                                    tab.icon, 
-                                    contentDescription = null, 
-                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha=0.6f), 
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Spacer(modifier = Modifier.width(16.dp))
-                                Text(
-                                    tab.title, 
-                                    modifier = Modifier.weight(1f), 
-                                    color = MaterialTheme.colorScheme.onSurface, 
-                                    fontWeight = FontWeight.Medium,
-                                    fontSize = 16.sp
-                                )
-                            }
-                            if (index < unselectedTabs.size - 1) {
-                                androidx.compose.material3.HorizontalDivider(
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                                    thickness = 0.5.dp,
-                                    modifier = Modifier.padding(start = 56.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        buttons = {
-            IOSDialogButton(
-                text = "Cancel",
-                onClick = onDismiss,
-            )
-            IOSDialogButton(
-                text = "Save",
-                onClick = {
-                    if (selectedItems.size == 3) {
-                        onSave(selectedItems)
-                        onDismiss()
-                    }
-                },
-                color = if (selectedItems.size == 3) com.example.awancoalledger.ui.theme.PrimaryBlue else MaterialTheme.colorScheme.onSurface.copy(alpha=0.3f),
-                fontWeight = FontWeight.Bold,
-                isLast = true
-            )
-        }
-    )
 }

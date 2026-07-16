@@ -271,6 +271,7 @@ fun LedgerDetailScreen(
                         }) { (pair, bal) ->
                             val (item, type) = pair
                             SwipeableItem(
+                                
                                 onEdit = { 
                                     if (type == "entry") editingEntry = item as LedgerEntry 
                                     else editingPayment = item as Payment 

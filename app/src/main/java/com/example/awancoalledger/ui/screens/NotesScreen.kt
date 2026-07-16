@@ -126,20 +126,11 @@ fun NotesScreen(
                                         .statusBarsPadding()
                                         .padding(horizontal = 16.dp)
                 ) {
-                    // ── Navigation row ────────────────────────────────────────────
-                    Row(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        IconButton(onClick = { 
-                            haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                            onBack() 
-                        }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = PrimaryBlue)
-                        }
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            // Sort
+                    com.example.awancoalledger.ui.components.ScreenHeader(
+                        title = currentFolder?.name ?: "All Notes",
+                        subtitle = "${filteredNotes.size} notes",
+                        onBack = { onBack() },
+                        actions = {
                             Box {
                                 IconButton(onClick = { 
                                     haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
@@ -156,8 +147,7 @@ fun NotesScreen(
                                         DropdownMenuItem(
                                                 text = {
                                                     Row(
-                                                            verticalAlignment =
-                                                                    Alignment.CenterVertically
+                                                            verticalAlignment = Alignment.CenterVertically
                                                     ) {
                                                         if (sortOrder == order) {
                                                             Icon(
@@ -204,35 +194,7 @@ fun NotesScreen(
                                 }
                             }
                         }
-                    }
-
-                    // ── Title + note count ────────────────────────────────────────
-                    Row(
-                            verticalAlignment = Alignment.Bottom,
-                            modifier = Modifier.padding(bottom = 2.dp)
-                    ) {
-                        Text(
-                                currentFolder?.name ?: "All Notes",
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontSize = 34.sp,
-                                fontWeight = FontWeight.Bold
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        AnimatedContent(
-                                targetState = filteredNotes.size,
-                                transitionSpec = {
-                                    slideInVertically { it } togetherWith slideOutVertically { -it }
-                                },
-                                label = "noteCount"
-                        ) { count ->
-                            Text(
-                                    count.toString(),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    fontSize = 22.sp,
-                                    modifier = Modifier.padding(bottom = 4.dp)
-                            )
-                        }
-                    }
+                    )
 
                     // ── iOS-style search bar with animated cancel ─────────────────
                     Row(
@@ -347,11 +309,22 @@ fun NotesScreen(
                     Spacer(Modifier.height(8.dp))
                     Text(
                             if (searchQuery.isNotEmpty()) "No notes match \"$searchQuery\"."
-                            else "Tap the compose button below\nto create your first note.",
+                            else "Create your first note.",
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                             fontSize = 15.sp,
                             textAlign = TextAlign.Center
                     )
+                    if (searchQuery.isEmpty()) {
+                        Spacer(Modifier.height(24.dp))
+                        androidx.compose.material3.Button(
+                            onClick = { onNavigateToEditor(null) },
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 32.dp, vertical = 16.dp)
+                        ) {
+                            Text("Compose Note", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        }
+                    }
                 }
             }
         } else {
@@ -670,6 +643,7 @@ fun NoteListGroup(
             notes.forEachIndexed { index, note ->
                 SwipeableItem(
                     onEdit = { onNoteClick(note.id) }, onDelete = { onDelete(note) },
+                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
                     content = {
                         NoteListItem(
                             note = note,

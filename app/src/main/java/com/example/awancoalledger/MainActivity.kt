@@ -33,6 +33,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -66,6 +67,8 @@ import com.example.awancoalledger.ui.theme.SurfaceColor
 import com.example.awancoalledger.viewmodel.LedgerViewModel
 import com.example.awancoalledger.viewmodel.LedgerViewModelFactory
 import androidx.compose.animation.*
+
+import dev.chrisbanes.haze.*
 import androidx.compose.animation.core.*
 
 class MainActivity : FragmentActivity() {
@@ -191,12 +194,15 @@ class MainActivity : FragmentActivity() {
 fun MainAppContainer(viewModel: LedgerViewModel) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val frostedGlass by viewModel.isFrostedGlassEnabled.collectAsState()
+    val hazeState = remember { HazeState() }
     val currentRoute = navBackStackEntry?.destination?.route
 
     // Hide bottom bar on detail screens
-    val showBottomBar = currentRoute in listOf("summary", "parties", "expenses", "inventory", "notes", "settings")
+    val showBottomBar = currentRoute in listOf("summary", "parties", "expenses", "inventory", "notes", "settings", "vehicle_tracker")
 
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+    val dockItems by viewModel.dockItems.collectAsState()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -204,18 +210,25 @@ fun MainAppContainer(viewModel: LedgerViewModel) {
         bottomBar = {
             if (showBottomBar) {
                 NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.surface,
+                    modifier = if (frostedGlass) Modifier.hazeChild(state = hazeState, style = HazeStyle(backgroundColor = androidx.compose.ui.graphics.Color.Transparent, blurRadius = 15.dp, tint = dev.chrisbanes.haze.HazeTint(androidx.compose.ui.graphics.Color(0x33000000)))) else Modifier,
+                    containerColor = if (frostedGlass) Color.Transparent else MaterialTheme.colorScheme.surface,
                     contentColor = MaterialTheme.colorScheme.onSurface,
-                    tonalElevation = 8.dp
+                    tonalElevation = if (frostedGlass) 0.dp else 8.dp
                 ) {
-                    val items = listOf(
-                        NavTab("Home", "summary", Icons.Default.Home),
-                        NavTab("Parties", "parties", Icons.Default.People),
-                        NavTab("Expenses", "expenses", Icons.Default.Payments),
-                        NavTab("Inventory", "inventory", Icons.Default.Layers),
-                        NavTab("Notes", "notes", Icons.Default.Description),
-                        NavTab("Settings", "settings", Icons.Default.Settings)
+                    val availableTabs = mapOf(
+                        "parties" to NavTab("Contacts", "parties", Icons.Default.People),
+                        "expenses" to NavTab("Expenses", "expenses", Icons.Default.Payments),
+                        "inventory" to NavTab("Inventory", "inventory", Icons.Default.Layers),
+                        "notes" to NavTab("Notes", "notes", Icons.Default.Description),
+                        "vehicle_tracker" to NavTab("Vehicles", "vehicle_tracker", Icons.Default.LocalShipping)
                     )
+                    
+                    val items = mutableListOf<NavTab>()
+                    items.add(NavTab("Home", "summary", Icons.Default.Home))
+                    dockItems.forEach { route ->
+                        availableTabs[route]?.let { items.add(it) }
+                    }
+                    items.add(NavTab("Settings", "settings", Icons.Default.Settings))
 
                     items.forEach { item ->
                         val selected = currentRoute == item.route
@@ -224,10 +237,16 @@ fun MainAppContainer(viewModel: LedgerViewModel) {
                             onClick = {
                                 if (!selected) {
                                     haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                                    navController.navigate(item.route) {
-                                        popUpTo("summary") { saveState = true }
-                                        launchSingleTop = true
-                                        restoreState = true
+                                    if (item.route == "summary") {
+                                        navController.popBackStack(navController.graph.findStartDestination().id, inclusive = false, saveState = true)
+                                    } else {
+                                        navController.navigate(item.route) {
+                                            popUpTo(navController.graph.findStartDestination().id) { 
+                                                saveState = true 
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
                                     }
                                 }
                             },
@@ -246,7 +265,7 @@ fun MainAppContainer(viewModel: LedgerViewModel) {
             }
         }
     ) { padding ->
-        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+        Box(modifier = Modifier.fillMaxSize().then(if (frostedGlass) Modifier.haze(hazeState) else Modifier.padding(padding))) {
             NavHost(
                 navController = navController, 
                 startDestination = "summary",
@@ -344,7 +363,7 @@ fun MainAppContainer(viewModel: LedgerViewModel) {
                         haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
                         val route = if (noteId == null) "note_editor/new" else "note_editor/$noteId"
                         navController.navigate(route)
-                    }) 
+                    }, onBack = { navController.navigate("summary") { popUpTo(0) } }) 
                 }
                 
                 composable(
@@ -367,8 +386,7 @@ fun MainAppContainer(viewModel: LedgerViewModel) {
                 composable("settings") { 
                     SettingsScreen(
                         viewModel, 
-                        onNavigateToReminders = { navController.navigate("reminders") },
-                        onNavigateToVehicleTracker = { navController.navigate("vehicle_tracker") }
+                        onNavigateToShortcut = { route -> navController.navigate(route) }
                     ) 
                 }
                 composable("vehicle_tracker") { VehicleTrackerScreen(viewModel, onNavigateBack = { navController.popBackStack() }) }

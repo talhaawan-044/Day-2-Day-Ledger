@@ -258,6 +258,10 @@ class LedgerViewModel(
         .map { settingsRepository.isDarkMode() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), settingsRepository.isDarkMode())
 
+    val isFrostedGlassEnabled = settingsRepository.getSettingsFlow()
+        .map { settingsRepository.isFrostedGlassEnabled() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), settingsRepository.isFrostedGlassEnabled())
+
     private val _isLocked = MutableStateFlow(settingsRepository.isAppLockEnabled())
     val isLocked: StateFlow<Boolean> = _isLocked.asStateFlow()
     
@@ -314,8 +318,17 @@ class LedgerViewModel(
         .map { settingsRepository.isGridView() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), settingsRepository.isGridView())
 
+    val dockItems = settingsRepository.getSettingsFlow()
+        .map { settingsRepository.getDockItems() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), settingsRepository.getDockItems())
+
     fun toggleDarkMode(enabled: Boolean) {
         settingsRepository.setDarkMode(enabled)
+        syncAfterWrite { syncManager.uploadSettings() }
+    }
+
+    fun toggleFrostedGlass(enabled: Boolean) {
+        settingsRepository.setFrostedGlassEnabled(enabled)
         syncAfterWrite { syncManager.uploadSettings() }
     }
 
@@ -383,6 +396,11 @@ class LedgerViewModel(
 
     fun updateCountryCode(code: String) {
         settingsRepository.setDefaultCountryCode(code)
+        syncAfterWrite { syncManager.uploadSettings() }
+    }
+
+    fun updateDockItems(items: List<String>) {
+        settingsRepository.setDockItems(items)
         syncAfterWrite { syncManager.uploadSettings() }
     }
 
