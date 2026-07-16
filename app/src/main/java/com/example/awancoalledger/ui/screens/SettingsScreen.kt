@@ -609,6 +609,16 @@ fun SettingsScreen(
                     }
             )
         }
+
+        if (showCountryDialog) {
+            CountrySelectionModal(
+                onDismiss = { showCountryDialog = false },
+                onCountrySelected = { config ->
+                    viewModel.updateCountryCode(config.code)
+                    showCountryDialog = false
+                }
+            )
+        }
     }
 }
 

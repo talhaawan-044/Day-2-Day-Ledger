@@ -18,3 +18,7 @@
    - Package: `com.example.awancoalledger.dev`
    - App Name: "Coal Ledger (Dev)" (defined in `src/debug/res/values/strings.xml`)
    - It will install alongside the live app and generate a fresh, empty Room database. Do not attempt to migrate live data into it.
+
+4. **UI Updates & Screenshots Workflow:**
+   - The user will drop UI screenshots via KDE connect into `/mnt/DEVELOPMENT/Day-2-Day-Kotlin-Final/App-screenshots-for-ai/` for AI agents to review.
+   - **CRITICAL:** Always check this directory when the user mentions screenshots. Once the screenshot has been analyzed and the corresponding task is complete, the AI **MUST** delete the screenshot to keep the directory clean.
