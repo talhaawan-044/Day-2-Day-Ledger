@@ -146,10 +146,10 @@ fun HomeScreen(
             // 1b ── Quick Stats
             QuickStatsRow(
                     partiesCount = partiesCount,
-                    remindersCount = activeRemindersCount,
+                    // remindersCount = activeRemindersCount,
                     notesCount = notesCount,
                     onPartiesClick = onNavigateToParties,
-                    onRemindersClick = onNavigateToReminders,
+                    // onRemindersClick = onNavigateToReminders,
                     onNotesClick = onNavigateToNotes
             )
 
@@ -911,10 +911,10 @@ fun ActivityRow(activity: RecentActivity, onClick: () -> Unit) {
 @Composable
 fun QuickStatsRow(
     partiesCount: Int,
-    remindersCount: Int,
+    // remindersCount: Int,
     notesCount: Int,
     onPartiesClick: () -> Unit,
-    onRemindersClick: () -> Unit,
+    // onRemindersClick: () -> Unit,
     onNotesClick: () -> Unit
 ) {
     Row(
@@ -922,7 +922,7 @@ fun QuickStatsRow(
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         QuickStatChip(Modifier.weight(1f), label = "Parties", value = partiesCount, icon = Icons.Default.People, color = PrimaryBlue, onClick = onPartiesClick)
-        QuickStatChip(Modifier.weight(1f), label = "Reminders", value = remindersCount, icon = Icons.Default.NotificationsActive, color = iOSOrange, onClick = onRemindersClick)
+        // QuickStatChip(Modifier.weight(1f), label = "Reminders", value = remindersCount, icon = Icons.Default.NotificationsActive, color = iOSOrange, onClick = onRemindersClick)
         QuickStatChip(Modifier.weight(1f), label = "Notes", value = notesCount, icon = Icons.Default.StickyNote2, color = iOSPurple, onClick = onNotesClick)
     }
 }

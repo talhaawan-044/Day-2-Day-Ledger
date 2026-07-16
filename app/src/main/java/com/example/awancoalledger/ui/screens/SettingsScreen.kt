@@ -234,7 +234,7 @@ fun SettingsScreen(
             }
 
             SettingsSection(title = "INTERNAL TOOLS") {
-                SettingsRow(
+                /* SettingsRow(
                         Icons.Default.Notifications,
                         "Reminders Manager",
                         "$activeRemindersCount Active",
@@ -246,7 +246,7 @@ fun SettingsScreen(
                         lastClickTime = currentTime
                         onNavigateToReminders()
                     }
-                }
+                } */
                 SettingsRow(
                         Icons.Default.DirectionsCar,
                         "Vehicle Tracker",

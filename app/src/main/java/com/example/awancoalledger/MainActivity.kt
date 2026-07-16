@@ -308,11 +308,13 @@ fun MainAppContainer(viewModel: LedgerViewModel) {
                             }
                         },
                         onNavigateToReminders = {
+                            /*
                             haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
                             navController.navigate("reminders") {
                                 popUpTo("summary") { saveState = true }
                                 launchSingleTop = true
                             }
+                            */
                         },
                         onNavigateToVehicleTracker = {
                             haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
@@ -370,7 +372,7 @@ fun MainAppContainer(viewModel: LedgerViewModel) {
                     ) 
                 }
                 composable("vehicle_tracker") { VehicleTrackerScreen(viewModel, onNavigateBack = { navController.popBackStack() }) }
-                composable("reminders") { RemindersScreen(viewModel, onBack = { navController.popBackStack() }) }
+                // composable("reminders") { RemindersScreen(viewModel, onBack = { navController.popBackStack() }) }
                 
                 composable(
                     "note_editor/{noteId}?folderId={folderId}",
