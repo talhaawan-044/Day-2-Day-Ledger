@@ -24,6 +24,7 @@ object ExportUtils {
             endDate: Long? = null,
             businessName: String,
             ownerName: String,
+            ownerPhone: String,
             logoUri: String? = null,
             signatureUri: String? = null
     ) {
@@ -219,7 +220,7 @@ object ExportUtils {
                 paint.textSize = 11f
                 paint.typeface = tfRegular
                 canvas.drawText(
-                        "$ownerName | ${details.owner.phone ?: "N/A"}",
+                        "$ownerName | $ownerPhone",
                         if (logoBitmap != null) 110f else 25f,
                         75f,
                         paint

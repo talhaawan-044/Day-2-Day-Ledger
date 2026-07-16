@@ -706,6 +706,7 @@ fun ExportActionSheet(
 ) {
     val businessName by viewModel.businessName.collectAsState()
     val ownerName by viewModel.ownerName.collectAsState()
+    val businessPhone by viewModel.businessPhone.collectAsState(initial = "")
     val logoUri by viewModel.companyLogoUri.collectAsState()
     val signatureUri by viewModel.signatureUri.collectAsState()
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -797,6 +798,7 @@ fun ExportActionSheet(
                     endDate = toDate,
                     businessName = businessName,
                     ownerName = ownerName,
+                    ownerPhone = businessPhone,
                     logoUri = logoUri?.toString(),
                     signatureUri = signatureUri?.toString()
                 )
