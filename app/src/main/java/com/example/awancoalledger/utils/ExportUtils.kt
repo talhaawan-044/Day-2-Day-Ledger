@@ -219,7 +219,7 @@ object ExportUtils {
                 paint.textSize = 11f
                 paint.typeface = tfRegular
                 canvas.drawText(
-                        "$ownerName | ${details.party.phone ?: "N/A"}",
+                        "$ownerName | ${details.owner.phone ?: "N/A"}",
                         if (logoBitmap != null) 110f else 25f,
                         75f,
                         paint
