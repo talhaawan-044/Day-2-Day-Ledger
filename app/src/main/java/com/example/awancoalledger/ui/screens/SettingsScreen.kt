@@ -57,6 +57,7 @@ fun SettingsScreen(
     val bizName by viewModel.businessName.collectAsState(initial = "")
     val ownerName by viewModel.ownerName.collectAsState(initial = "")
     val phone by viewModel.businessPhone.collectAsState(initial = "")
+    val countryConfig by viewModel.countryConfig.collectAsState()
     val address by viewModel.businessAddress.collectAsState(initial = "")
     val appLock by viewModel.isAppLockEnabled.collectAsState(initial = false)
     val biometrics by viewModel.isBiometricsEnabled.collectAsState(initial = false)
@@ -166,6 +167,7 @@ fun SettingsScreen(
     var showBackupsModal by remember { mutableStateOf(false) }
     var showLoginDialog by remember { mutableStateOf(false) }
     var showLogoutDialog by remember { mutableStateOf(false) }
+    var showCountryDialog by remember { mutableStateOf(false) }
     var lastClickTime by remember { mutableLongStateOf(0L) }
 
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -268,6 +270,14 @@ fun SettingsScreen(
                 }
                 SettingsRow(Icons.Default.Person, "Owner Name", ownerName, color = iOSOrange) {
                     editingField = "Owner Name" to ownerName
+                }
+                SettingsRow(
+                        Icons.Default.Public,
+                        "Country Code",
+                        "${countryConfig.name} (${countryConfig.code})",
+                        color = PrimaryBlue
+                ) {
+                    showCountryDialog = true
                 }
                 SettingsRow(Icons.Default.Phone, "Phone", phone, color = SuccessGreen) {
                     editingField = "Phone" to phone
@@ -1193,6 +1203,67 @@ fun PremiumAccountCard(
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 16.sp
                     )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CountrySelectionModal(
+    onDismiss: () -> Unit,
+    onCountrySelected: (com.example.awancoalledger.data.CountryConfig) -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+        dragHandle = {
+            BottomSheetDefaults.DragHandle(
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+            )
+        }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .padding(bottom = 32.dp)
+        ) {
+            Text(
+                "Select Country",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            
+            androidx.compose.foundation.lazy.LazyColumn {
+                items(com.example.awancoalledger.data.SUPPORTED_COUNTRIES.size) { index ->
+                    val country = com.example.awancoalledger.data.SUPPORTED_COUNTRIES[index]
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onCountrySelected(country) }
+                            .padding(vertical = 16.dp, horizontal = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = country.name,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = country.code,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    if (index < com.example.awancoalledger.data.SUPPORTED_COUNTRIES.size - 1) {
+                        androidx.compose.material3.Divider(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
+                    }
                 }
             }
         }

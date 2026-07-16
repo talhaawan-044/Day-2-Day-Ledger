@@ -26,6 +26,19 @@ enum class ReminderRecurrence {
     NONE, DAILY, WEEKLY, BI_WEEKLY, MONTHLY, YEARLY, CUSTOM
 }
 
+data class CountryConfig(val name: String, val code: String, val maxDigits: Int)
+
+val SUPPORTED_COUNTRIES = listOf(
+    CountryConfig("Pakistan", "+92", 10),
+    CountryConfig("India", "+91", 10),
+    CountryConfig("United States", "+1", 10),
+    CountryConfig("United Kingdom", "+44", 11),
+    CountryConfig("United Arab Emirates", "+971", 9),
+    CountryConfig("Saudi Arabia", "+966", 9),
+    CountryConfig("Australia", "+61", 9),
+    CountryConfig("Germany", "+49", 11)
+)
+
 @Entity(tableName = "parties")
 data class Party(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,

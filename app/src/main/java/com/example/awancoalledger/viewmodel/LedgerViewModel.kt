@@ -281,6 +281,17 @@ class LedgerViewModel(
         .map { settingsRepository.getBusinessAddress() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), settingsRepository.getBusinessAddress())
 
+    val countryConfig = settingsRepository.getSettingsFlow()
+        .map { 
+            val code = settingsRepository.getDefaultCountryCode()
+            SUPPORTED_COUNTRIES.find { it.code == code } ?: SUPPORTED_COUNTRIES.first()
+        }
+        .stateIn(
+            viewModelScope, 
+            SharingStarted.WhileSubscribed(5000), 
+            SUPPORTED_COUNTRIES.find { it.code == settingsRepository.getDefaultCountryCode() } ?: SUPPORTED_COUNTRIES.first()
+        )
+
     val isBiometricsEnabled = settingsRepository.getSettingsFlow()
         .map { settingsRepository.isBiometricsEnabled() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), settingsRepository.isBiometricsEnabled())
@@ -367,6 +378,11 @@ class LedgerViewModel(
 
     fun updateBusinessAddress(address: String) {
         settingsRepository.setBusinessAddress(address)
+        syncAfterWrite { syncManager.uploadSettings() }
+    }
+
+    fun updateCountryCode(code: String) {
+        settingsRepository.setDefaultCountryCode(code)
         syncAfterWrite { syncManager.uploadSettings() }
     }
 

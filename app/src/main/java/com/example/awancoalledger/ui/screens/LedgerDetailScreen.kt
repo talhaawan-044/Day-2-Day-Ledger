@@ -63,6 +63,7 @@ fun LedgerDetailScreen(
 ) {
     val detailsState: State<PartyWithDetails?> = viewModel.partyDetails.collectAsState(initial = null)
     val details: PartyWithDetails? = detailsState.value
+    val countryConfig by viewModel.countryConfig.collectAsState()
     
     // Preview States
     var previewingEntry by remember { mutableStateOf<LedgerEntry?>(null) }
@@ -398,6 +399,7 @@ fun LedgerDetailScreen(
         if (editingParty != null) {
             PartyActionSheet(
                 party = editingParty,
+                countryConfig = countryConfig,
                 onDismiss = { editingParty = null },
                 onAction = { name, phone, address, type ->
                     viewModel.updateParty(editingParty!!.copy(name = name, phone = phone, address = address, type = type))

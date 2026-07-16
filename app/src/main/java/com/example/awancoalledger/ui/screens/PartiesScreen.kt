@@ -58,6 +58,7 @@ fun PartiesScreen(viewModel: LedgerViewModel, onNavigateToLedger: (Int) -> Unit)
     // Sort and Grid State
     var sortOrder by remember { mutableStateOf(PartySortOrder.NAME) }
     val isGridView by viewModel.isGridView.collectAsState()
+    val countryConfig by viewModel.countryConfig.collectAsState()
 
     val haptic = LocalHapticFeedback.current
 
@@ -284,6 +285,7 @@ fun PartiesScreen(viewModel: LedgerViewModel, onNavigateToLedger: (Int) -> Unit)
 
         if (showAddPartySheet) {
             PartyActionSheet(
+                    countryConfig = countryConfig,
                     onDismiss = { showAddPartySheet = false },
                     onAction = { name, phone, address, type ->
                         viewModel.addParty(name, phone, address, type)
@@ -295,6 +297,7 @@ fun PartiesScreen(viewModel: LedgerViewModel, onNavigateToLedger: (Int) -> Unit)
         if (editingParty != null) {
             PartyActionSheet(
                     party = editingParty,
+                    countryConfig = countryConfig,
                     onDismiss = { editingParty = null },
                     onAction = { name, phone, address, type ->
                         viewModel.updateParty(
@@ -515,12 +518,13 @@ fun PartyCardItem(party: Party, balance: Double, onClick: () -> Unit) {
 @Composable
 fun PartyActionSheet(
         party: Party? = null,
+        countryConfig: com.example.awancoalledger.data.CountryConfig,
         onDismiss: () -> Unit,
         onAction: (String, String, String, PartyType) -> Unit
 ) {
     var name by remember { mutableStateOf(party?.name ?: "") }
     // Store only digits after prefix
-    var phoneDigits by remember { mutableStateOf(party?.phone?.removePrefix("+92") ?: "") }
+    var phoneDigits by remember { mutableStateOf(party?.phone?.removePrefix(countryConfig.code) ?: "") }
     var address by remember { mutableStateOf(party?.address ?: "") }
     var type by remember { mutableStateOf(party?.type ?: PartyType.BUYER) }
 
@@ -548,7 +552,7 @@ fun PartyActionSheet(
                 )
                 TextButton(
                         onClick = {
-                            if (name.isNotBlank()) onAction(name, "+92$phoneDigits", address, type)
+                            if (name.isNotBlank()) onAction(name, "${countryConfig.code}$phoneDigits", address, type)
                         }
                 ) {
                     Text(
@@ -568,13 +572,13 @@ fun PartyActionSheet(
                         label = "Phone Number",
                         value = phoneDigits,
                         onValueChange = { input ->
-                            if (input.all { it.isDigit() } && input.length <= 10) {
+                            if (input.all { it.isDigit() } && input.length <= countryConfig.maxDigits) {
                                 phoneDigits = input
                             }
                         },
                         prefix = {
                             Text(
-                                    "+92 ",
+                                    "${countryConfig.code} ",
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontWeight = FontWeight.Bold
                             )

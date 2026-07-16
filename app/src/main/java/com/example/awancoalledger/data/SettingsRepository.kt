@@ -20,6 +20,9 @@ class SettingsRepository(context: Context) {
     fun getBusinessAddress(): String = prefs.getString("biz_address", "Quetta, Baluchistan") ?: "Quetta, Baluchistan"
     fun setBusinessAddress(value: String) = prefs.edit().putString("biz_address", value).apply()
 
+    fun getDefaultCountryCode(): String = prefs.getString("default_country_code", "+92") ?: "+92"
+    fun setDefaultCountryCode(value: String) = prefs.edit().putString("default_country_code", value).apply()
+
     fun isAppLockEnabled(): Boolean = prefs.getBoolean("app_lock", false)
     fun setAppLockEnabled(value: Boolean) = prefs.edit().putBoolean("app_lock", value).apply()
 
