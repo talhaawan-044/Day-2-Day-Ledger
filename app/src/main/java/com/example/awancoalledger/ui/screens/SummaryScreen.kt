@@ -345,11 +345,11 @@ fun SyncBadge(status: SyncStatus, onClick: () -> Unit) {
 
     Surface(
             onClick = onClick,
-            color = MaterialTheme.colorScheme.surface,
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
             shape = CircleShape
     ) {
         Row(
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -363,10 +363,11 @@ fun SyncBadge(status: SyncStatus, onClick: () -> Unit) {
             )
             Spacer(Modifier.width(6.dp))
             Text(
-                    label,
+                    label.uppercase(),
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp
             )
         }
     }
@@ -931,12 +932,12 @@ fun QuickStatsRow(
 fun QuickStatChip(modifier: Modifier, label: String, value: Int, icon: ImageVector, color: Color, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
-        modifier = modifier.height(100.dp),
+        modifier = modifier.height(116.dp),
         color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(24.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp), 
+            modifier = Modifier.padding(14.dp), 
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
@@ -948,8 +949,8 @@ fun QuickStatChip(modifier: Modifier, label: String, value: Int, icon: ImageVect
             ) {
                 Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(18.dp))
             }
-            Column {
-                Text("$value", color = MaterialTheme.colorScheme.onSurface, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Column(modifier = Modifier.padding(bottom = 2.dp)) {
+                Text("$value", color = MaterialTheme.colorScheme.onSurface, fontSize = 24.sp, fontWeight = FontWeight.Bold)
                 Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp, fontWeight = FontWeight.Medium)
             }
         }
