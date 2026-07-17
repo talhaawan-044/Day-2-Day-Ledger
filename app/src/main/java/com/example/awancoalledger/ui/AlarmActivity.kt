@@ -1,5 +1,6 @@
 package com.example.awancoalledger.ui
 
+import androidx.compose.material3.MaterialTheme
 import android.app.KeyguardManager
 import android.content.Context
 import android.os.Build
@@ -34,7 +35,6 @@ import com.example.awancoalledger.data.LedgerRepository
 import com.example.awancoalledger.data.ReminderPriority
 import com.example.awancoalledger.ui.theme.AwanCoalLedgerTheme
 import com.example.awancoalledger.ui.theme.ErrorRed
-import com.example.awancoalledger.ui.theme.PrimaryBlue
 import com.example.awancoalledger.utils.AlarmSoundManager
 import com.example.awancoalledger.utils.NotificationHelper
 import com.example.awancoalledger.utils.ReminderScheduler
@@ -219,7 +219,7 @@ fun AlarmScreen(
     val accentColor = when (priority) {
         ReminderPriority.HIGH -> ErrorRed
         ReminderPriority.MEDIUM -> Color(0xFFFF9500)
-        else -> PrimaryBlue
+        else -> MaterialTheme.colorScheme.primary
     }
 
     Box(

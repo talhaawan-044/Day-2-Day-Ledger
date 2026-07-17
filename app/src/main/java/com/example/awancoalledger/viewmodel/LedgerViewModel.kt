@@ -258,6 +258,10 @@ class LedgerViewModel(
         .map { settingsRepository.isDarkMode() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), settingsRepository.isDarkMode())
 
+    val accentColorHex = settingsRepository.getSettingsFlow()
+        .map { settingsRepository.getAccentColorHex() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), settingsRepository.getAccentColorHex())
+
     val isFrostedGlassEnabled = settingsRepository.getSettingsFlow()
         .map { settingsRepository.isFrostedGlassEnabled() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), settingsRepository.isFrostedGlassEnabled())
@@ -372,6 +376,11 @@ class LedgerViewModel(
         if (settingsRepository.isAppLockEnabled()) {
             _isLocked.value = true
         }
+    }
+
+    fun updateAccentColorHex(hex: String) {
+        settingsRepository.setAccentColorHex(hex)
+        syncAfterWrite { syncManager.uploadSettings() }
     }
 
     fun updateOwnerName(name: String) {
@@ -599,6 +608,14 @@ class LedgerViewModel(
 
     // --- Parties & Ledger Flows ---
     val allPartiesWithDetails = repository.getAllPartiesWithDetails()
+        .map { list -> 
+            list.map { party -> 
+                party.copy(
+                    entries = party.entries.filter { !it.isDeleted },
+                    payments = party.payments.filter { !it.isDeleted }
+                ) 
+            } 
+        }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val partiesCount = allPartiesWithDetails.map { it.size }
@@ -673,8 +690,11 @@ class LedgerViewModel(
     fun selectParty(partyId: Int) {
         selectPartyJob?.cancel()
         selectPartyJob = viewModelScope.launch {
-            repository.getPartyWithDetails(partyId).collect {
-                _partyDetails.value = it
+            repository.getPartyWithDetails(partyId).collect { details ->
+                _partyDetails.value = details?.copy(
+                    entries = details.entries.filter { !it.isDeleted },
+                    payments = details.payments.filter { !it.isDeleted }
+                )
             }
         }
     }
@@ -1107,10 +1127,30 @@ class LedgerViewModel(
         }
     }
     
+    private suspend fun recalculateVehicleMileage(vehicleId: Int) {
+        val fuelEntries = repository.getAllFuelEntriesList().filter { it.vehicleId == vehicleId && !it.isDeleted }
+        val maintEntries = repository.getAllMaintenanceEntriesList().filter { it.vehicleId == vehicleId && !it.isDeleted }
+        
+        val maxFuel = fuelEntries.maxOfOrNull { it.mileage } ?: 0.0
+        val maxMaint = maintEntries.maxOfOrNull { it.mileage } ?: 0.0
+        val highestEntryMileage = maxOf(maxFuel, maxMaint)
+        
+        repository.getVehicleById(vehicleId)?.let { vehicle ->
+            // If there's an entry, and it's less than the currently cached max, we decrement it.
+            // If they deleted everything, highestEntryMileage is 0.0, so we just preserve the last known.
+            if (highestEntryMileage > 0 && highestEntryMileage < vehicle.currentMileage) {
+                val updated = vehicle.copy(currentMileage = highestEntryMileage, lastUpdated = System.currentTimeMillis())
+                repository.insertVehicle(updated)
+                syncAfterWrite { syncManager.uploadVehicle(updated) }
+            }
+        }
+    }
+    
     fun deleteFuelEntry(entry: FuelEntry) {
         viewModelScope.launch { 
             repository.deleteFuelEntry(entry)
             syncManager.deleteFuelEntry(entry)
+            recalculateVehicleMileage(entry.vehicleId)
         }
     }
     
@@ -1118,6 +1158,7 @@ class LedgerViewModel(
         viewModelScope.launch { 
             repository.deleteMaintenanceEntry(entry)
             syncManager.deleteMaintenanceEntry(entry)
+            recalculateVehicleMileage(entry.vehicleId)
         }
     }
 

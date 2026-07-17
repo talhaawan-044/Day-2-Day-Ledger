@@ -121,8 +121,9 @@ class MainActivity : FragmentActivity() {
         setContent {
             val viewModel: LedgerViewModel = viewModel(factory = factory)
             val isDarkMode by viewModel.isDarkMode.collectAsState()
+            val accentColorHex by viewModel.accentColorHex.collectAsState()
             
-            AwanCoalLedgerTheme(darkTheme = isDarkMode) {
+            AwanCoalLedgerTheme(darkTheme = isDarkMode, accentColorHex = accentColorHex) {
                 val isLocked by viewModel.isLocked.collectAsState()
                 val ownerName by viewModel.ownerName.collectAsState()
                 val biometricsEnabled by viewModel.isBiometricsEnabled.collectAsState()

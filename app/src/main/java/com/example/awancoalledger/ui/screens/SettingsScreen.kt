@@ -1,5 +1,6 @@
 package com.example.awancoalledger.ui.screens
 
+import androidx.compose.material3.MaterialTheme
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -44,8 +45,8 @@ import java.util.*
 import androidx.activity.compose.BackHandler
 
 enum class SettingsCategory(val title: String, val icon: androidx.compose.ui.graphics.vector.ImageVector, val color: androidx.compose.ui.graphics.Color, val subtitle: String) {
-    CLOUD_ACCOUNT("Cloud Account", androidx.compose.material.icons.Icons.Outlined.CloudUpload, PrimaryBlue, "Sync & Backups"),
-    BUSINESS_PROFILE("Business Profile", androidx.compose.material.icons.Icons.Outlined.Business, PrimaryBlue, "Name, phone, logo"),
+    CLOUD_ACCOUNT("Cloud Account", androidx.compose.material.icons.Icons.Outlined.CloudUpload, androidx.compose.ui.graphics.Color(0xFF007AFF), "Sync & Backups"),
+    BUSINESS_PROFILE("Business Profile", androidx.compose.material.icons.Icons.Outlined.Business, androidx.compose.ui.graphics.Color(0xFF007AFF), "Name, phone, logo"),
     PRIVACY_SECURITY("Privacy & Security", androidx.compose.material.icons.Icons.Outlined.Lock, ErrorRed, "App lock, biometrics"),
     PREFERENCES("Preferences", androidx.compose.material.icons.Icons.Outlined.SettingsSuggest, iOSPurple, "Dark mode, dock"),
     DATA_MANAGEMENT("Data Management", androidx.compose.material.icons.Icons.Outlined.History, iOSOrange, "Backups, recovery")
@@ -233,7 +234,7 @@ fun SettingsScreen(
                 if (unusedModules.isNotEmpty()) {
                     SettingsSection(title = "SHORTCUTS") {
                         unusedModules.forEachIndexed { index, tab ->
-                            SettingsRow(icon = tab.icon, title = tab.title, value = "Access " + tab.title, color = PrimaryBlue, isLast = index == unusedModules.size - 1) {
+                            SettingsRow(icon = tab.icon, title = tab.title, value = "Access " + tab.title, color = MaterialTheme.colorScheme.primary, isLast = index == unusedModules.size - 1) {
                                 val currentTime = System.currentTimeMillis()
                                 if (currentTime - lastClickTime > 1000) {
                                     lastClickTime = currentTime
@@ -246,7 +247,7 @@ fun SettingsScreen(
                 
                 SettingsSection(title = "CATEGORIES") {
                     SettingsCategory.values().forEachIndexed { index, category ->
-                        SettingsRow(icon = category.icon, title = category.title, value = category.subtitle, color = category.color, isLast = index == SettingsCategory.values().size - 1) {
+                        SettingsRow(icon = category.icon, title = category.title, value = category.subtitle, color = if (category == SettingsCategory.CLOUD_ACCOUNT || category == SettingsCategory.BUSINESS_PROFILE) MaterialTheme.colorScheme.primary else category.color, isLast = index == SettingsCategory.values().size - 1) {
                             currentCategory = category
                         }
                     }
@@ -270,7 +271,7 @@ fun SettingsScreen(
                             title = "Guest Mode",
                             subtitle = "Back up your data to the cloud",
                             icon = Icons.Outlined.CloudUpload,
-                            color = PrimaryBlue,
+                            color = MaterialTheme.colorScheme.primary,
                             onClick = { showLoginDialog = true }
                     )
                 } else {
@@ -278,7 +279,7 @@ fun SettingsScreen(
                             title = user?.displayName ?: user?.email ?: "Account Sync Active",
                             subtitle = user?.email ?: "Your data is secured in the cloud",
                             icon = Icons.Outlined.CloudDone,
-                            color = PrimaryBlue,
+                            color = MaterialTheme.colorScheme.primary,
                             isLoggedIn = true,
                             onLogout = { showLogoutDialog = true }
                     )
@@ -311,7 +312,7 @@ fun SettingsScreen(
                     }
                     SettingsCategory.BUSINESS_PROFILE -> {
             SettingsSection(title = "BUSINESS PROFILE") {
-                SettingsRow(Icons.Outlined.Business, "Business Name", bizName, color = PrimaryBlue) {
+                SettingsRow(Icons.Outlined.Business, "Business Name", bizName, color = MaterialTheme.colorScheme.primary) {
                     editingField = "Business Name" to bizName
                 }
                 SettingsRow(Icons.Outlined.Person, "Owner Name", ownerName, color = iOSOrange) {
@@ -321,7 +322,7 @@ fun SettingsScreen(
                         Icons.Outlined.Public,
                         "Country Code",
                         "${countryConfig.name} (${countryConfig.code})",
-                        color = PrimaryBlue
+                        color = MaterialTheme.colorScheme.primary
                 ) {
                     showCountryDialog = true
                 }
@@ -366,7 +367,7 @@ fun SettingsScreen(
                                             CircularProgressIndicator(
                                                     modifier = Modifier.size(20.dp),
                                                     strokeWidth = 2.dp,
-                                                    color = PrimaryBlue
+                                                    color = MaterialTheme.colorScheme.primary
                                             )
                                         }
                                     }
@@ -392,7 +393,7 @@ fun SettingsScreen(
                             } else {
                                 Text(
                                         "Upload",
-                                        color = PrimaryBlue,
+                                        color = MaterialTheme.colorScheme.primary,
                                         fontSize = 16.sp,
                                         fontWeight = FontWeight.Bold
                                 )
@@ -442,7 +443,7 @@ fun SettingsScreen(
                                             CircularProgressIndicator(
                                                     modifier = Modifier.size(20.dp),
                                                     strokeWidth = 2.dp,
-                                                    color = PrimaryBlue
+                                                    color = MaterialTheme.colorScheme.primary
                                             )
                                         }
                                     }
@@ -468,7 +469,7 @@ fun SettingsScreen(
                             } else {
                                 Text(
                                         "Upload",
-                                        color = PrimaryBlue,
+                                        color = MaterialTheme.colorScheme.primary,
                                         fontSize = 16.sp,
                                         fontWeight = FontWeight.Bold
                                 )
@@ -487,7 +488,7 @@ fun SettingsScreen(
                     }
                     SettingsCategory.PRIVACY_SECURITY -> {
             SettingsSection(title = "PRIVACY & SECURITY") {
-                SettingsToggleRow(Icons.Outlined.Lock, "App Lock", appLock, color = PrimaryBlue) {
+                SettingsToggleRow(Icons.Outlined.Lock, "App Lock", appLock, color = MaterialTheme.colorScheme.primary) {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     if (it) showPinKeypad = true else viewModel.toggleAppLock(false)
                 }
@@ -514,6 +515,8 @@ fun SettingsScreen(
                     }
                     SettingsCategory.PREFERENCES -> {
             SettingsSection(title = "PREFERENCES") {
+                AccentColorRow(viewModel, haptic)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
                 SettingsRow(
                         androidx.compose.material.icons.Icons.Outlined.ViewCarousel,
                         "Customize Dock",
@@ -535,7 +538,7 @@ fun SettingsScreen(
                         androidx.compose.material.icons.Icons.Outlined.BlurOn,
                         "Frosted Glass (iOS Blur)",
                         frostedGlass,
-                        color = PrimaryBlue
+                        color = MaterialTheme.colorScheme.primary
                 ) {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     viewModel.toggleFrostedGlass(it)
@@ -558,7 +561,7 @@ fun SettingsScreen(
                         "View Snapshots",
                         color = iOSOrange
                 ) { showBackupsModal = true }
-                SettingsRow(Icons.Outlined.CloudDownload, "Manual Export", color = PrimaryBlue) {
+                SettingsRow(Icons.Outlined.CloudDownload, "Manual Export", color = MaterialTheme.colorScheme.primary) {
                     viewModel.shareBackup(context) { error ->
                         Toast.makeText(context, "Export Failed: $error", Toast.LENGTH_LONG).show()
                     }
@@ -716,7 +719,7 @@ fun ProfileHeader(owner: String, biz: String, logoUri: android.net.Uri? = null, 
                             Modifier.size(64.dp)
                                     .clip(CircleShape)
                                     .background(
-                                            Brush.linearGradient(listOf(PrimaryBlue, iOSPurple))
+                                            Brush.linearGradient(listOf(MaterialTheme.colorScheme.primary, iOSPurple))
                                     )
                                     .clickable { onLogoClick() },
                     contentAlignment = Alignment.Center
@@ -927,7 +930,7 @@ fun PinKeypadModal(onDismiss: () -> Unit, onComplete: (String) -> Unit) {
                                         Modifier.size(16.dp)
                                                 .clip(CircleShape)
                                                 .background(
-                                                        if (pin.length > index) PrimaryBlue
+                                                        if (pin.length > index) MaterialTheme.colorScheme.primary
                                                         else Color.LightGray.copy(alpha = 0.3f)
                                                 )
                         )
@@ -977,7 +980,7 @@ fun PinKeypadModal(onDismiss: () -> Unit, onComplete: (String) -> Unit) {
                 }
 
                 TextButton(onClick = onDismiss, modifier = Modifier.padding(top = 16.dp)) {
-                    Text("Cancel", color = PrimaryBlue)
+                    Text("Cancel", color = MaterialTheme.colorScheme.primary)
                 }
             }
         }
@@ -1035,7 +1038,7 @@ fun AutoBackupsModal(viewModel: LedgerViewModel, onDismiss: () -> Unit) {
                             Icon(
                                     Icons.Outlined.AddAPhoto,
                                     contentDescription = "Manual Snapshot",
-                                    tint = PrimaryBlue
+                                    tint = MaterialTheme.colorScheme.primary
                             )
                 }
             }
@@ -1078,7 +1081,7 @@ fun AutoBackupsModal(viewModel: LedgerViewModel, onDismiss: () -> Unit) {
                                                         .clip(CircleShape)
                                                         .background(
                                                                 (if (isManual) iOSOrange
-                                                                        else PrimaryBlue)
+                                                                        else MaterialTheme.colorScheme.primary)
                                                                         .copy(alpha = 0.2f)
                                                         ),
                                         contentAlignment = Alignment.Center
@@ -1087,7 +1090,7 @@ fun AutoBackupsModal(viewModel: LedgerViewModel, onDismiss: () -> Unit) {
                                             if (isManual) Icons.Outlined.Person
                                             else Icons.Outlined.AutoMode,
                                             null,
-                                            tint = if (isManual) iOSOrange else PrimaryBlue,
+                                            tint = if (isManual) iOSOrange else MaterialTheme.colorScheme.primary,
                                             modifier = Modifier.size(20.dp)
                                     )
                                 }
@@ -1395,7 +1398,7 @@ fun DockCustomizationDialog(
                             androidx.compose.material3.Icon(
                                 tab.icon, 
                                 contentDescription = null, 
-                                tint = com.example.awancoalledger.ui.theme.PrimaryBlue, 
+                                tint = MaterialTheme.colorScheme.primary, 
                                 modifier = Modifier.size(24.dp)
                             )
                             Spacer(modifier = Modifier.width(16.dp))
@@ -1554,10 +1557,49 @@ fun DockCustomizationDialog(
                         onDismiss()
                     }
                 },
-                color = if (selectedItems.size == 3) com.example.awancoalledger.ui.theme.PrimaryBlue else MaterialTheme.colorScheme.onSurface.copy(alpha=0.3f),
+                color = if (selectedItems.size == 3) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha=0.3f),
                 fontWeight = FontWeight.Bold,
                 isLast = true
             )
         }
     )
+}
+
+@Composable
+fun AccentColorRow(viewModel: LedgerViewModel, haptic: androidx.compose.ui.hapticfeedback.HapticFeedback) {
+    val currentHex by viewModel.accentColorHex.collectAsState()
+    
+    val accentColors = listOf(
+        "#007AFF" to "Blue",
+        "#56D25B" to "Green",
+        "#FF9500" to "Orange",
+        "#FF3B30" to "Red",
+        "#5856D6" to "Purple"
+    )
+
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp)) {
+        Text("Accent Color", color = MaterialTheme.colorScheme.onBackground, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+            accentColors.forEach { (hex, _) ->
+                val color = try { Color(android.graphics.Color.parseColor(hex)) } catch(e: Exception) { Color.Gray }
+                val isSelected = currentHex == hex
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .background(color)
+                        .border(
+                            width = if (isSelected) 3.dp else 0.dp,
+                            color = if (isSelected) MaterialTheme.colorScheme.onBackground else Color.Transparent,
+                            shape = CircleShape
+                        )
+                        .clickable {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            viewModel.updateAccentColorHex(hex)
+                        }
+                )
+            }
+        }
+    }
 }

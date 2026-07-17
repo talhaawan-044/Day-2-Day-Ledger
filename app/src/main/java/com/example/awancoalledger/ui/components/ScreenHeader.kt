@@ -1,5 +1,6 @@
 package com.example.awancoalledger.ui.components
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -14,7 +15,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.awancoalledger.ui.theme.PrimaryBlue
 
 @Composable
 fun ScreenHeader(
@@ -40,7 +40,7 @@ fun ScreenHeader(
                 Icon(
                     imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                     contentDescription = "Back",
-                    tint = PrimaryBlue,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(28.dp)
                 )
             }

@@ -1,5 +1,6 @@
 package com.example.awancoalledger.ui.screens
 
+import androidx.compose.material3.MaterialTheme
 import android.content.Intent
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -36,7 +37,6 @@ import androidx.compose.ui.unit.sp
 import com.example.awancoalledger.ui.components.DeleteConfirmationDialog
 import com.example.awancoalledger.ui.components.NoteBackgrounds
 import com.example.awancoalledger.ui.components.NoteBackgroundRenderer
-import com.example.awancoalledger.ui.theme.PrimaryBlue
 import com.example.awancoalledger.viewmodel.LedgerViewModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -449,7 +449,7 @@ fun NoteEditorScreen(
                                     Icon(
                                             Icons.AutoMirrored.Outlined.ArrowBack,
                                             null,
-                                            tint = PrimaryBlue
+                                            tint = MaterialTheme.colorScheme.primary
                                     )
                                 }
                             },
@@ -460,7 +460,7 @@ fun NoteEditorScreen(
                                             Icons.AutoMirrored.Outlined.Undo,
                                             null,
                                             tint =
-                                                    if (canUndo) PrimaryBlue
+                                                    if (canUndo) MaterialTheme.colorScheme.primary
                                                     else
                                                             MaterialTheme.colorScheme
                                                                     .onSurfaceVariant.copy(
@@ -474,7 +474,7 @@ fun NoteEditorScreen(
                                             Icons.AutoMirrored.Outlined.Redo,
                                             null,
                                             tint =
-                                                    if (canRedo) PrimaryBlue
+                                                    if (canRedo) MaterialTheme.colorScheme.primary
                                                     else
                                                             MaterialTheme.colorScheme
                                                                     .onSurfaceVariant.copy(
@@ -493,7 +493,7 @@ fun NoteEditorScreen(
                                             Icons.Outlined.Search,
                                             null,
                                             tint =
-                                                    if (showFindBar) PrimaryBlue
+                                                    if (showFindBar) MaterialTheme.colorScheme.primary
                                                     else MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
@@ -504,14 +504,14 @@ fun NoteEditorScreen(
                                             else Icons.Outlined.PushPin,
                                             null,
                                             tint =
-                                                    if (isPinned) PrimaryBlue
+                                                    if (isPinned) MaterialTheme.colorScheme.primary
                                                     else MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                                 // More menu
                                 Box {
                                     IconButton(onClick = { showMoreMenu = true }) {
-                                        Icon(Icons.Outlined.MoreVert, null, tint = PrimaryBlue)
+                                        Icon(Icons.Outlined.MoreVert, null, tint = MaterialTheme.colorScheme.primary)
                                     }
                                     DropdownMenu(
                                             expanded = showMoreMenu,
@@ -620,7 +620,7 @@ fun NoteEditorScreen(
                                 TextButton(onClick = { saveAndGoBack() }) {
                                     Text(
                                             "Done",
-                                            color = PrimaryBlue,
+                                            color = MaterialTheme.colorScheme.primary,
                                             fontWeight = FontWeight.SemiBold,
                                             fontSize = 17.sp
                                     )
@@ -856,7 +856,7 @@ fun NoteEditorScreen(
                                     fontWeight = FontWeight.Bold,
                                     lineHeight = 34.sp
                             ),
-                    cursorBrush = SolidColor(PrimaryBlue),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                     modifier = Modifier.fillMaxWidth(),
                     decorationBox = { inner ->
                         if (title.isEmpty()) {
@@ -885,10 +885,11 @@ fun NoteEditorScreen(
                                     fontSize = fontSize.sp,
                                     lineHeight = (fontSize * 1.65f).sp
                             ),
-                    cursorBrush = SolidColor(PrimaryBlue),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                     visualTransformation =
                             NoteMarkdownTransformation(
                                     fontColor = fontColor,
+                                    primaryColor = MaterialTheme.colorScheme.primary,
                                     findQuery = findQuery,
                                     findRanges = findResults,
                                     currentMatch = findIndex
@@ -1008,7 +1009,7 @@ private fun FindBar(
                                     color = MaterialTheme.colorScheme.onSurface,
                                     fontSize = 15.sp
                             ),
-                    cursorBrush = SolidColor(PrimaryBlue),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                     singleLine = true,
                     modifier = Modifier.weight(1f),
                     decorationBox = { inner ->
@@ -1041,7 +1042,7 @@ private fun FindBar(
                             Icons.Outlined.KeyboardArrowUp,
                             null,
                             tint =
-                                    if (matchCount > 0) PrimaryBlue
+                                    if (matchCount > 0) MaterialTheme.colorScheme.primary
                                     else
                                             MaterialTheme.colorScheme.onSurfaceVariant.copy(
                                                     alpha = 0.3f
@@ -1058,7 +1059,7 @@ private fun FindBar(
                             Icons.Outlined.KeyboardArrowDown,
                             null,
                             tint =
-                                    if (matchCount > 0) PrimaryBlue
+                                    if (matchCount > 0) MaterialTheme.colorScheme.primary
                                     else
                                             MaterialTheme.colorScheme.onSurfaceVariant.copy(
                                                     alpha = 0.3f
@@ -1095,7 +1096,7 @@ private fun FormatButton(
             modifier =
                     Modifier.clip(RoundedCornerShape(8.dp))
                             .background(
-                                    if (isActive) PrimaryBlue.copy(alpha = 0.14f)
+                                    if (isActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
                                     else Color.Transparent
                             )
                             .clickable(onClick = onClick)
@@ -1105,7 +1106,7 @@ private fun FormatButton(
         Icon(
                 icon,
                 contentDescription = tooltip,
-                tint = if (isActive) PrimaryBlue else fontColor,
+                tint = if (isActive) MaterialTheme.colorScheme.primary else fontColor,
                 modifier = Modifier.size(21.dp)
         )
     }
@@ -1124,7 +1125,7 @@ private fun HeaderCycleButton(level: Int, fontColor: Color, onClick: () -> Unit)
             modifier =
                     Modifier.clip(RoundedCornerShape(8.dp))
                             .background(
-                                    if (level > 0) PrimaryBlue.copy(alpha = 0.14f)
+                                    if (level > 0) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
                                     else Color.Transparent
                             )
                             .clickable(onClick = onClick)
@@ -1133,7 +1134,7 @@ private fun HeaderCycleButton(level: Int, fontColor: Color, onClick: () -> Unit)
     ) {
         Text(
                 label,
-                color = if (level > 0) PrimaryBlue else fontColor,
+                color = if (level > 0) MaterialTheme.colorScheme.primary else fontColor,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold
         )
@@ -1188,6 +1189,7 @@ private fun EditorStatDot() {
 
 class NoteMarkdownTransformation(
         private val fontColor: Color,
+        private val primaryColor: Color,
         private val findQuery: String = "",
         private val findRanges: List<IntRange> = emptyList(),
         private val currentMatch: Int = 0
@@ -1243,14 +1245,14 @@ class NoteMarkdownTransformation(
             Regex("^> .+$", RegexOption.MULTILINE).findAll(text.text).forEach { m ->
                 addStyle(
                         SpanStyle(
-                                color = PrimaryBlue.copy(alpha = 0.82f),
+                                color = primaryColor.copy(alpha = 0.82f),
                                 fontStyle = FontStyle.Italic
                         ),
                         m.range.first,
                         m.range.last + 1
                 )
                 addStyle(
-                        SpanStyle(color = PrimaryBlue, fontWeight = FontWeight.Bold),
+                        SpanStyle(color = primaryColor, fontWeight = FontWeight.Bold),
                         m.range.first,
                         (m.range.first + 2).coerceAtMost(m.range.last + 1)
                 )
@@ -1361,7 +1363,7 @@ class NoteMarkdownTransformation(
             // Bullet – "• "
             Regex("^• ", RegexOption.MULTILINE).findAll(text.text).forEach { m ->
                 addStyle(
-                        SpanStyle(color = PrimaryBlue, fontWeight = FontWeight.ExtraBold),
+                        SpanStyle(color = primaryColor, fontWeight = FontWeight.ExtraBold),
                         m.range.first,
                         m.range.last + 1
                 )
@@ -1370,7 +1372,7 @@ class NoteMarkdownTransformation(
             // Numbered list – "1. "
             Regex("^\\d+\\. ", RegexOption.MULTILINE).findAll(text.text).forEach { m ->
                 addStyle(
-                        SpanStyle(color = PrimaryBlue, fontWeight = FontWeight.SemiBold),
+                        SpanStyle(color = primaryColor, fontWeight = FontWeight.SemiBold),
                         m.range.first,
                         m.range.last + 1
                 )
@@ -1388,7 +1390,7 @@ class NoteMarkdownTransformation(
             // Checked – "[x] "
             Regex("^\\[x\\] ", RegexOption.MULTILINE).findAll(text.text).forEach { m ->
                 addStyle(
-                        SpanStyle(color = PrimaryBlue, fontWeight = FontWeight.SemiBold),
+                        SpanStyle(color = primaryColor, fontWeight = FontWeight.SemiBold),
                         m.range.first,
                         m.range.last + 1
                 )
@@ -1484,7 +1486,7 @@ fun EnhancedBackgroundSheet(
                                     .clip(CircleShape)
                                     .background(color)
                                     .then(
-                                        if (isSelected) Modifier.border(3.dp, PrimaryBlue, CircleShape)
+                                        if (isSelected) Modifier.border(3.dp, MaterialTheme.colorScheme.primary, CircleShape)
                                         else Modifier.border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f), CircleShape)
                                     )
                                     .clickable { onSelectColor(color) },
@@ -1521,7 +1523,7 @@ fun EnhancedBackgroundSheet(
                                         .clip(RoundedCornerShape(12.dp))
                                         .background(MaterialTheme.colorScheme.background)
                                         .then(
-                                            if (isSelected) Modifier.border(3.dp, PrimaryBlue, RoundedCornerShape(12.dp))
+                                            if (isSelected) Modifier.border(3.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
                                             else Modifier.border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f), RoundedCornerShape(12.dp))
                                         )
                                         .clickable { onSelectBgImage(bgId) },
@@ -1535,7 +1537,7 @@ fun EnhancedBackgroundSheet(
                                         )
                                     }
                                     if (isSelected) {
-                                        Box(modifier = Modifier.size(28.dp).clip(CircleShape).background(PrimaryBlue), contentAlignment = Alignment.Center) {
+                                        Box(modifier = Modifier.size(28.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary), contentAlignment = Alignment.Center) {
                                             Icon(Icons.Outlined.Check, null, tint = Color.White, modifier = Modifier.size(18.dp))
                                         }
                                     }
@@ -1613,7 +1615,7 @@ fun EnhancedColorSheet(
                                                         if (isSelected)
                                                                 Modifier.border(
                                                                         3.dp,
-                                                                        PrimaryBlue,
+                                                                        MaterialTheme.colorScheme.primary,
                                                                         CircleShape
                                                                 )
                                                         else
@@ -1738,7 +1740,7 @@ private fun FolderPickerRow(
                             .padding(vertical = 14.dp, horizontal = 4.dp),
             verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, null, tint = PrimaryBlue, modifier = Modifier.size(22.dp))
+        Icon(icon, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
         Spacer(Modifier.width(16.dp))
         Text(
                 name,
@@ -1747,6 +1749,6 @@ private fun FolderPickerRow(
                 modifier = Modifier.weight(1f)
         )
         if (isSelected)
-                Icon(Icons.Outlined.Check, null, tint = PrimaryBlue, modifier = Modifier.size(18.dp))
+                Icon(Icons.Outlined.Check, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
     }
 }

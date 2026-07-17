@@ -1,5 +1,6 @@
 package com.example.awancoalledger.ui.screens
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -90,7 +91,7 @@ fun LedgerDetailScreen(
 
     if (details == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = PrimaryBlue)
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
         }
         return
     }
@@ -313,7 +314,7 @@ fun LedgerDetailScreen(
                     editingEntry = entry
                     previewingEntry = null
                 },
-                onShare = { com.example.awancoalledger.utils.ExportUtils.shareDetailedEntry(context, entry) }
+                onShare = { com.example.awancoalledger.utils.ExportUtils.shareDetailedEntry(context, entry, details.party.name) }
             )
         }
 
@@ -326,7 +327,7 @@ fun LedgerDetailScreen(
                     editingPayment = payment
                     previewingPayment = null
                 },
-                onShare = { com.example.awancoalledger.utils.ExportUtils.shareDetailedPayment(context, payment) }
+                onShare = { com.example.awancoalledger.utils.ExportUtils.shareDetailedPayment(context, payment, details.party.name) }
             )
         }
 
@@ -468,9 +469,9 @@ fun SecondaryActionButton(label: String, icon: ImageVector, modifier: Modifier, 
         shape = RoundedCornerShape(20.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(20.dp))
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.width(10.dp))
-            Text(label, color = PrimaryBlue, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
+            Text(label, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp)
         }
     }
 }
@@ -482,7 +483,7 @@ fun HistoryCardItem(entry: LedgerEntry, partyType: PartyType, balance: Double, o
     
     // For Buyer, it increases Receivable (+). For Supplier, it increases Payable (+).
     val displayColor = if (isBuyer) iOSOrange else ErrorRed
-    val entryColor = PrimaryBlue // Define entryColor locally for entries
+    val entryColor = MaterialTheme.colorScheme.primary // Define entryColor locally for entries
     val df = DecimalFormat("#,###.##")
 
     Box(
@@ -650,7 +651,7 @@ fun EntryActionSheet(
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = MaterialTheme.colorScheme.surface) {
         Column(modifier = Modifier.padding(16.dp).fillMaxWidth().padding(bottom = 32.dp).verticalScroll(rememberScrollState())) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = onDismiss) { Text("Cancel", color = PrimaryBlue) }
+                TextButton(onClick = onDismiss) { Text("Cancel", color = MaterialTheme.colorScheme.primary) }
                 Text(if (entry == null) "New Entry" else "Edit Entry", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 TextButton(onClick = { 
                     val w = weight.toDoubleOrNull() ?: 0.0
@@ -658,7 +659,7 @@ fun EntryActionSheet(
                     val calculatedRate = if (w > 0) total / w else total
                     onAdd(selectedDate, truck, mine, wh, w, calculatedRate, fare.toDoubleOrNull(), null) 
                 }) { 
-                    Text("Save", color = PrimaryBlue, fontWeight = FontWeight.Bold) 
+                    Text("Save", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold) 
                 }
             }
             
@@ -673,9 +674,9 @@ fun EntryActionSheet(
             ) {
                 Row(modifier = Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text("Date", color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
-                    Text(formatDisplayDate(selectedDate), color = PrimaryBlue, fontWeight = FontWeight.Bold)
+                    Text(formatDisplayDate(selectedDate), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Icon(Icons.Outlined.CalendarToday, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(16.dp))
+                    Icon(Icons.Outlined.CalendarToday, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
                 }
             }
             
@@ -738,7 +739,7 @@ fun ExportActionSheet(
                 TextButton(onClick = {
                     fromState.selectedDateMillis?.let { fromDate = it }
                     showFromPicker = false
-                }) { Text("OK", color = PrimaryBlue) }
+                }) { Text("OK", color = MaterialTheme.colorScheme.primary) }
             },
             dismissButton = { TextButton(onClick = { showFromPicker = false }) { Text("Cancel") } }
         ) { DatePicker(state = fromState) }
@@ -751,7 +752,7 @@ fun ExportActionSheet(
                 TextButton(onClick = {
                     toState.selectedDateMillis?.let { toDate = it }
                     showToPicker = false
-                }) { Text("OK", color = PrimaryBlue) }
+                }) { Text("OK", color = MaterialTheme.colorScheme.primary) }
             },
             dismissButton = { TextButton(onClick = { showToPicker = false }) { Text("Cancel") } }
         ) { DatePicker(state = toState) }
@@ -772,7 +773,7 @@ fun ExportActionSheet(
             ) {
                 Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(formatDisplayDate(fromDate), color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                    Icon(Icons.Outlined.CalendarToday, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(20.dp))
+                    Icon(Icons.Outlined.CalendarToday, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                 }
             }
             
@@ -788,13 +789,13 @@ fun ExportActionSheet(
             ) {
                 Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(formatDisplayDate(toDate), color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                    Icon(Icons.Outlined.CalendarToday, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(20.dp))
+                    Icon(Icons.Outlined.CalendarToday, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                 }
             }
             
             Spacer(modifier = Modifier.height(32.dp))
             
-            ExportActionRow(Icons.Outlined.Description, "Download PDF", PrimaryBlue) {
+            ExportActionRow(Icons.Outlined.Description, "Download PDF", MaterialTheme.colorScheme.primary) {
                 ExportUtils.generateAndSharePdf(
                     context = context, 
                     details = details, 
@@ -873,10 +874,10 @@ fun PaymentActionSheet(
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = MaterialTheme.colorScheme.surface) {
         Column(modifier = Modifier.padding(16.dp).fillMaxWidth().padding(bottom = 32.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = onDismiss) { Text("Close", color = PrimaryBlue) }
+                TextButton(onClick = onDismiss) { Text("Close", color = MaterialTheme.colorScheme.primary) }
                 Text(if (payment == null) "Add Payment" else "Edit Payment", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                 TextButton(onClick = { amount.toDoubleOrNull()?.let { onAdd(selectedDate, it, type, note) } }) { 
-                    Text("Done", color = PrimaryBlue, fontWeight = FontWeight.Bold) 
+                    Text("Done", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold) 
                 }
             }
             
@@ -891,9 +892,9 @@ fun PaymentActionSheet(
             ) {
                 Row(modifier = Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text("Date", color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
-                    Text(formatDisplayDate(selectedDate), color = PrimaryBlue, fontWeight = FontWeight.Bold)
+                    Text(formatDisplayDate(selectedDate), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Icon(Icons.Outlined.CalendarToday, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(16.dp))
+                    Icon(Icons.Outlined.CalendarToday, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
                 }
             }
 

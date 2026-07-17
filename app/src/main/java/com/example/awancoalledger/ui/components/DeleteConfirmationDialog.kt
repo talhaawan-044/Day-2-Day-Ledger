@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.awancoalledger.ui.theme.ErrorRed
-import com.example.awancoalledger.ui.theme.PrimaryBlue
 import kotlinx.coroutines.delay
 import androidx.compose.material3.MaterialTheme
 
@@ -100,7 +99,7 @@ fun DeleteConfirmationDialog(
                     ) {
                         Text(
                             text = "Cancel",
-                            color = PrimaryBlue,
+                            color = MaterialTheme.colorScheme.primary,
                             fontSize = 17.sp,
                             fontWeight = FontWeight.Medium
                         )

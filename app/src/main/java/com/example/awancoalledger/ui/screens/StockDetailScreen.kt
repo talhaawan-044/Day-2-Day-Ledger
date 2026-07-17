@@ -1,5 +1,6 @@
 package com.example.awancoalledger.ui.screens
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -33,7 +34,6 @@ import com.example.awancoalledger.data.Stock
 import com.example.awancoalledger.data.StockEntry
 import com.example.awancoalledger.ui.components.*
 import com.example.awancoalledger.ui.theme.ErrorRed
-import com.example.awancoalledger.ui.theme.PrimaryBlue
 import com.example.awancoalledger.ui.theme.SuccessGreen
 import com.example.awancoalledger.viewmodel.LedgerViewModel
 import java.text.DecimalFormat
@@ -77,7 +77,7 @@ fun StockDetailScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, null, tint = PrimaryBlue)
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, null, tint = MaterialTheme.colorScheme.primary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
@@ -100,7 +100,7 @@ fun StockDetailScreen(
 
                     item {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Outlined.History, null, tint = PrimaryBlue, modifier = Modifier.size(20.dp))
+                            Icon(Icons.Outlined.History, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                             Spacer(Modifier.width(8.dp))
                             Text(
                                 "ENTRY HISTORY",
@@ -155,7 +155,7 @@ fun StockDetailScreen(
                     .align(Alignment.BottomEnd)
                     .padding(24.dp)
                     .navigationBarsPadding(),
-                containerColor = PrimaryBlue,
+                containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = Color.White,
                 shape = RoundedCornerShape(16.dp)
             ) {
@@ -272,7 +272,7 @@ fun StockSummaryHeader(stock: Stock) {
                 LinearProgressIndicator(
                     progress = { progress },
                     modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
-                    color = if (isHealthy) PrimaryBlue else ErrorRed,
+                    color = if (isHealthy) MaterialTheme.colorScheme.primary else ErrorRed,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant
                 )
             }
@@ -352,7 +352,7 @@ fun AddStockEntryDialog(
                 onClick = { if (isFormValid) onConfirm(weight.toDouble(), warehouse) },
                 enabled = isFormValid,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = PrimaryBlue,
+                    containerColor = MaterialTheme.colorScheme.primary,
                     disabledContainerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
                 ),
                 shape = RoundedCornerShape(12.dp)
@@ -391,7 +391,7 @@ fun StockEntryCard(entry: StockEntry) {
                 )
                 Text(
                     entry.warehouse,
-                    color = PrimaryBlue,
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium
                 )

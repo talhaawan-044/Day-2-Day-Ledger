@@ -1,5 +1,6 @@
 package com.example.awancoalledger.ui.screens
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
@@ -30,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.awancoalledger.data.Note
 import com.example.awancoalledger.ui.components.*
-import com.example.awancoalledger.ui.theme.PrimaryBlue
 import com.example.awancoalledger.viewmodel.LedgerViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -118,7 +118,60 @@ fun NotesScreen(
 
     Scaffold(
             containerColor = MaterialTheme.colorScheme.background,
-            topBar = {
+
+            bottomBar = {
+                BottomAppBar(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f),
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        modifier = Modifier.height(80.dp).navigationBarsPadding()
+                ) {
+                    Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(onClick = { 
+                            haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                            showAddFolderDialog = true 
+                        }) {
+                            Icon(
+                                Icons.Outlined.CreateNewFolder,
+                                contentDescription = "New Folder",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                        
+                        AnimatedContent(targetState = filteredNotes.size, label = "bottomCount") {
+                                count ->
+                            Text(
+                                    if (count == 1) "1 Note" else "$count Notes",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Medium
+                            )
+                        }
+                        Spacer(Modifier.weight(1f))
+                        IconButton(onClick = { 
+                            haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                            onNavigateToEditor(null)
+                        }) {
+                            Icon(
+                                    Icons.Outlined.EditNote,
+                                    contentDescription = "New Note",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(30.dp)
+                            )
+                        }
+                    }
+                }
+            }
+    ) { padding ->
+        LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(padding).background(MaterialTheme.colorScheme.background),
+                verticalArrangement = Arrangement.spacedBy(0.dp)
+        ) {
+            item {
                 Column(
                         modifier =
                                 Modifier.fillMaxWidth()
@@ -136,7 +189,7 @@ fun NotesScreen(
                                     haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
                                     showSortMenu = true 
                                 }) {
-                                    Icon(Icons.Outlined.Sort, null, tint = PrimaryBlue)
+                                    Icon(Icons.Outlined.Sort, null, tint = MaterialTheme.colorScheme.primary)
                                 }
                                 DropdownMenu(
                                         expanded = showSortMenu,
@@ -153,7 +206,7 @@ fun NotesScreen(
                                                             Icon(
                                                                     Icons.Outlined.Check,
                                                                     null,
-                                                                    tint = PrimaryBlue,
+                                                                    tint = MaterialTheme.colorScheme.primary,
                                                                     modifier = Modifier.size(16.dp)
                                                             )
                                                             Spacer(Modifier.width(8.dp))
@@ -189,7 +242,7 @@ fun NotesScreen(
                                             if (grid) Icons.AutoMirrored.Outlined.List
                                             else Icons.Outlined.GridView,
                                             null,
-                                            tint = PrimaryBlue
+                                            tint = MaterialTheme.colorScheme.primary
                                     )
                                 }
                             }
@@ -228,128 +281,74 @@ fun NotesScreen(
                                     searchQuery = ""
                                     isSearchFocused = false
                                 }
-                            ) { Text("Cancel", color = PrimaryBlue, fontSize = 16.sp) }
+                            ) { Text("Cancel", color = MaterialTheme.colorScheme.primary, fontSize = 16.sp) }
                         }
                     }
 
                 }
-            },
-            bottomBar = {
-                BottomAppBar(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f),
-                        contentPadding = PaddingValues(horizontal = 16.dp),
-                        modifier = Modifier.height(80.dp).navigationBarsPadding()
-                ) {
-                    Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+            }
+            if (filteredNotes.isEmpty()) {
+                item {
+                    Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 40.dp, vertical = 60.dp)
                     ) {
-                        IconButton(onClick = { 
-                            haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                            showAddFolderDialog = true 
-                        }) {
-                            Icon(
-                                Icons.Outlined.CreateNewFolder,
-                                contentDescription = "New Folder",
-                                tint = PrimaryBlue,
-                                modifier = Modifier.size(28.dp)
-                            )
-                        }
-                        
-                        AnimatedContent(targetState = filteredNotes.size, label = "bottomCount") {
-                                count ->
-                            Text(
-                                    if (count == 1) "1 Note" else "$count Notes",
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Medium
-                            )
-                        }
-                        Spacer(Modifier.weight(1f))
-                        IconButton(onClick = { 
-                            haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                            onNavigateToEditor(null)
-                        }) {
-                            Icon(
-                                    Icons.Outlined.EditNote,
-                                    contentDescription = "New Note",
-                                    tint = PrimaryBlue,
-                                    modifier = Modifier.size(30.dp)
-                            )
-                        }
-                    }
-                }
-            }
-    ) { padding ->
-        if (filteredNotes.isEmpty()) {
-            // ── Empty state ───────────────────────────────────────────────────
-            Box(
-                    modifier = Modifier.fillMaxSize().padding(padding),
-                    contentAlignment = Alignment.Center
-            ) {
-                Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(40.dp)
-                ) {
-                    Icon(
-                            if (searchQuery.isNotEmpty()) Icons.Outlined.SearchOff
-                            else Icons.Outlined.NoteAlt,
-                            null,
-                            tint = MaterialTheme.colorScheme.outline,
-                            modifier = Modifier.size(72.dp)
-                    )
-                    Spacer(Modifier.height(20.dp))
-                    Text(
-                            if (searchQuery.isNotEmpty()) "No Results" else "No Notes Yet",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.SemiBold
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                            if (searchQuery.isNotEmpty()) "No notes match \"$searchQuery\"."
-                            else "Create your first note.",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                            fontSize = 15.sp,
-                            textAlign = TextAlign.Center
-                    )
-                    if (searchQuery.isEmpty()) {
-                        Spacer(Modifier.height(24.dp))
-                        androidx.compose.material3.Button(
-                            onClick = { onNavigateToEditor(null) },
-                            shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
-                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
-                            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 32.dp, vertical = 16.dp)
-                        ) {
-                            Text("Compose Note", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Icon(
+                                if (searchQuery.isNotEmpty()) Icons.Outlined.SearchOff
+                                else Icons.Outlined.NoteAlt,
+                                null,
+                                tint = MaterialTheme.colorScheme.outline,
+                                modifier = Modifier.size(72.dp)
+                        )
+                        Spacer(Modifier.height(20.dp))
+                        Text(
+                                if (searchQuery.isNotEmpty()) "No Results" else "No Notes Yet",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.SemiBold
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                                if (searchQuery.isNotEmpty()) "No notes match \"$searchQuery\"."
+                                else "Create your first note.",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                fontSize = 15.sp,
+                                textAlign = TextAlign.Center
+                        )
+                        if (searchQuery.isEmpty()) {
+                            Spacer(Modifier.height(24.dp))
+                            androidx.compose.material3.Button(
+                                onClick = { onNavigateToEditor(null) },
+                                shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+                                colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                                contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp)
+                            ) {
+                                Text("Compose Note", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            }
                         }
                     }
                 }
-            }
-        } else {
-            LazyColumn(
-                    modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(0.dp)
-            ) {
+            } else {
                 if (pinnedNotes.isNotEmpty()) {
-                    item { SectionHeader("PINNED", pinnedNotes.size) }
+                    item { Box(modifier = Modifier.padding(horizontal = 16.dp)) { SectionHeader("PINNED", pinnedNotes.size) } }
                     item {
-                        AnimatedContent(isGridView, label = "pinnedView") { grid ->
-                            if (grid) {
-                                NoteGridGroup(
-                                        notes = pinnedNotes,
-                                        onNoteClick = onNavigateToEditor,
-                                        onDelete = { noteToDelete = it },
-                                        onLongPress = { contextMenuNote = it }
-                                )
-                            } else {
-                                NoteListGroup(
-                                        notes = pinnedNotes,
-                                        onNoteClick = onNavigateToEditor,
-                                        onDelete = { noteToDelete = it },
-                                        onLongPress = { contextMenuNote = it }
-                                )
+                        Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                            AnimatedContent(isGridView, label = "pinnedView") { grid ->
+                                if (grid) {
+                                    NoteGridGroup(
+                                            notes = pinnedNotes,
+                                            onNoteClick = onNavigateToEditor,
+                                            onDelete = { noteToDelete = it },
+                                            onLongPress = { contextMenuNote = it }
+                                    )
+                                } else {
+                                    NoteListGroup(
+                                            notes = pinnedNotes,
+                                            onNoteClick = onNavigateToEditor,
+                                            onDelete = { noteToDelete = it },
+                                            onLongPress = { contextMenuNote = it }
+                                    )
+                                }
                             }
                         }
                     }
@@ -357,28 +356,25 @@ fun NotesScreen(
                 }
 
                 if (otherNotes.isNotEmpty()) {
+                    item { Box(modifier = Modifier.padding(horizontal = 16.dp)) { SectionHeader(if (pinnedNotes.isEmpty()) "NOTES" else "OTHERS", otherNotes.size) } }
                     item {
-                        SectionHeader(
-                                if (pinnedNotes.isEmpty()) "NOTES" else "OTHERS",
-                                otherNotes.size
-                        )
-                    }
-                    item {
-                        AnimatedContent(isGridView, label = "othersView") { grid ->
-                            if (grid) {
-                                NoteGridGroup(
-                                        notes = otherNotes,
-                                        onNoteClick = onNavigateToEditor,
-                                        onDelete = { noteToDelete = it },
-                                        onLongPress = { contextMenuNote = it }
-                                )
-                            } else {
-                                NoteListGroup(
-                                        notes = otherNotes,
-                                        onNoteClick = onNavigateToEditor,
-                                        onDelete = { noteToDelete = it },
-                                        onLongPress = { contextMenuNote = it }
-                                )
+                        Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                            AnimatedContent(isGridView, label = "othersView") { grid ->
+                                if (grid) {
+                                    NoteGridGroup(
+                                            notes = otherNotes,
+                                            onNoteClick = onNavigateToEditor,
+                                            onDelete = { noteToDelete = it },
+                                            onLongPress = { contextMenuNote = it }
+                                    )
+                                } else {
+                                    NoteListGroup(
+                                            notes = otherNotes,
+                                            onNoteClick = onNavigateToEditor,
+                                            onDelete = { noteToDelete = it },
+                                            onLongPress = { contextMenuNote = it }
+                                    )
+                                }
                             }
                         }
                     }
@@ -447,7 +443,7 @@ fun NotesScreen(
                     },
                     enabled = folderName.isNotBlank()
                 ) {
-                    Text("Save", color = PrimaryBlue)
+                    Text("Save", color = MaterialTheme.colorScheme.primary)
                 }
             },
             dismissButton = {
@@ -551,7 +547,7 @@ fun NoteContextMenu(
                     Icon(
                             Icons.Outlined.PushPin,
                             null,
-                            tint = PrimaryBlue,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(16.dp)
                     )
                 }

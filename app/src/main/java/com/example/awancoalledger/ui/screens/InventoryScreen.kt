@@ -1,5 +1,6 @@
 package com.example.awancoalledger.ui.screens
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.awancoalledger.data.Stock
 import com.example.awancoalledger.ui.components.*
-import com.example.awancoalledger.ui.theme.PrimaryBlue
 import com.example.awancoalledger.viewmodel.LedgerViewModel
 import java.text.DecimalFormat
 
@@ -151,7 +151,7 @@ fun InventoryScreen(viewModel: LedgerViewModel, onNavigateToStockDetail: (Int) -
                                 modifier =
                                         Modifier.size(48.dp)
                                                 .clip(RoundedCornerShape(12.dp))
-                                                .background(PrimaryBlue),
+                                                .background(MaterialTheme.colorScheme.primary),
                                 contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -278,7 +278,7 @@ fun StockListCard(stock: Stock, modifier: Modifier = Modifier, onClick: () -> Un
                     modifier =
                             Modifier.size(44.dp)
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(PrimaryBlue),
+                                    .background(MaterialTheme.colorScheme.primary),
                     contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -316,7 +316,7 @@ fun StockListCard(stock: Stock, modifier: Modifier = Modifier, onClick: () -> Un
                 )
                 Text(
                         "In Stock",
-                        color = PrimaryBlue,
+                        color = MaterialTheme.colorScheme.primary,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 0.5.sp
@@ -339,7 +339,7 @@ fun StockGridCard(stock: Stock, modifier: Modifier = Modifier, onClick: () -> Un
                     modifier =
                             Modifier.size(40.dp)
                                     .clip(RoundedCornerShape(10.dp))
-                                    .background(PrimaryBlue),
+                                    .background(MaterialTheme.colorScheme.primary),
                     contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -410,7 +410,7 @@ fun AddStockDialog(onDismiss: () -> Unit, onConfirm: (String, Double, String) ->
                 IOSDialogButton(text = "Cancel", onClick = onDismiss)
                 IOSDialogButton(
                         text = "Initialize",
-                        color = if (isFormValid) PrimaryBlue else PrimaryBlue.copy(alpha = 0.4f),
+                        color = if (isFormValid) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
                         fontWeight = FontWeight.Bold,
                         isLast = true,
                         onClick = {

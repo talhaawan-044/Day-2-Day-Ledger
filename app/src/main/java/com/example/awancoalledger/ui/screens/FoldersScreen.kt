@@ -1,5 +1,6 @@
 package com.example.awancoalledger.ui.screens
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -21,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.awancoalledger.data.Folder
 import com.example.awancoalledger.ui.components.*
-import com.example.awancoalledger.ui.theme.PrimaryBlue
 import com.example.awancoalledger.viewmodel.LedgerViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -58,13 +58,13 @@ fun FoldersScreen(
                     onBack = onBack,
                     actions = {
                         IconButton(onClick = { showAddFolderDialog = true }) {
-                            Icon(Icons.Outlined.CreateNewFolder, contentDescription = "New Folder", tint = PrimaryBlue)
+                            Icon(Icons.Outlined.CreateNewFolder, contentDescription = "New Folder", tint = MaterialTheme.colorScheme.primary)
                         }
                         IconButton(onClick = { onNavigateToEditor(null) }) {
-                            Icon(Icons.Outlined.EditNote, contentDescription = "New Note", tint = PrimaryBlue)
+                            Icon(Icons.Outlined.EditNote, contentDescription = "New Note", tint = MaterialTheme.colorScheme.primary)
                         }
                         TextButton(onClick = { isEditMode = !isEditMode }) {
-                            Text(if (isEditMode) "Done" else "Edit", color = PrimaryBlue, fontWeight = FontWeight.Bold)
+                            Text(if (isEditMode) "Done" else "Edit", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                         }
                     }
                 )
@@ -197,7 +197,7 @@ fun FolderItem(
                 Spacer(Modifier.width(12.dp))
             }
             
-            Icon(icon, null, tint = PrimaryBlue, modifier = Modifier.size(24.dp))
+            Icon(icon, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
             Spacer(Modifier.width(16.dp))
             Text(title, color = MaterialTheme.colorScheme.onSurface, fontSize = 17.sp, modifier = Modifier.weight(1f))
             

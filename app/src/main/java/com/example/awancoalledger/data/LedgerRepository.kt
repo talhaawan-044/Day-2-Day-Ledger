@@ -113,15 +113,18 @@ class LedgerRepository(private val ledgerDao: LedgerDao) {
 
     // Vehicle Tracking
     fun getAllFuelEntries(): Flow<List<FuelEntry>> = ledgerDao.getAllFuelEntries()
+    suspend fun getAllFuelEntriesList(): List<FuelEntry> = ledgerDao.getAllFuelEntriesList()
     suspend fun insertFuelEntry(entry: FuelEntry) = ledgerDao.insertFuelEntry(entry)
     suspend fun deleteFuelEntry(entry: FuelEntry) = ledgerDao.insertFuelEntry(entry.copy(isDeleted = true, lastUpdated = System.currentTimeMillis()))
 
     fun getAllMaintenanceEntries(): Flow<List<MaintenanceEntry>> = ledgerDao.getAllMaintenanceEntries()
+    suspend fun getAllMaintenanceEntriesList(): List<MaintenanceEntry> = ledgerDao.getAllMaintenanceEntriesList()
     suspend fun insertMaintenanceEntry(entry: MaintenanceEntry) = ledgerDao.insertMaintenanceEntry(entry)
     suspend fun deleteMaintenanceEntry(entry: MaintenanceEntry) = ledgerDao.insertMaintenanceEntry(entry.copy(isDeleted = true, lastUpdated = System.currentTimeMillis()))
 
     // Vehicles
     fun getAllVehicles(): Flow<List<Vehicle>> = ledgerDao.getAllVehicles()
+    suspend fun getVehicleById(id: Int): Vehicle? = ledgerDao.getVehicleById(id)
     suspend fun insertVehicle(vehicle: Vehicle): Long = ledgerDao.insertVehicle(vehicle)
     suspend fun deleteVehicle(vehicle: Vehicle) = ledgerDao.insertVehicle(vehicle.copy(isDeleted = true, lastUpdated = System.currentTimeMillis()))
     fun getFuelEntriesForVehicle(vehicleId: Int): Flow<List<FuelEntry>> = ledgerDao.getFuelEntriesForVehicle(vehicleId)

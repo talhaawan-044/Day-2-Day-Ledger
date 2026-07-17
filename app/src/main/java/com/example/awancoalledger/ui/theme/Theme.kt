@@ -49,9 +49,11 @@ private val DarkColorScheme =
 @Composable
 fun AwanCoalLedgerTheme(
         darkTheme: Boolean = isSystemInDarkTheme(),
+        accentColorHex: String = "#007AFF",
         content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val primaryColor = try { Color(android.graphics.Color.parseColor(accentColorHex)) } catch (e: Exception) { PrimaryBlue }
+    val colorScheme = if (darkTheme) DarkColorScheme.copy(primary = primaryColor) else LightColorScheme.copy(primary = primaryColor)
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {

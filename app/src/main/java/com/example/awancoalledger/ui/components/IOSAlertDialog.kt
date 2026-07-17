@@ -1,5 +1,6 @@
 package com.example.awancoalledger.ui.components
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,7 +17,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.example.awancoalledger.ui.theme.PrimaryBlue
 
 @Composable
 fun IOSAlertDialog(
@@ -98,7 +98,7 @@ fun IOSAlertDialog(
 fun RowScope.IOSDialogButton(
     text: String,
     onClick: () -> Unit,
-    color: Color = PrimaryBlue,
+    color: Color = MaterialTheme.colorScheme.primary,
     fontWeight: FontWeight = FontWeight.Normal,
     isLast: Boolean = false
 ) {

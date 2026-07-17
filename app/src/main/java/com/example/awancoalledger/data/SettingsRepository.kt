@@ -38,6 +38,9 @@ class SettingsRepository(context: Context) {
     fun getAppPin(): String = prefs.getString("app_pin", "1234") ?: "1234"
     fun setAppPin(value: String) = prefs.edit().putString("app_pin", value).apply()
 
+    fun getAccentColorHex(): String = prefs.getString("accent_color_hex", "#007AFF") ?: "#007AFF"
+    fun setAccentColorHex(value: String) = prefs.edit().putString("accent_color_hex", value).apply()
+
     fun getCompanyLogoUri(): String? = prefs.getString("company_logo_uri", null)
     fun setCompanyLogoUri(value: String?) = prefs.edit().putString("company_logo_uri", value).apply()
 

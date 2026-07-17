@@ -1,5 +1,6 @@
 package com.example.awancoalledger.ui.screens
 //15,32,387,421
+import androidx.compose.material3.MaterialTheme
 import android.widget.Toast
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -84,7 +85,7 @@ fun ExpensesScreen(viewModel: LedgerViewModel) {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             showExportSheet = true
                         },
-                        modifier = Modifier.background(PrimaryBlue, RoundedCornerShape(8.dp))
+                        modifier = Modifier.background(MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
                     ) {
                         Icon(Icons.Outlined.IosShare, contentDescription = "Export", tint = Color.White)
                     }
@@ -357,7 +358,7 @@ fun ExpensesScreen(viewModel: LedgerViewModel) {
                         },
                         modifier = Modifier.fillMaxWidth().height(56.dp),
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = PrimaryBlue),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                 ) {
                     Icon(Icons.Outlined.DateRange, contentDescription = null)
@@ -436,7 +437,7 @@ fun ExportOptionButton(modifier: Modifier = Modifier, title: String, onClick: ()
 fun CategoryPill(label: String, selected: Boolean, onClick: () -> Unit) {
     Surface(
             modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { onClick() },
-            color = if (selected) PrimaryBlue else MaterialTheme.colorScheme.surfaceVariant,
+            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
             shape = RoundedCornerShape(12.dp)
     ) {
         Text(
@@ -510,7 +511,7 @@ fun ExpenseRow(expense: Expense, onClick: () -> Unit) {
         val (icon, tintColor) =
                 when (expense.category) {
                     ExpenseCategory.FOOD -> Icons.Outlined.Fastfood to iOSOrange
-                    ExpenseCategory.TRANSPORT -> Icons.Outlined.DirectionsCar to PrimaryBlue
+                    ExpenseCategory.TRANSPORT -> Icons.Outlined.DirectionsCar to MaterialTheme.colorScheme.primary
                     ExpenseCategory.BUSINESS -> Icons.Outlined.WorkOutline to iOSPurple
                     ExpenseCategory.UTILITIES -> Icons.Outlined.FlashOn to SuccessGreen
                     else -> Icons.Outlined.ReceiptLong to Color.Gray
@@ -644,7 +645,7 @@ fun AddExpenseDialog(
                         Icon(
                                 Icons.Outlined.CalendarToday,
                                 contentDescription = null,
-                                tint = PrimaryBlue,
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(20.dp)
                         )
                     }
@@ -685,7 +686,7 @@ fun AddExpenseDialog(
                                             category = cat
                                         },
                                 color =
-                                        if (selected) PrimaryBlue
+                                        if (selected) MaterialTheme.colorScheme.primary
                                         else
                                                 MaterialTheme.colorScheme.surfaceVariant.copy(
                                                         alpha = 0.3f
@@ -715,7 +716,7 @@ fun AddExpenseDialog(
                     },
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                     enabled = amount.isNotEmpty()
             ) {
                 Text(
@@ -783,7 +784,7 @@ fun ExpensePreviewSheet(expense: Expense, onDismiss: () -> Unit, onEdit: () -> U
                                     )
                                     .padding(16.dp)
             ) {
-                Text(expense.category.name, color = PrimaryBlue, fontWeight = FontWeight.Bold)
+                Text(expense.category.name, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                         expense.note ?: "No note provided",
@@ -804,7 +805,7 @@ fun ExpensePreviewSheet(expense: Expense, onDismiss: () -> Unit, onEdit: () -> U
                     onClick = onEdit,
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text(
                         "Edit Expense",

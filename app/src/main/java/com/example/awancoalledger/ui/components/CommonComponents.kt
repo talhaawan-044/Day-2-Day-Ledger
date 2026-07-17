@@ -1,4 +1,5 @@
 package com.example.awancoalledger.ui.components
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.composed
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
@@ -17,7 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.awancoalledger.ui.theme.PrimaryBlue
 import com.example.awancoalledger.ui.theme.SuccessGreen
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -72,8 +72,8 @@ fun PremiumInput(
         prefix = prefix,
         colors = OutlinedTextFieldDefaults.colors(
             unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-            focusedBorderColor = PrimaryBlue,
-            cursorColor = PrimaryBlue,
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            cursorColor = MaterialTheme.colorScheme.primary,
             focusedContainerColor = MaterialTheme.colorScheme.surface,
             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f)
         ),
@@ -108,7 +108,7 @@ fun EmptyStateCard(
                 imageVector = icon,
                 contentDescription = title,
                 modifier = Modifier.fillMaxSize(),
-                tint = PrimaryBlue.copy(alpha = 0.8f)
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
             )
         }
         Spacer(modifier = Modifier.height(24.dp))
@@ -132,7 +132,7 @@ fun EmptyStateCard(
             Button(
                 onClick = onAction,
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp)
             ) {
                 Text(actionText, fontWeight = FontWeight.Bold, fontSize = 16.sp)

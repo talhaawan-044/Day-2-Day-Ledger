@@ -1,5 +1,6 @@
 package com.example.awancoalledger.ui.screens
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
@@ -90,7 +91,7 @@ fun VehicleTrackerScreen(viewModel: LedgerViewModel, onNavigateBack: () -> Unit)
                                 imageVector = Icons.Outlined.AddCircle,
                                 contentDescription = null,
                                 modifier = Modifier.size(28.dp),
-                                tint = PrimaryBlue
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
@@ -168,7 +169,7 @@ fun VehicleTrackerScreen(viewModel: LedgerViewModel, onNavigateBack: () -> Unit)
                                 ActionButton(
                                     label = "Add Entry",
                                     icon = Icons.Outlined.AddCircle,
-                                    color = PrimaryBlue,
+                                    color = MaterialTheme.colorScheme.primary,
                                     onClick = { 
                                         logToEdit = null
                                         showLogModal = true 
@@ -208,7 +209,7 @@ fun VehicleTrackerScreen(viewModel: LedgerViewModel, onNavigateBack: () -> Unit)
                                     label = "Fuel Economy",
                                     value = String.format("%.1f km/L", avgKmPerLiter),
                                     icon = Icons.Outlined.AutoGraph,
-                                    color = PrimaryBlue
+                                    color = MaterialTheme.colorScheme.primary
                                 )
                                 TrackerStatItem(
                                     modifier = Modifier.weight(1f),
@@ -233,8 +234,8 @@ fun VehicleTrackerScreen(viewModel: LedgerViewModel, onNavigateBack: () -> Unit)
                                     Box(modifier = Modifier.padding(20.dp)) {
                                         PremiumLineGraph(
                                             data = efficiencyTrend,
-                                            lineColor = PrimaryBlue,
-                                            fillColor = PrimaryBlue.copy(alpha = 0.1f)
+                                            lineColor = MaterialTheme.colorScheme.primary,
+                                            fillColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                                         )
                                     }
                                 }
@@ -361,7 +362,7 @@ fun VehicleCard(vehicle: Vehicle, isSelected: Boolean, onEdit: () -> Unit, modif
         color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(32.dp),
         shadowElevation = if (isSelected) 8.dp else 2.dp,
-        border = if (isSelected) BorderStroke(2.dp, PrimaryBlue) else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
     ) {
         Column(modifier = Modifier.padding(28.dp)) {
             // Top Section
@@ -373,7 +374,7 @@ fun VehicleCard(vehicle: Vehicle, isSelected: Boolean, onEdit: () -> Unit, modif
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f).padding(end = 16.dp)) {
                     Box(
                         modifier = Modifier.size(48.dp).background(
-                            PrimaryBlue.copy(alpha = 0.15f),
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
                             CircleShape
                         ),
                         contentAlignment = Alignment.Center
@@ -381,7 +382,7 @@ fun VehicleCard(vehicle: Vehicle, isSelected: Boolean, onEdit: () -> Unit, modif
                         Icon(
                             imageVector = if (vehicle.type == "TRUCK") Icons.Outlined.LocalShipping else Icons.Outlined.DirectionsCar,
                             contentDescription = null,
-                            tint = PrimaryBlue,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp)
                         )
                     }
@@ -406,7 +407,7 @@ fun VehicleCard(vehicle: Vehicle, isSelected: Boolean, onEdit: () -> Unit, modif
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (vehicle.isPrimary) {
                         Surface(
-                            color = PrimaryBlue,
+                            color = MaterialTheme.colorScheme.primary,
                             shape = RoundedCornerShape(percent = 50)
                         ) {
                             Row(
@@ -730,12 +731,12 @@ fun AddVehicleModal(onDismiss: () -> Unit, onAdd: (String, String, String, Doubl
             
             Surface(
                 onClick = { isPrimary = !isPrimary },
-                color = if (isPrimary) PrimaryBlue.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                color = if (isPrimary) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
                 shape = RoundedCornerShape(16.dp),
-                border = if (isPrimary) BorderStroke(2.dp, PrimaryBlue) else null
+                border = if (isPrimary) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                    Checkbox(checked = isPrimary, onCheckedChange = { isPrimary = it }, colors = CheckboxDefaults.colors(checkedColor = PrimaryBlue))
+                    Checkbox(checked = isPrimary, onCheckedChange = { isPrimary = it }, colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colorScheme.primary))
                     Spacer(Modifier.width(8.dp))
                     Text("Set as Primary Vehicle", fontWeight = FontWeight.Bold)
                 }
@@ -760,7 +761,7 @@ fun AddVehicleModal(onDismiss: () -> Unit, onAdd: (String, String, String, Doubl
                 },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text("Add Vehicle", fontSize = 17.sp, fontWeight = FontWeight.Bold)
             }
@@ -799,12 +800,12 @@ fun EditVehicleModal(vehicle: Vehicle, onDismiss: () -> Unit, onUpdate: (Vehicle
             
             Surface(
                 onClick = { isPrimary = !isPrimary },
-                color = if (isPrimary) PrimaryBlue.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                color = if (isPrimary) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
                 shape = RoundedCornerShape(16.dp),
-                border = if (isPrimary) BorderStroke(2.dp, PrimaryBlue) else null
+                border = if (isPrimary) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                    Checkbox(checked = isPrimary, onCheckedChange = { isPrimary = it }, colors = CheckboxDefaults.colors(checkedColor = PrimaryBlue))
+                    Checkbox(checked = isPrimary, onCheckedChange = { isPrimary = it }, colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colorScheme.primary))
                     Spacer(Modifier.width(8.dp))
                     Text("Set as Primary Vehicle", fontWeight = FontWeight.Bold)
                 }
@@ -829,7 +830,7 @@ fun EditVehicleModal(vehicle: Vehicle, onDismiss: () -> Unit, onUpdate: (Vehicle
                 },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text("Update Vehicle", fontSize = 17.sp, fontWeight = FontWeight.Bold)
             }
@@ -855,18 +856,18 @@ fun TypeButton(label: String, icon: ImageVector, isSelected: Boolean, modifier: 
     Surface(
         onClick = onClick,
         modifier = modifier.height(60.dp),
-        color = if (isSelected) PrimaryBlue.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+        color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
         shape = RoundedCornerShape(16.dp),
-        border = if (isSelected) BorderStroke(2.dp, PrimaryBlue) else null
+        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
     ) {
         Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = if (isSelected) PrimaryBlue else MaterialTheme.colorScheme.onSurfaceVariant
+                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.width(8.dp))
-            Text(label, fontWeight = FontWeight.Bold, color = if (isSelected) PrimaryBlue else MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(label, fontWeight = FontWeight.Bold, color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -933,11 +934,11 @@ fun LogEntryModal(
                         imageVector = Icons.Outlined.CalendarToday,
                         contentDescription = null,
                         modifier = Modifier.size(20.dp),
-                        tint = PrimaryBlue
+                        tint = MaterialTheme.colorScheme.primary
                     )
                     Spacer(Modifier.width(12.dp))
                     Text("Entry Date", modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
-                    Text(SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(selectedDate)), fontWeight = FontWeight.Black, color = PrimaryBlue)
+                    Text(SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(selectedDate)), fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
                 }
             }
             
@@ -997,7 +998,7 @@ fun LogEntryModal(
                 },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text(if (entry != null) "Update Entry" else "Save Entry", fontSize = 17.sp, fontWeight = FontWeight.Bold)
             }

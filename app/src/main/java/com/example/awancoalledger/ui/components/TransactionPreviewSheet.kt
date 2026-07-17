@@ -1,5 +1,6 @@
 package com.example.awancoalledger.ui.components
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -106,7 +107,7 @@ fun EntryPreviewSheet(
                 onClick = onAction,
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text(actionLabel, color = Color.White, fontWeight = FontWeight.Bold)
             }
@@ -182,7 +183,7 @@ fun PaymentPreviewSheet(
                 onClick = onAction,
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text(actionLabel, color = Color.White, fontWeight = FontWeight.Bold)
             }

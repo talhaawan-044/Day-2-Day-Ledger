@@ -5,6 +5,7 @@ package com.example.awancoalledger.ui.screens
 //  Improved & unified version based on SummaryView.tsx + SummaryScreen.kt
 // ─────────────────────────────────────────────────────────────────────────────
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
@@ -242,7 +243,7 @@ fun HomeScreen(
                             onNavigateToLedger(payment.partyId)
                         },
                         actionLabel = "Go to Ledger",
-                        onShare = { /* Share logic if needed */ }
+                        onShare = { ExportUtils.shareDetailedPayment(context, payment, activity.partyName) }
                     )
                 }
             } else {
@@ -256,7 +257,7 @@ fun HomeScreen(
                             onNavigateToLedger(entry.partyId)
                         },
                         actionLabel = "Go to Ledger",
-                        onShare = { ExportUtils.shareDetailedEntry(context, entry) }
+                        onShare = { ExportUtils.shareDetailedEntry(context, entry, activity.partyName) }
                     )
                 }
             }
@@ -339,7 +340,7 @@ fun SyncBadge(status: SyncStatus, onClick: () -> Unit) {
     val (color, label, icon) =
             when (status) {
                 SyncStatus.Synced -> Triple(SuccessGreen, "Synced", Icons.Outlined.CloudDone)
-                SyncStatus.Syncing -> Triple(PrimaryBlue, "Syncing", Icons.Outlined.Sync)
+                SyncStatus.Syncing -> Triple(MaterialTheme.colorScheme.primary, "Syncing", Icons.Outlined.Sync)
                 SyncStatus.LocalOnly -> Triple(iOSOrange, "Offline", Icons.Outlined.CloudOff)
                 SyncStatus.Error -> Triple(ErrorRed, "Error", Icons.Outlined.ErrorOutline)
             }
@@ -656,7 +657,7 @@ fun FinancialInsightsCarousel(
                         value = "${totalStock.toInt()} tons",
                         subLabel = "Current inventory",
                         icon = Icons.Outlined.LocalShipping,
-                        color = PrimaryBlue,
+                        color = MaterialTheme.colorScheme.primary,
                         onClick = onStockClick
                 )
             }
@@ -742,12 +743,12 @@ fun LatestTransactionsSection(
                     fontWeight = FontWeight.Bold
             )
             TextButton(onClick = onSeeAllClick, contentPadding = PaddingValues(horizontal = 4.dp)) {
-                Text("See All", color = PrimaryBlue, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                Text("See All", color = MaterialTheme.colorScheme.primary, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 Icon(
                         Icons.Outlined.ChevronRight,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
-                        tint = PrimaryBlue
+                        tint = MaterialTheme.colorScheme.primary
                 )
             }
         }
@@ -823,7 +824,7 @@ fun ActivityRow(activity: RecentActivity, onClick: () -> Unit) {
             when {
                 isPayment -> Icons.Outlined.AccountBalanceWallet to SuccessGreen
                 isStockArrival -> Icons.Outlined.Inventory2 to iOSOrange
-                else -> Icons.Outlined.LocalShipping to PrimaryBlue
+                else -> Icons.Outlined.LocalShipping to MaterialTheme.colorScheme.primary
             }
 
     val subtitle =
@@ -843,7 +844,7 @@ fun ActivityRow(activity: RecentActivity, onClick: () -> Unit) {
         isPayment && activity.payment?.type == PaymentType.THEY_PAID -> SuccessGreen
         isPayment -> ErrorRed
         activity.amount > 0 -> MaterialTheme.colorScheme.onSurface
-        else -> PrimaryBlue
+        else -> MaterialTheme.colorScheme.primary
     }
 
     Row(
@@ -923,7 +924,7 @@ fun QuickStatsRow(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        QuickStatChip(Modifier.weight(1f), label = "Parties", value = partiesCount, icon = Icons.Outlined.People, color = PrimaryBlue, onClick = onPartiesClick)
+        QuickStatChip(Modifier.weight(1f), label = "Parties", value = partiesCount, icon = Icons.Outlined.People, color = MaterialTheme.colorScheme.primary, onClick = onPartiesClick)
         // QuickStatChip(Modifier.weight(1f), label = "Reminders", value = remindersCount, icon = Icons.Outlined.NotificationsActive, color = iOSOrange, onClick = onRemindersClick)
         QuickStatChip(Modifier.weight(1f), label = "Notes", value = notesCount, icon = Icons.Outlined.StickyNote2, color = iOSPurple, onClick = onNotesClick)
     }
@@ -933,26 +934,28 @@ fun QuickStatsRow(
 fun QuickStatChip(modifier: Modifier, label: String, value: Int, icon: ImageVector, color: Color, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
-        modifier = modifier.height(116.dp),
+        modifier = modifier,
         color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(24.dp)
+        shape = RoundedCornerShape(20.dp)
     ) {
         Column(
-            modifier = Modifier.padding(14.dp), 
+            modifier = Modifier.padding(16.dp), 
             horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.SpaceBetween
+            verticalArrangement = Arrangement.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .background(color, RoundedCornerShape(8.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
-            }
-            Column(modifier = Modifier.padding(bottom = 2.dp)) {
+            Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .background(color, RoundedCornerShape(8.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+                }
+                Spacer(modifier = Modifier.width(12.dp))
                 Text("$value", color = MaterialTheme.colorScheme.onSurface, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-                Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp, fontWeight = FontWeight.Medium)
             }
         }
     }
@@ -986,7 +989,7 @@ fun SyncDetailDialog(status: SyncStatus, lastSyncTime: Long?, onDismiss: () -> U
     val timeFmt = remember { SimpleDateFormat("hh:mm a, MMM dd", Locale.getDefault()) }
     val (color, statusText) = when (status) {
         SyncStatus.Synced -> SuccessGreen to "All data synced"
-        SyncStatus.Syncing -> PrimaryBlue to "Syncing in progress..."
+        SyncStatus.Syncing -> MaterialTheme.colorScheme.primary to "Syncing in progress..."
         SyncStatus.LocalOnly -> iOSOrange to "Offline – not signed in"
         SyncStatus.Error -> ErrorRed to "Sync failed"
     }
@@ -1048,13 +1051,13 @@ fun VehicleStatusTile(kmsLeft: Double, nextMileage: Double, onClick: () -> Unit)
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
-                modifier = Modifier.size(48.dp).clip(CircleShape).background(if (isOverdue || isWarning) Color.White.copy(alpha = 0.2f) else PrimaryBlue.copy(alpha = 0.1f)),
+                modifier = Modifier.size(48.dp).clip(CircleShape).background(if (isOverdue || isWarning) Color.White.copy(alpha = 0.2f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     Icons.Outlined.DirectionsCar, 
                     null, 
-                    tint = if (isOverdue || isWarning) Color.White else PrimaryBlue,
+                    tint = if (isOverdue || isWarning) Color.White else MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -1111,7 +1114,7 @@ fun QuickActionsDock(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 QuickActionButton("Expense", Icons.Outlined.Payments, iOSOrange, onAddExpense)
-                QuickActionButton("Contact", Icons.Outlined.PersonAdd, PrimaryBlue, onAddParty)
+                QuickActionButton("Contact", Icons.Outlined.PersonAdd, MaterialTheme.colorScheme.primary, onAddParty)
                 QuickActionButton("Inventory", Icons.Outlined.Inventory, iOSPurple, onInventory)
                 QuickActionButton("Garage", Icons.Outlined.DirectionsCar, SuccessGreen, onGarage)
             }

@@ -1,5 +1,6 @@
 package com.example.awancoalledger.ui.screens
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -63,204 +64,108 @@ fun PartiesScreen(viewModel: LedgerViewModel, onNavigateToLedger: (Int) -> Unit)
 
     val haptic = LocalHapticFeedback.current
 
-    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        Column(
-                modifier =
-                        Modifier.fillMaxSize()
-                                .statusBarsPadding()
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-        ) {
-            val backDispatcher = androidx.activity.compose.LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-            com.example.awancoalledger.ui.components.ScreenHeader(
-                title = "Contacts",
-                onBack = { backDispatcher?.onBackPressed() },
-                modifier = Modifier.padding(horizontal = 0.dp) // already inside padded Column
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            PremiumInput(
-                    label = "Search Contacts",
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    leadingIcon = {
-                        Icon(
-                                Icons.Outlined.Search,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-            )
+    val backDispatcher = androidx.activity.compose.LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Add Contact Button
-            Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        showAddPartySheet = true
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                        .height(56.dp)
-                        .shadow(4.dp, RoundedCornerShape(16.dp)),
-                    colors =
-                            ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.onBackground,
-                                    contentColor = MaterialTheme.colorScheme.background
-                            ),
-                    shape = RoundedCornerShape(16.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                            Icons.Outlined.PersonAdd,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.background,
-                            modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                            "Add New Party",
-                            color = MaterialTheme.colorScheme.background,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Filter Tabs + Sort/Grid Buttons
-            Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    PartyFilterPill("All Contacts", selectedFilter == "All Contacts") {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        selectedFilter = "All Contacts"
-                    }
-                    PartyFilterPill("Buyers", selectedFilter == "Buyers") {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        selectedFilter = "Buyers"
-                    }
-                    PartyFilterPill("Suppliers", selectedFilter == "Suppliers") {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        selectedFilter = "Suppliers"
-                    }
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    IconButton(
-                            onClick = {
-                                sortOrder =
-                                        when (sortOrder) {
-                                            PartySortOrder.NAME -> PartySortOrder.BALANCE
-                                            PartySortOrder.BALANCE -> PartySortOrder.TYPE
-                                            PartySortOrder.TYPE -> PartySortOrder.NAME
-                                        }
-                            }
-                    ) {
-                        Icon(
-                                Icons.AutoMirrored.Outlined.Sort,
-                                contentDescription = "Sort",
-                                tint =
-                                        if (sortOrder != PartySortOrder.NAME) PrimaryBlue
-                                        else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    IconButton(onClick = { viewModel.toggleGridView(!isGridView) }) {
-                        Icon(
-                                imageVector =
-                                        if (isGridView) Icons.Outlined.List
-                                        else Icons.Outlined.GridView,
-                                contentDescription = "Toggle View",
-                                tint =
-                                        if (isGridView) PrimaryBlue
-                                        else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                    "CONTACTS (${sortOrder.name})",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Parties List/Grid
-            val filteredAndSortedParties =
-                    allPartiesWithDetails
-                            .filter {
-                                val matchesSearch =
-                                        it.party.name.contains(searchQuery, ignoreCase = true)
-                                val matchesFilter =
-                                        when (selectedFilter) {
-                                            "Buyers" -> it.party.type == PartyType.BUYER
-                                            "Suppliers" -> it.party.type == PartyType.SUPPLIER
-                                            else -> true
-                                        }
-                                matchesSearch && matchesFilter
-                            }
-                            .sortedWith { a, b ->
-                                when (sortOrder) {
-                                    PartySortOrder.NAME ->
-                                            a.party
-                                                    .name
-                                                    .lowercase()
-                                                    .compareTo(b.party.name.lowercase())
-                                    PartySortOrder.BALANCE -> {
-                                        val balA = viewModel.getBalance(a).absoluteValue
-                                        val balB = viewModel.getBalance(b).absoluteValue
-                                        balB.compareTo(balA) // Descending absolute balance
-                                    }
-                                    PartySortOrder.TYPE ->
-                                            a.party.type.name.compareTo(b.party.type.name)
+    // Parties List/Grid
+    val filteredAndSortedParties =
+            allPartiesWithDetails
+                    .filter {
+                        val matchesSearch =
+                                it.party.name.contains(searchQuery, ignoreCase = true)
+                        val matchesFilter =
+                                when (selectedFilter) {
+                                    "Buyers" -> it.party.type == PartyType.BUYER
+                                    "Suppliers" -> it.party.type == PartyType.SUPPLIER
+                                    else -> true
                                 }
+                        matchesSearch && matchesFilter
+                    }
+                    .sortedWith { a, b ->
+                        when (sortOrder) {
+                            PartySortOrder.NAME ->
+                                    a.party
+                                            .name
+                                            .lowercase()
+                                            .compareTo(b.party.name.lowercase())
+                            PartySortOrder.BALANCE -> {
+                                val balA = viewModel.getBalance(a).absoluteValue
+                                val balB = viewModel.getBalance(b).absoluteValue
+                                balB.compareTo(balA) // Descending absolute balance
                             }
-
-            if (filteredAndSortedParties.isEmpty()) {
-                com.example.awancoalledger.ui.components.EmptyStateCard(
-                    icon = Icons.Outlined.Contacts,
-                    title = if (searchQuery.isNotEmpty()) "No Results" else "No Contacts Yet",
-                    description = if (searchQuery.isNotEmpty()) "No contacts match \"$searchQuery\"." else "Add your first contact to start tracking.",
-                    actionText = if (searchQuery.isEmpty()) "Add Contact" else null,
-                    onAction = if (searchQuery.isEmpty()) { { showAddPartySheet = true } } else null,
-                    modifier = Modifier.weight(1f)
-                )
-            } else {
-                if (isGridView) {
-                    LazyVerticalGrid(
-                            columns = GridCells.Fixed(2),
-                            contentPadding = PaddingValues(bottom = 16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.weight(1f)
-                    ) {
-                        items(filteredAndSortedParties, key = { it.party.id }) { details ->
-                            PartyGridItem(
-                                    party = details.party,
-                                    balance = viewModel.getBalance(details),
-                                    onClick = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        onNavigateToLedger(details.party.id)
-                                    }
-                            )
+                            PartySortOrder.TYPE ->
+                                    a.party.type.name.compareTo(b.party.type.name)
                         }
                     }
+
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        if (isGridView && filteredAndSortedParties.isNotEmpty()) {
+            androidx.compose.foundation.lazy.grid.LazyVerticalGrid(
+                    columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(2),
+                    contentPadding = PaddingValues(bottom = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxSize()
+            ) {
+                item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(2) }) {
+                    PartiesHeader(
+                        backDispatcher = backDispatcher,
+                        searchQuery = searchQuery,
+                        onSearchChange = { searchQuery = it },
+                        showAddPartySheet = { showAddPartySheet = true },
+                        selectedFilter = selectedFilter,
+                        onFilterChange = { selectedFilter = it },
+                        sortOrder = sortOrder,
+                        onSortChange = { sortOrder = it },
+                        isGridView = isGridView,
+                        onGridToggle = { viewModel.toggleGridView(it) },
+                        haptic = haptic
+                    )
+                }
+                items(filteredAndSortedParties, key = { it.party.id }) { details ->
+                    PartyGridItem(
+                            party = details.party,
+                            balance = viewModel.getBalance(details),
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onNavigateToLedger(details.party.id)
+                            }
+                    )
+                }
+            }
+        } else {
+            LazyColumn(
+                    modifier = Modifier.fillMaxSize()
+            ) {
+                item {
+                    PartiesHeader(
+                        backDispatcher = backDispatcher,
+                        searchQuery = searchQuery,
+                        onSearchChange = { searchQuery = it },
+                        showAddPartySheet = { showAddPartySheet = true },
+                        selectedFilter = selectedFilter,
+                        onFilterChange = { selectedFilter = it },
+                        sortOrder = sortOrder,
+                        onSortChange = { sortOrder = it },
+                        isGridView = isGridView,
+                        onGridToggle = { viewModel.toggleGridView(it) },
+                        haptic = haptic
+                    )
+                }
+
+                if (filteredAndSortedParties.isEmpty()) {
+                    item {
+                        com.example.awancoalledger.ui.components.EmptyStateCard(
+                            icon = Icons.Outlined.Contacts,
+                            title = if (searchQuery.isNotEmpty()) "No Results" else "No Contacts Yet",
+                            description = if (searchQuery.isNotEmpty()) "No contacts match \"$searchQuery\"." else "Add your first contact to start tracking.",
+                            actionText = if (searchQuery.isEmpty()) "Add Contact" else null,
+                            onAction = if (searchQuery.isEmpty()) { { showAddPartySheet = true } } else null,
+                            modifier = Modifier.fillMaxWidth().padding(16.dp)
+                        )
+                    }
                 } else {
-                    LazyColumn(
-                            modifier =
-                                    Modifier.fillMaxWidth()
-                                            .weight(
-                                                    1f,
-                                                    fill = false
-                                            ) // Allow it to wrap if content is small
-                                            .clip(RoundedCornerShape(24.dp))
-                                            .background(MaterialTheme.colorScheme.surface)
-                    ) {
-                        items(filteredAndSortedParties, key = { it.party.id }) { details ->
+                    items(filteredAndSortedParties, key = { it.party.id }) { details ->
+                        Box(modifier = Modifier.padding(horizontal = 16.dp)) {
                             SwipeableItem(
                                     onEdit = { editingParty = details.party },
                                     onDelete = { partyToDelete = details.party },
@@ -277,12 +182,11 @@ fun PartiesScreen(viewModel: LedgerViewModel, onNavigateToLedger: (Int) -> Unit)
                                         )
                                     },
                             )
-                            HorizontalDivider(
-                                    modifier = Modifier.padding(horizontal = 16.dp),
-                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                                    thickness = 0.5.dp
-                            )
                         }
+                        HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                        )
                     }
                 }
             }
@@ -371,7 +275,7 @@ fun PartyGridItem(party: Party, balance: Double, onClick: () -> Unit) {
             onClick = onClick,
             color = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(20.dp),
-            modifier = Modifier.fillMaxWidth().height(160.dp)
+            modifier = Modifier.fillMaxWidth().height(180.dp)
     ) {
         Column(
                 modifier = Modifier.padding(16.dp),
@@ -384,7 +288,7 @@ fun PartyGridItem(party: Party, balance: Double, onClick: () -> Unit) {
                                     .clip(RoundedCornerShape(12.dp))
                                     .background(
                                             if (party.type == PartyType.BUYER)
-                                                    PrimaryBlue
+                                                    MaterialTheme.colorScheme.primary
                                             else iOSOrange
                                     ),
                     contentAlignment = Alignment.Center
@@ -446,7 +350,7 @@ fun PartyCardItem(party: Party, balance: Double, onClick: () -> Unit) {
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(
                                         if (party.type == PartyType.BUYER)
-                                                PrimaryBlue
+                                                MaterialTheme.colorScheme.primary
                                         else iOSOrange
                                 ),
                 contentAlignment = Alignment.Center
@@ -471,13 +375,13 @@ fun PartyCardItem(party: Party, balance: Double, onClick: () -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Surface(
                         color =
-                                (if (party.type == PartyType.BUYER) PrimaryBlue else iOSOrange)
+                                (if (party.type == PartyType.BUYER) MaterialTheme.colorScheme.primary else iOSOrange)
                                         .copy(alpha = 0.2f),
                         shape = RoundedCornerShape(4.dp)
                 ) {
                     Text(
                             party.type.name.uppercase(),
-                            color = if (party.type == PartyType.BUYER) PrimaryBlue else iOSOrange,
+                            color = if (party.type == PartyType.BUYER) MaterialTheme.colorScheme.primary else iOSOrange,
                             fontSize = 8.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
@@ -549,7 +453,7 @@ fun PartyActionSheet(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(onClick = onDismiss) { Text("Cancel", color = PrimaryBlue) }
+                TextButton(onClick = onDismiss) { Text("Cancel", color = MaterialTheme.colorScheme.primary) }
                 Text(
                         if (party == null) "New Party" else "Edit Party",
                         style = MaterialTheme.typography.titleMedium,
@@ -563,7 +467,7 @@ fun PartyActionSheet(
                 ) {
                     Text(
                             if (party == null) "Add" else "Save",
-                            color = PrimaryBlue,
+                            color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold
                     )
                 }
@@ -665,5 +569,145 @@ fun PartyActionSheet(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun PartiesHeader(
+    backDispatcher: androidx.activity.OnBackPressedDispatcher?,
+    searchQuery: String,
+    onSearchChange: (String) -> Unit,
+    showAddPartySheet: () -> Unit,
+    selectedFilter: String,
+    onFilterChange: (String) -> Unit,
+    sortOrder: PartySortOrder,
+    onSortChange: (PartySortOrder) -> Unit,
+    isGridView: Boolean,
+    onGridToggle: (Boolean) -> Unit,
+    haptic: androidx.compose.ui.hapticfeedback.HapticFeedback
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .statusBarsPadding()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        com.example.awancoalledger.ui.components.ScreenHeader(
+            title = "Contacts",
+            onBack = { backDispatcher?.onBackPressed() },
+            modifier = Modifier.padding(horizontal = 0.dp)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        com.example.awancoalledger.ui.components.PremiumInput(
+                label = "Search Contacts",
+                value = searchQuery,
+                onValueChange = onSearchChange,
+                leadingIcon = {
+                    Icon(
+                            Icons.Outlined.Search,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Add Contact Button
+        Button(
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    showAddPartySheet()
+                },
+                modifier = Modifier.fillMaxWidth()
+                    .height(56.dp)
+                    .shadow(4.dp, RoundedCornerShape(16.dp)),
+                colors =
+                        ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.onBackground,
+                                contentColor = MaterialTheme.colorScheme.background
+                        ),
+                shape = RoundedCornerShape(16.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                        Icons.Outlined.PersonAdd,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.background,
+                        modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                        "Add New Party",
+                        color = MaterialTheme.colorScheme.background,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Filter Tabs + Sort/Grid Buttons
+        Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                PartyFilterPill("All Contacts", selectedFilter == "All Contacts") {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onFilterChange("All Contacts")
+                }
+                PartyFilterPill("Buyers", selectedFilter == "Buyers") {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onFilterChange("Buyers")
+                }
+                PartyFilterPill("Suppliers", selectedFilter == "Suppliers") {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onFilterChange("Suppliers")
+                }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                IconButton(
+                        onClick = {
+                            val newOrder = when (sortOrder) {
+                                        PartySortOrder.NAME -> PartySortOrder.BALANCE
+                                        PartySortOrder.BALANCE -> PartySortOrder.TYPE
+                                        PartySortOrder.TYPE -> PartySortOrder.NAME
+                                    }
+                            onSortChange(newOrder)
+                        }
+                ) {
+                    Icon(
+                            Icons.AutoMirrored.Outlined.Sort,
+                            contentDescription = "Sort",
+                            tint =
+                                    if (sortOrder != PartySortOrder.NAME) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                IconButton(onClick = { onGridToggle(!isGridView) }) {
+                    Icon(
+                            imageVector =
+                                    if (isGridView) Icons.Outlined.List
+                                    else Icons.Outlined.GridView,
+                            contentDescription = "Toggle View",
+                            tint =
+                                    if (isGridView) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+                "CONTACTS (${sortOrder.name})",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(12.dp))
     }
 }

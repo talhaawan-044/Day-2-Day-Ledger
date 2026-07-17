@@ -1,5 +1,6 @@
 package com.example.awancoalledger.ui.components
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,7 +12,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.awancoalledger.ui.theme.PrimaryBlue
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -68,7 +68,7 @@ fun IOSDatePickerSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextButton(onClick = onDismiss) {
-                    Text("Cancel", color = PrimaryBlue, fontSize = 17.sp, fontWeight = FontWeight.Medium)
+                    Text("Cancel", color = MaterialTheme.colorScheme.primary, fontSize = 17.sp, fontWeight = FontWeight.Medium)
                 }
                 Text("Date", fontWeight = FontWeight.SemiBold, fontSize = 17.sp)
                 TextButton(onClick = {
@@ -76,7 +76,7 @@ fun IOSDatePickerSheet(
                     result.set(selectedYear, selectedMonth, selectedDay.coerceAtMost(maxDays))
                     onDateSelected(result.timeInMillis)
                 }) {
-                    Text("Done", color = PrimaryBlue, fontWeight = FontWeight.Bold, fontSize = 17.sp)
+                    Text("Done", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, fontSize = 17.sp)
                 }
             }
 
@@ -125,7 +125,7 @@ fun IOSTimePickerSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextButton(onClick = onDismiss) {
-                    Text("Cancel", color = PrimaryBlue, fontSize = 17.sp, fontWeight = FontWeight.Medium)
+                    Text("Cancel", color = MaterialTheme.colorScheme.primary, fontSize = 17.sp, fontWeight = FontWeight.Medium)
                 }
                 Text("Time", fontWeight = FontWeight.SemiBold, fontSize = 17.sp)
                 TextButton(onClick = {
@@ -134,7 +134,7 @@ fun IOSTimePickerSheet(
                     result.set(Calendar.MINUTE, selectedMinute)
                     onTimeSelected(result.timeInMillis)
                 }) {
-                    Text("Done", color = PrimaryBlue, fontWeight = FontWeight.Bold, fontSize = 17.sp)
+                    Text("Done", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, fontSize = 17.sp)
                 }
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
@@ -149,7 +149,7 @@ fun IOSTimePickerSheet(
                 )
                 Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                     WheelPicker(items = (0..23).map { it.toString().padStart(2, '0') }, initialIndex = selectedHour, onItemSelected = { selectedHour = it }, modifier = Modifier.weight(1f))
-                    Text(":", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = PrimaryBlue, modifier = Modifier.padding(bottom = 4.dp))
+                    Text(":", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(bottom = 4.dp))
                     WheelPicker(items = (0..59).map { it.toString().padStart(2, '0') }, initialIndex = selectedMinute, onItemSelected = { selectedMinute = it }, modifier = Modifier.weight(1f))
                 }
             }
@@ -224,7 +224,7 @@ fun WheelPicker(
                     text = items[index],
                     fontSize = if (index == centeredIndex) 22.sp else 19.sp,
                     fontWeight = if (index == centeredIndex) FontWeight.ExtraBold else FontWeight.Medium,
-                    color = if (index == centeredIndex) PrimaryBlue else MaterialTheme.colorScheme.onSurface,
+                    color = if (index == centeredIndex) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                     maxLines = 1
                 )
             }
