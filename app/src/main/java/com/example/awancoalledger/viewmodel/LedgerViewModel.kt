@@ -292,13 +292,9 @@ class LedgerViewModel(
     val countryConfig = settingsRepository.getSettingsFlow()
         .map { 
             val code = settingsRepository.getDefaultCountryCode()
-            SUPPORTED_COUNTRIES.find { it.code == code } ?: SUPPORTED_COUNTRIES.first()
-        }
-        .stateIn(
-            viewModelScope, 
-            SharingStarted.WhileSubscribed(5000), 
-            SUPPORTED_COUNTRIES.find { it.code == settingsRepository.getDefaultCountryCode() } ?: SUPPORTED_COUNTRIES.first()
-        )
+            SUPPORTED_COUNTRIES.find { it.code == code } 
+                ?: com.example.awancoalledger.data.CountryConfig("Custom", code, 15)
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SUPPORTED_COUNTRIES.find { it.code == settingsRepository.getDefaultCountryCode() } ?: com.example.awancoalledger.data.CountryConfig("Custom", settingsRepository.getDefaultCountryCode(), 15))
 
     val isBiometricsEnabled = settingsRepository.getSettingsFlow()
         .map { settingsRepository.isBiometricsEnabled() }

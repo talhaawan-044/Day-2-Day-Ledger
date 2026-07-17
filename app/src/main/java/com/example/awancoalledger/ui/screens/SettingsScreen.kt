@@ -693,9 +693,49 @@ fun SettingsScreen(
             )
         }
 
-        if (showCountryDialog) {
+            var showCustomCountryDialog by remember { mutableStateOf(false) }
+            var customCountryCodeInput by remember { mutableStateOf("") }
+
+            if (showCustomCountryDialog) {
+                com.example.awancoalledger.ui.components.IOSAlertDialog(
+                    onDismissRequest = { showCustomCountryDialog = false },
+                    title = "Custom Country Code",
+                    message = "Enter your custom country code (e.g., +33)",
+                    content = {
+                        OutlinedTextField(
+                            value = customCountryCodeInput,
+                            onValueChange = { customCountryCodeInput = it },
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                            singleLine = true
+                        )
+                    },
+                    buttons = {
+                        com.example.awancoalledger.ui.components.IOSDialogButton(
+                            text = "Cancel",
+                            onClick = { showCustomCountryDialog = false },
+                            isDestructive = true
+                        )
+                        com.example.awancoalledger.ui.components.IOSDialogButton(
+                            text = "Save",
+                            onClick = {
+                                val code = customCountryCodeInput.trim()
+                                if (code.isNotEmpty()) {
+                                    val finalCode = if (code.startsWith("+")) code else "+$code"
+                                    viewModel.updateCountryCode(finalCode)
+                                }
+                                showCustomCountryDialog = false
+                                showCountryDialog = false
+                            },
+                            isBold = true
+                        )
+                    }
+                )
+            }
+
             CountrySelectionModal(
                 onDismiss = { showCountryDialog = false },
+                onCustomRequest = { showCustomCountryDialog = true },
                 onCountrySelected = { config ->
                     viewModel.updateCountryCode(config.code)
                     showCountryDialog = false
@@ -1271,6 +1311,7 @@ fun PremiumAccountCard(
 @Composable
 fun CountrySelectionModal(
     onDismiss: () -> Unit,
+    onCustomRequest: () -> Unit,
     onCountrySelected: (com.example.awancoalledger.data.CountryConfig) -> Unit
 ) {
     ModalBottomSheet(
@@ -1321,6 +1362,28 @@ fun CountrySelectionModal(
                     }
                     if (index < com.example.awancoalledger.data.SUPPORTED_COUNTRIES.size - 1) {
                         androidx.compose.material3.Divider(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
+                    }
+                }
+                item {
+                    androidx.compose.material3.Divider(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onCustomRequest() }
+                            .padding(vertical = 16.dp, horizontal = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Other / Custom",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Icon(
+                            androidx.compose.material.icons.Icons.Default.KeyboardArrowRight,
+                            contentDescription = "Enter Custom Code",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             }
