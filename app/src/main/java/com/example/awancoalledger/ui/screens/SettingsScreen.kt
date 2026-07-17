@@ -43,7 +43,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 import androidx.activity.compose.BackHandler
-
+import com.example.awancoalledger.ui.components.IOSDialogButton
 enum class SettingsCategory(val title: String, val icon: androidx.compose.ui.graphics.vector.ImageVector, val color: androidx.compose.ui.graphics.Color, val subtitle: String) {
     CLOUD_ACCOUNT("Cloud Account", androidx.compose.material.icons.Icons.Outlined.CloudUpload, androidx.compose.ui.graphics.Color(0xFF007AFF), "Sync & Backups"),
     BUSINESS_PROFILE("Business Profile", androidx.compose.material.icons.Icons.Outlined.Business, androidx.compose.ui.graphics.Color(0xFF007AFF), "Name, phone, logo"),
@@ -702,21 +702,21 @@ fun SettingsScreen(
                     title = "Custom Country Code",
                     message = "Enter your custom country code (e.g., +33)",
                     content = {
-                        OutlinedTextField(
+                        androidx.compose.material3.OutlinedTextField(
                             value = customCountryCodeInput,
                             onValueChange = { customCountryCodeInput = it },
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Phone),
                             singleLine = true
                         )
                     },
                     buttons = {
-                        com.example.awancoalledger.ui.components.IOSDialogButton(
+                        IOSDialogButton(
                             text = "Cancel",
                             onClick = { showCustomCountryDialog = false },
-                            isDestructive = true
+                            color = ErrorRed
                         )
-                        com.example.awancoalledger.ui.components.IOSDialogButton(
+                        IOSDialogButton(
                             text = "Save",
                             onClick = {
                                 val code = customCountryCodeInput.trim()
@@ -727,23 +727,25 @@ fun SettingsScreen(
                                 showCustomCountryDialog = false
                                 showCountryDialog = false
                             },
-                            isBold = true
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                            isLast = true
                         )
                     }
                 )
             }
 
-            CountrySelectionModal(
-                onDismiss = { showCountryDialog = false },
-                onCustomRequest = { showCustomCountryDialog = true },
-                onCountrySelected = { config ->
-                    viewModel.updateCountryCode(config.code)
-                    showCountryDialog = false
-                }
-            )
+            if (showCountryDialog) {
+                CountrySelectionModal(
+                    onDismiss = { showCountryDialog = false },
+                    onCustomRequest = { showCustomCountryDialog = true },
+                    onCountrySelected = { config ->
+                        viewModel.updateCountryCode(config.code)
+                        showCountryDialog = false
+                    }
+                )
+            }
         }
     }
-}
 
 @Composable
 fun ProfileHeader(owner: String, biz: String, logoUri: android.net.Uri? = null, isUploading: Boolean = false, onLogoClick: () -> Unit = {}) {
@@ -1380,7 +1382,7 @@ fun CountrySelectionModal(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Icon(
-                            androidx.compose.material.icons.Icons.Default.KeyboardArrowRight,
+                            androidx.compose.material.icons.Icons.AutoMirrored.Outlined.KeyboardArrowRight,
                             contentDescription = "Enter Custom Code",
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
