@@ -30,3 +30,9 @@
    - No where in the ui, use glow unless it's the ui element which is under the frosted glass.
    - This app is ios inspired so we are not gonna use any emojis or generic ai generate icons
      but ios style vector icons.
+
+6. **Real-Life Data & Backward Compatibility (CRITICAL):**
+   - The main app is actively used in real life by the user. The data stored in Firebase Firestore and the local Room database is live, critical data.
+   - When introducing changes in the `feature/big-updates` dev branch, **NEVER** write code, schemas, or migrations that could nuke, reset, or corrupt the data currently present in the production schema when we push these updates and changes which we made here to that production app.
+   - Any modifications to the database schema, data syncing logic, or data restoration logic MUST be strictly backward compatible. If a field name is changed, a proper migration must be mapped so older data is gracefully transitioned.
+   - Data restoration logic must gracefully handle missing fields in older Firebase documents without crashing or losing records.

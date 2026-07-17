@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface LedgerDao {
-    @Query("SELECT * FROM parties")
+    @Query("SELECT * FROM parties WHERE isDeleted = 0")
     fun getAllParties(): Flow<List<Party>>
 
     @Query("SELECT * FROM parties WHERE id = :id")
@@ -15,23 +15,23 @@ interface LedgerDao {
     suspend fun getPartyBySyncId(syncId: String): Party?
 
     @Transaction
-    @Query("SELECT * FROM parties WHERE id = :partyId")
+    @Query("SELECT * FROM parties WHERE id = :partyId AND isDeleted = 0")
     fun getPartyWithDetails(partyId: Int): Flow<PartyWithDetails?>
 
     @Transaction
-    @Query("SELECT * FROM parties")
+    @Query("SELECT * FROM parties WHERE isDeleted = 0")
     fun getAllPartiesWithDetails(): Flow<List<PartyWithDetails>>
 
     @Upsert
     suspend fun upsertParty(party: Party)
 
     @Delete
-    suspend fun deleteParty(party: Party)
+    suspend fun hardDeleteParty(party: Party)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEntry(entry: LedgerEntry)
 
-    @Query("SELECT * FROM ledger_entries WHERE partyId = :partyId ORDER BY date DESC")
+    @Query("SELECT * FROM ledger_entries WHERE partyId = :partyId AND isDeleted = 0 ORDER BY date DESC")
     fun getEntriesForParty(partyId: Int): Flow<List<LedgerEntry>>
 
     @Query("SELECT * FROM ledger_entries WHERE syncId = :syncId LIMIT 1")
@@ -40,51 +40,51 @@ interface LedgerDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPayment(payment: Payment)
 
-    @Query("SELECT * FROM payments WHERE partyId = :partyId ORDER BY date DESC")
+    @Query("SELECT * FROM payments WHERE partyId = :partyId AND isDeleted = 0 ORDER BY date DESC")
     fun getPaymentsForParty(partyId: Int): Flow<List<Payment>>
 
     @Query("SELECT * FROM payments WHERE syncId = :syncId LIMIT 1")
     suspend fun getPaymentBySyncId(syncId: String): Payment?
 
-    @Query("SELECT * FROM ledger_entries ORDER BY date DESC LIMIT 5")
+    @Query("SELECT * FROM ledger_entries WHERE isDeleted = 0 AND partyId IN (SELECT id FROM parties WHERE isDeleted = 0) ORDER BY date DESC LIMIT 5")
     fun getRecentEntries(): Flow<List<LedgerEntry>>
 
-    @Query("SELECT * FROM ledger_entries")
+    @Query("SELECT * FROM ledger_entries WHERE isDeleted = 0 AND partyId IN (SELECT id FROM parties WHERE isDeleted = 0)")
     fun getAllEntries(): Flow<List<LedgerEntry>>
 
-    @Query("SELECT * FROM payments")
+    @Query("SELECT * FROM payments WHERE isDeleted = 0 AND partyId IN (SELECT id FROM parties WHERE isDeleted = 0)")
     fun getAllPayments(): Flow<List<Payment>>
 
     @Delete
-    suspend fun deleteEntry(entry: LedgerEntry)
+    suspend fun hardDeleteEntry(entry: LedgerEntry)
 
     @Delete
-    suspend fun deletePayment(payment: Payment)
+    suspend fun hardDeletePayment(payment: Payment)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertExpense(expense: Expense)
 
-    @Query("SELECT * FROM expenses ORDER BY date DESC")
+    @Query("SELECT * FROM expenses WHERE isDeleted = 0 ORDER BY date DESC")
     fun getAllExpenses(): Flow<List<Expense>>
 
     @Query("SELECT * FROM expenses WHERE syncId = :syncId LIMIT 1")
     suspend fun getExpenseBySyncId(syncId: String): Expense?
 
     @Delete
-    suspend fun deleteExpense(expense: Expense)
+    suspend fun hardDeleteExpense(expense: Expense)
 
     // Reminder Lists
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReminderList(list: ReminderList): Long
 
-    @Query("SELECT * FROM reminder_lists ORDER BY `order` ASC")
+    @Query("SELECT * FROM reminder_lists WHERE isDeleted = 0 ORDER BY `order` ASC")
     fun getAllReminderLists(): Flow<List<ReminderList>>
 
     @Query("SELECT * FROM reminder_lists WHERE syncId = :syncId LIMIT 1")
     suspend fun getReminderListBySyncId(syncId: String): ReminderList?
 
     @Delete
-    suspend fun deleteReminderList(list: ReminderList)
+    suspend fun hardDeleteReminderList(list: ReminderList)
 
     // Reminders Enhanced
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -96,23 +96,23 @@ interface LedgerDao {
     @Query("SELECT * FROM reminders WHERE syncId = :syncId LIMIT 1")
     suspend fun getReminderBySyncId(syncId: String): Reminder?
 
-    @Query("SELECT * FROM reminders WHERE listId = :listId ORDER BY isCompleted ASC, priority DESC")
+    @Query("SELECT * FROM reminders WHERE listId = :listId AND isDeleted = 0 ORDER BY isCompleted ASC, priority DESC")
     fun getRemindersForList(listId: Int): Flow<List<Reminder>>
 
-    @Query("SELECT * FROM reminders WHERE parentId = :parentId")
+    @Query("SELECT * FROM reminders WHERE parentId = :parentId AND isDeleted = 0")
     fun getSubtasks(parentId: Int): Flow<List<Reminder>>
 
-    @Query("SELECT * FROM reminders WHERE isCompleted = 0")
+    @Query("SELECT * FROM reminders WHERE isCompleted = 0 AND isDeleted = 0")
     fun getActiveReminders(): Flow<List<Reminder>>
 
-    @Query("SELECT * FROM reminders WHERE isCompleted = 1")
+    @Query("SELECT * FROM reminders WHERE isCompleted = 1 AND isDeleted = 0")
     fun getCompletedReminders(): Flow<List<Reminder>>
 
-    @Query("SELECT * FROM reminders")
+    @Query("SELECT * FROM reminders WHERE isDeleted = 0")
     fun getAllReminders(): Flow<List<Reminder>>
 
     @Delete
-    suspend fun deleteReminder(reminder: Reminder)
+    suspend fun hardDeleteReminder(reminder: Reminder)
 
     // Stocks
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -121,7 +121,7 @@ interface LedgerDao {
     @Update
     suspend fun updateStock(stock: Stock)
 
-    @Query("SELECT * FROM stocks ORDER BY updatedAt DESC")
+    @Query("SELECT * FROM stocks WHERE isDeleted = 0 ORDER BY updatedAt DESC")
     fun getAllStocks(): Flow<List<Stock>>
 
     @Query("SELECT * FROM stocks WHERE mineName = :mineName LIMIT 1")
@@ -134,20 +134,20 @@ interface LedgerDao {
     suspend fun getStockBySyncId(syncId: String): Stock?
 
     @Delete
-    suspend fun deleteStock(stock: Stock)
+    suspend fun hardDeleteStock(stock: Stock)
 
     // Stock Entries
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertStockEntry(entry: StockEntry)
 
-    @Query("SELECT * FROM stock_entries WHERE stockId = :stockId ORDER BY date DESC")
+    @Query("SELECT * FROM stock_entries WHERE stockId = :stockId AND isDeleted = 0 ORDER BY date DESC")
     fun getEntriesForStock(stockId: Int): Flow<List<StockEntry>>
 
     @Query("SELECT * FROM stock_entries WHERE syncId = :syncId LIMIT 1")
     suspend fun getStockEntryBySyncId(syncId: String): StockEntry?
 
     @Delete
-    suspend fun deleteStockEntry(entry: StockEntry)
+    suspend fun hardDeleteStockEntry(entry: StockEntry)
 
     // Notes
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -159,57 +159,57 @@ interface LedgerDao {
     @Query("SELECT * FROM notes WHERE syncId = :syncId LIMIT 1")
     suspend fun getNoteBySyncId(syncId: String): Note?
 
-    @Query("SELECT * FROM notes ORDER BY isPinned DESC, date DESC")
+    @Query("SELECT * FROM notes WHERE isDeleted = 0 ORDER BY isPinned DESC, date DESC")
     fun getAllNotes(): Flow<List<Note>>
 
-    @Query("SELECT * FROM notes WHERE folderId = :folderId ORDER BY isPinned DESC, date DESC")
+    @Query("SELECT * FROM notes WHERE folderId = :folderId AND isDeleted = 0 ORDER BY isPinned DESC, date DESC")
     fun getNotesInFolder(folderId: Int): Flow<List<Note>>
 
     @Delete
-    suspend fun deleteNote(note: Note)
+    suspend fun hardDeleteNote(note: Note)
 
     // Folders
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFolder(folder: Folder): Long
 
-    @Query("SELECT * FROM folders ORDER BY name ASC")
+    @Query("SELECT * FROM folders WHERE isDeleted = 0 ORDER BY name ASC")
     fun getAllFolders(): Flow<List<Folder>>
 
     @Query("SELECT * FROM folders WHERE syncId = :syncId LIMIT 1")
     suspend fun getFolderBySyncId(syncId: String): Folder?
 
     @Delete
-    suspend fun deleteFolder(folder: Folder)
+    suspend fun hardDeleteFolder(folder: Folder)
 
     // Backup & Restore Support
-    @Query("SELECT * FROM parties")
+    @Query("SELECT * FROM parties WHERE isDeleted = 0")
     suspend fun getAllPartiesList(): List<Party>
 
-    @Query("SELECT * FROM ledger_entries")
+    @Query("SELECT * FROM ledger_entries WHERE isDeleted = 0 AND partyId IN (SELECT id FROM parties WHERE isDeleted = 0)")
     suspend fun getAllEntriesList(): List<LedgerEntry>
 
-    @Query("SELECT * FROM payments")
+    @Query("SELECT * FROM payments WHERE isDeleted = 0 AND partyId IN (SELECT id FROM parties WHERE isDeleted = 0)")
     suspend fun getAllPaymentsList(): List<Payment>
 
-    @Query("SELECT * FROM expenses")
+    @Query("SELECT * FROM expenses WHERE isDeleted = 0")
     suspend fun getAllExpensesList(): List<Expense>
 
-    @Query("SELECT * FROM reminder_lists")
+    @Query("SELECT * FROM reminder_lists WHERE isDeleted = 0")
     suspend fun getAllReminderListsList(): List<ReminderList>
 
-    @Query("SELECT * FROM reminders")
+    @Query("SELECT * FROM reminders WHERE isDeleted = 0")
     suspend fun getAllRemindersList(): List<Reminder>
 
-    @Query("SELECT * FROM stocks")
+    @Query("SELECT * FROM stocks WHERE isDeleted = 0")
     suspend fun getAllStocksList(): List<Stock>
 
-    @Query("SELECT * FROM stock_entries")
+    @Query("SELECT * FROM stock_entries WHERE isDeleted = 0")
     suspend fun getAllStockEntriesList(): List<StockEntry>
 
-    @Query("SELECT * FROM notes")
+    @Query("SELECT * FROM notes WHERE isDeleted = 0")
     suspend fun getAllNotesList(): List<Note>
 
-    @Query("SELECT * FROM folders")
+    @Query("SELECT * FROM folders WHERE isDeleted = 0")
     suspend fun getAllFoldersList(): List<Folder>
 
     @Transaction
@@ -243,32 +243,32 @@ interface LedgerDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFuelEntry(entry: FuelEntry)
 
-    @Query("SELECT * FROM fuel_entries ORDER BY date DESC")
+    @Query("SELECT * FROM fuel_entries WHERE isDeleted = 0 ORDER BY date DESC")
     fun getAllFuelEntries(): Flow<List<FuelEntry>>
 
-    @Query("SELECT * FROM fuel_entries")
+    @Query("SELECT * FROM fuel_entries WHERE isDeleted = 0")
     suspend fun getAllFuelEntriesList(): List<FuelEntry>
 
     @Query("SELECT * FROM fuel_entries WHERE syncId = :syncId LIMIT 1")
     suspend fun getFuelEntryBySyncId(syncId: String): FuelEntry?
 
     @Delete
-    suspend fun deleteFuelEntry(entry: FuelEntry)
+    suspend fun hardDeleteFuelEntry(entry: FuelEntry)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMaintenanceEntry(entry: MaintenanceEntry)
 
-    @Query("SELECT * FROM maintenance_entries ORDER BY date DESC")
+    @Query("SELECT * FROM maintenance_entries WHERE isDeleted = 0 ORDER BY date DESC")
     fun getAllMaintenanceEntries(): Flow<List<MaintenanceEntry>>
 
-    @Query("SELECT * FROM maintenance_entries")
+    @Query("SELECT * FROM maintenance_entries WHERE isDeleted = 0")
     suspend fun getAllMaintenanceEntriesList(): List<MaintenanceEntry>
 
     @Query("SELECT * FROM maintenance_entries WHERE syncId = :syncId LIMIT 1")
     suspend fun getMaintenanceEntryBySyncId(syncId: String): MaintenanceEntry?
 
     @Delete
-    suspend fun deleteMaintenanceEntry(entry: MaintenanceEntry)
+    suspend fun hardDeleteMaintenanceEntry(entry: MaintenanceEntry)
 
     @Query("DELETE FROM fuel_entries") suspend fun deleteAllFuelEntries()
     @Query("DELETE FROM maintenance_entries") suspend fun deleteAllMaintenanceEntries()
@@ -278,10 +278,10 @@ interface LedgerDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertVehicle(vehicle: Vehicle): Long
 
-    @Query("SELECT * FROM vehicles ORDER BY lastUpdated DESC")
+    @Query("SELECT * FROM vehicles WHERE isDeleted = 0 ORDER BY lastUpdated DESC")
     fun getAllVehicles(): Flow<List<Vehicle>>
 
-    @Query("SELECT * FROM vehicles")
+    @Query("SELECT * FROM vehicles WHERE isDeleted = 0")
     suspend fun getAllVehiclesList(): List<Vehicle>
 
     @Query("SELECT * FROM vehicles WHERE id = :id")
@@ -291,12 +291,12 @@ interface LedgerDao {
     suspend fun getVehicleBySyncId(syncId: String): Vehicle?
 
     @Delete
-    suspend fun deleteVehicle(vehicle: Vehicle)
+    suspend fun hardDeleteVehicle(vehicle: Vehicle)
 
     // Scoped Queries
-    @Query("SELECT * FROM fuel_entries WHERE vehicleId = :vehicleId ORDER BY date DESC")
+    @Query("SELECT * FROM fuel_entries WHERE vehicleId = :vehicleId AND isDeleted = 0 ORDER BY date DESC")
     fun getFuelEntriesForVehicle(vehicleId: Int): Flow<List<FuelEntry>>
 
-    @Query("SELECT * FROM maintenance_entries WHERE vehicleId = :vehicleId ORDER BY date DESC")
+    @Query("SELECT * FROM maintenance_entries WHERE vehicleId = :vehicleId AND isDeleted = 0 ORDER BY date DESC")
     fun getMaintenanceEntriesForVehicle(vehicleId: Int): Flow<List<MaintenanceEntry>>
 }

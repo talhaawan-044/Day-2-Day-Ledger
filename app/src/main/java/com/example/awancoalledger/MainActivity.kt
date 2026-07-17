@@ -86,7 +86,7 @@ class MainActivity : FragmentActivity() {
             this,
             firebaseManager.firestore,
             repository,
-            database.ledgerDao(),
+            database,
             firebaseManager,
             settingsRepository
         )

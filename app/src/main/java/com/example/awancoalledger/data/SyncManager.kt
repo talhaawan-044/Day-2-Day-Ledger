@@ -12,16 +12,18 @@ import kotlin.ExperimentalStdlibApi
 
 import android.content.Context
 import com.example.awancoalledger.utils.DataExchangeUtils
+import androidx.room.withTransaction
 
 @OptIn(ExperimentalStdlibApi::class)
 class SyncManager(
     private val context: Context,
     private val firestore: FirebaseFirestore,
     private val repository: LedgerRepository,
-    private val dao: LedgerDao,
+    private val database: LedgerDatabase,
     private val firebaseManager: FirebaseManager,
     private val settingsRepository: SettingsRepository
 ) {
+    private val dao = database.ledgerDao()
     private val scope = CoroutineScope(Dispatchers.IO)
     private val listeners = mutableListOf<com.google.firebase.firestore.ListenerRegistration>()
     private val syncMutex = kotlinx.coroutines.sync.Mutex()
@@ -45,7 +47,7 @@ class SyncManager(
                     val syncId = data["syncId"] as? String ?: return@forEach
                     
                     if (type == com.google.firebase.firestore.DocumentChange.Type.REMOVED) {
-                        dao.getPartyBySyncId(syncId)?.let { dao.deleteParty(it) }
+                        dao.getPartyBySyncId(syncId)?.let { dao.hardDeleteParty(it) }
                         return@forEach
                     }
 
@@ -54,12 +56,13 @@ class SyncManager(
                     if (local == null || lastUpdated > local.lastUpdated) {
                         val party = Party(
                             id = local?.id ?: 0,
-                            name = data["name"] as String,
+                            name = data["name"] as? String ?: "",
                             phone = data["phone"] as? String ?: "",
                             address = data["address"] as? String ?: "",
-                            type = PartyType.valueOf(data["type"] as String),
+                            type = runCatching { PartyType.valueOf(data["type"] as? String ?: "BUYER") }.getOrDefault(PartyType.BUYER),
                             syncId = syncId,
-                            lastUpdated = lastUpdated
+                            lastUpdated = lastUpdated,
+                            isDeleted = data["isDeleted"] as? Boolean ?: false
                         )
                         dao.upsertParty(party)
                     }
@@ -76,7 +79,7 @@ class SyncManager(
                     val syncId = data["syncId"] as? String ?: return@forEach
 
                     if (type == com.google.firebase.firestore.DocumentChange.Type.REMOVED) {
-                        dao.getEntryBySyncId(syncId)?.let { dao.deleteEntry(it) }
+                        dao.getEntryBySyncId(syncId)?.let { dao.hardDeleteEntry(it) }
                         return@forEach
                     }
 
@@ -128,11 +131,11 @@ class SyncManager(
 
                         dao.insertEntry(LedgerEntry(
                             id = local?.id ?: 0,
-                            partyId = party.id, date = data["date"] as Long,
+                            partyId = party.id, date = (data["date"] as? Long) ?: 0L,
                             truckNumber = data["truckNumber"] as? String,
                             mine = data["mine"] as? String, warehouse = data["warehouse"] as? String,
                             weight = weight, rate = rate, fare = fare, advPayment = advPayment,
-                            syncId = syncId, lastUpdated = lastUpdated
+                            syncId = syncId, lastUpdated = lastUpdated, isDeleted = data["isDeleted"] as? Boolean ?: false
                         ))
                     }
                 }
@@ -147,7 +150,7 @@ class SyncManager(
                     val syncId = data["syncId"] as? String ?: return@forEach
 
                     if (type == com.google.firebase.firestore.DocumentChange.Type.REMOVED) {
-                        dao.getPaymentBySyncId(syncId)?.let { dao.deletePayment(it) }
+                        dao.getPaymentBySyncId(syncId)?.let { dao.hardDeletePayment(it) }
                         return@forEach
                     }
 
@@ -192,9 +195,9 @@ class SyncManager(
                         
                         dao.insertPayment(Payment(
                             id = local?.id ?: 0,
-                            partyId = party.id, date = data["date"] as Long, amount = amount,
-                            type = PaymentType.valueOf(data["type"] as String), note = data["note"] as? String,
-                            syncId = syncId, lastUpdated = lastUpdated
+                            partyId = party.id, date = (data["date"] as? Long) ?: 0L, amount = amount,
+                            type = runCatching { PaymentType.valueOf(data["type"] as? String ?: "THEY_PAID") }.getOrDefault(PaymentType.THEY_PAID), note = data["note"] as? String,
+                            syncId = syncId, lastUpdated = lastUpdated, isDeleted = data["isDeleted"] as? Boolean ?: false
                         ))
                     }
                 }
@@ -209,7 +212,7 @@ class SyncManager(
                     val syncId = data["syncId"] as? String ?: return@forEach
 
                     if (type == com.google.firebase.firestore.DocumentChange.Type.REMOVED) {
-                        dao.getExpenseBySyncId(syncId)?.let { dao.deleteExpense(it) }
+                        dao.getExpenseBySyncId(syncId)?.let { dao.hardDeleteExpense(it) }
                         return@forEach
                     }
 
@@ -220,9 +223,9 @@ class SyncManager(
                         dao.insertExpense(Expense(
                             id = local?.id ?: 0,
                             amount = amount,
-                            category = ExpenseCategory.valueOf(data["category"] as String),
-                            date = data["date"] as Long, note = data["note"] as? String,
-                            syncId = syncId, lastUpdated = lastUpdated
+                            category = runCatching { ExpenseCategory.valueOf(data["category"] as? String ?: "OTHERS") }.getOrDefault(ExpenseCategory.OTHERS),
+                            date = (data["date"] as? Long) ?: 0L, note = data["note"] as? String,
+                            syncId = syncId, lastUpdated = lastUpdated, isDeleted = data["isDeleted"] as? Boolean ?: false
                         ))
                     }
                 }
@@ -237,7 +240,7 @@ class SyncManager(
                     val syncId = data["syncId"] as? String ?: return@forEach
 
                     if (type == com.google.firebase.firestore.DocumentChange.Type.REMOVED) {
-                        dao.getStockBySyncId(syncId)?.let { dao.deleteStock(it) }
+                        dao.getStockBySyncId(syncId)?.let { dao.hardDeleteStock(it) }
                         return@forEach
                     }
 
@@ -248,9 +251,9 @@ class SyncManager(
                         val pw = (data["peakWeight"] as? Double) ?: (data["peakWeight"] as? Long)?.toDouble() ?: 0.0
                         dao.insertStock(Stock(
                             id = local?.id ?: 0,
-                            mineName = data["mineName"] as String, totalWeight = tw, peakWeight = pw,
-                            lastWarehouse = data["lastWarehouse"] as? String, updatedAt = data["updatedAt"] as Long,
-                            syncId = syncId, lastUpdated = lastUpdated
+                            mineName = data["mineName"] as? String ?: "", totalWeight = tw, peakWeight = pw,
+                            lastWarehouse = data["lastWarehouse"] as? String, updatedAt = (data["updatedAt"] as? Long) ?: 0L,
+                            syncId = syncId, lastUpdated = lastUpdated, isDeleted = data["isDeleted"] as? Boolean ?: false
                         ))
                     }
                 }
@@ -265,7 +268,7 @@ class SyncManager(
                     val syncId = data["syncId"] as? String ?: return@forEach
 
                     if (type == com.google.firebase.firestore.DocumentChange.Type.REMOVED) {
-                        dao.getStockEntryBySyncId(syncId)?.let { dao.deleteStockEntry(it) }
+                        dao.getStockEntryBySyncId(syncId)?.let { dao.hardDeleteStockEntry(it) }
                         return@forEach
                     }
 
@@ -310,9 +313,9 @@ class SyncManager(
                         val w = (data["weight"] as? Double) ?: (data["weight"] as? Long)?.toDouble() ?: 0.0
                         dao.insertStockEntry(StockEntry(
                             id = local?.id ?: 0,
-                            stockId = stock.id, weight = w, warehouse = data["warehouse"] as String,
-                            date = data["date"] as Long, note = data["note"] as? String,
-                            syncId = syncId, lastUpdated = lastUpdated
+                            stockId = stock.id, weight = w, warehouse = data["warehouse"] as? String ?: "",
+                            date = (data["date"] as? Long) ?: 0L, note = data["note"] as? String,
+                            syncId = syncId, lastUpdated = lastUpdated, isDeleted = data["isDeleted"] as? Boolean ?: false
                         ))
                     }
                 }
@@ -327,7 +330,7 @@ class SyncManager(
                     val syncId = data["syncId"] as? String ?: return@forEach
 
                     if (type == com.google.firebase.firestore.DocumentChange.Type.REMOVED) {
-                        dao.getFolderBySyncId(syncId)?.let { dao.deleteFolder(it) }
+                        dao.getFolderBySyncId(syncId)?.let { dao.hardDeleteFolder(it) }
                         return@forEach
                     }
 
@@ -336,8 +339,8 @@ class SyncManager(
                     if (local == null || lastUpdated > local.lastUpdated) {
                         dao.insertFolder(Folder(
                             id = local?.id ?: 0,
-                            name = data["name"] as String, dateCreated = data["dateCreated"] as Long,
-                            syncId = syncId, lastUpdated = lastUpdated
+                            name = data["name"] as? String ?: "", dateCreated = (data["dateCreated"] as? Long) ?: 0L,
+                            syncId = syncId, lastUpdated = lastUpdated, isDeleted = data["isDeleted"] as? Boolean ?: false
                         ))
                     }
                 }
@@ -352,7 +355,7 @@ class SyncManager(
                     val syncId = data["syncId"] as? String ?: return@forEach
 
                     if (type == com.google.firebase.firestore.DocumentChange.Type.REMOVED) {
-                        dao.getNoteBySyncId(syncId)?.let { dao.deleteNote(it) }
+                        dao.getNoteBySyncId(syncId)?.let { dao.hardDeleteNote(it) }
                         return@forEach
                     }
 
@@ -363,15 +366,15 @@ class SyncManager(
                     if (local == null || lastUpdated > local.lastUpdated) {
                         dao.insertNote(Note(
                             id = local?.id ?: 0,
-                            title = data["title"] as String, content = data["content"] as String,
-                            date = data["date"] as Long, isPinned = data["isPinned"] as? Boolean ?: false,
+                            title = data["title"] as? String ?: "", content = data["content"] as? String ?: "",
+                            date = (data["date"] as? Long) ?: 0L, isPinned = data["isPinned"] as? Boolean ?: false,
                             folderId = folderId,
                             color = (data["color"] as? Long)?.toInt()?.takeIf { it != -1 },
                             textColor = (data["textColor"] as? Long)?.toInt()?.takeIf { it != -1 },
                             isLocked = data["isLocked"] as? Boolean ?: false,
                             fontSize = (data["fontSize"] as? Double)?.toFloat() ?: (data["fontSize"] as? Long)?.toFloat()?.takeIf { it != -1f },
                             bgImageId = (data["bgImageId"] as? Long)?.toInt()?.takeIf { it != -1 },
-                            syncId = syncId, lastUpdated = lastUpdated
+                            syncId = syncId, lastUpdated = lastUpdated, isDeleted = data["isDeleted"] as? Boolean ?: false
                         ))
                     }
                 }
@@ -386,7 +389,7 @@ class SyncManager(
                     val syncId = data["syncId"] as? String ?: return@forEach
 
                     if (type == com.google.firebase.firestore.DocumentChange.Type.REMOVED) {
-                        dao.getReminderListBySyncId(syncId)?.let { dao.deleteReminderList(it) }
+                        dao.getReminderListBySyncId(syncId)?.let { dao.hardDeleteReminderList(it) }
                         return@forEach
                     }
 
@@ -395,12 +398,12 @@ class SyncManager(
                     if (local == null || lastUpdated > local.lastUpdated) {
                         dao.insertReminderList(ReminderList(
                             id = local?.id ?: 0,
-                            name = data["name"] as String,
-                            color = (data["color"] as Long).toInt(),
-                            iconName = data["iconName"] as String,
-                            order = (data["order"] as Long).toInt(),
+                            name = data["name"] as? String ?: "",
+                            color = (data["color"] as? Long)?.toInt() ?: 0,
+                            iconName = data["iconName"] as? String ?: "",
+                            order = (data["order"] as? Long)?.toInt() ?: 0,
                             isDefault = data["isDefault"] as? Boolean ?: false,
-                            syncId = syncId, lastUpdated = lastUpdated
+                            syncId = syncId, lastUpdated = lastUpdated, isDeleted = data["isDeleted"] as? Boolean ?: false
                         ))
                     }
                 }
@@ -415,7 +418,7 @@ class SyncManager(
                     val syncId = data["syncId"] as? String ?: return@forEach
 
                     if (type == com.google.firebase.firestore.DocumentChange.Type.REMOVED) {
-                        dao.getReminderBySyncId(syncId)?.let { dao.deleteReminder(it) }
+                        dao.getReminderBySyncId(syncId)?.let { dao.hardDeleteReminder(it) }
                         return@forEach
                     }
 
@@ -426,14 +429,14 @@ class SyncManager(
                     if (local == null || lastUpdated > local.lastUpdated) {
                         dao.insertReminder(Reminder(
                             id = local?.id ?: 0,
-                            title = data["title"] as String, note = data["note"] as? String,
+                            title = data["title"] as? String ?: "", note = data["note"] as? String,
                             url = data["url"] as? String, listId = list.id,
                             dueDate = data["dueDate"] as? Long,
                             isCompleted = data["isCompleted"] as? Boolean ?: false,
                             isFlagged = data["isFlagged"] as? Boolean ?: false,
                             priority = ReminderPriority.valueOf(data["priority"] as? String ?: "NONE"),
                             category = ReminderCategory.valueOf(data["category"] as? String ?: "GENERAL"),
-                            syncId = syncId, lastUpdated = lastUpdated
+                            syncId = syncId, lastUpdated = lastUpdated, isDeleted = data["isDeleted"] as? Boolean ?: false
                         ))
                     }
                 }
@@ -488,7 +491,7 @@ class SyncManager(
                     val syncId = data["syncId"] as? String ?: return@forEach
 
                     if (type == com.google.firebase.firestore.DocumentChange.Type.REMOVED) {
-                        dao.getFuelEntryBySyncId(syncId)?.let { dao.deleteFuelEntry(it) }
+                        dao.getFuelEntryBySyncId(syncId)?.let { dao.hardDeleteFuelEntry(it) }
                         return@forEach
                     }
 
@@ -506,7 +509,7 @@ class SyncManager(
                             id = local?.id ?: 0,
                             vehicleId = vehicleId,
                             mileage = mileage, liters = liters, amount = amount,
-                            date = data["date"] as Long, syncId = syncId, lastUpdated = lastUpdated
+                            date = (data["date"] as? Long) ?: 0L, syncId = syncId, lastUpdated = lastUpdated, isDeleted = data["isDeleted"] as? Boolean ?: false
                         ))
                     }
                 }
@@ -521,7 +524,7 @@ class SyncManager(
                     val syncId = data["syncId"] as? String ?: return@forEach
 
                     if (type == com.google.firebase.firestore.DocumentChange.Type.REMOVED) {
-                        dao.getMaintenanceEntryBySyncId(syncId)?.let { dao.deleteMaintenanceEntry(it) }
+                        dao.getMaintenanceEntryBySyncId(syncId)?.let { dao.hardDeleteMaintenanceEntry(it) }
                         return@forEach
                     }
 
@@ -538,8 +541,8 @@ class SyncManager(
                             id = local?.id ?: 0,
                             vehicleId = vehicleId,
                             mileage = mileage, cost = cost, description = data["description"] as? String ?: "",
-                            type = data["type"] as? String ?: "OIL_CHANGE", date = data["date"] as Long,
-                            syncId = syncId, lastUpdated = lastUpdated
+                            type = data["type"] as? String ?: "OIL_CHANGE", date = (data["date"] as? Long) ?: 0L,
+                            syncId = syncId, lastUpdated = lastUpdated, isDeleted = data["isDeleted"] as? Boolean ?: false
                         ))
                     }
                 }
@@ -554,7 +557,7 @@ class SyncManager(
                     val syncId = data["syncId"] as? String ?: return@forEach
 
                     if (type == com.google.firebase.firestore.DocumentChange.Type.REMOVED) {
-                        dao.getVehicleBySyncId(syncId)?.let { dao.deleteVehicle(it) }
+                        dao.getVehicleBySyncId(syncId)?.let { dao.hardDeleteVehicle(it) }
                         return@forEach
                     }
 
@@ -564,10 +567,10 @@ class SyncManager(
                         val mileage = (data["currentMileage"] as? Double) ?: (data["currentMileage"] as? Long)?.toDouble() ?: 0.0
                         dao.insertVehicle(Vehicle(
                             id = local?.id ?: 0,
-                            name = data["name"] as String, plateNumber = data["plateNumber"] as String,
+                            name = data["name"] as? String ?: "", plateNumber = data["plateNumber"] as? String ?: "",
                             type = data["type"] as? String ?: "TRUCK", currentMileage = mileage,
                             isPrimary = data["isPrimary"] as? Boolean ?: false,
-                            syncId = syncId, lastUpdated = lastUpdated
+                            syncId = syncId, lastUpdated = lastUpdated, isDeleted = data["isDeleted"] as? Boolean ?: false
                         ))
                     }
                 }
@@ -591,7 +594,9 @@ class SyncManager(
                 }
                 snapshot?.documentChanges?.let { changes ->
                     scope.launch {
-                        onUpdate(changes)
+                        database.withTransaction {
+                            onUpdate(changes)
+                        }
                     }
                 }
             }
@@ -618,7 +623,7 @@ class SyncManager(
         dao.getAllExpensesList().forEach { uploadExpenseInternal(userId, it) }
 
         dao.getAllStocksList().forEach { stock ->
-            uploadEntity(userId, "stocks", stock.syncId, mapOf<String, Any>(
+            uploadEntity(userId, "stocks", stock.syncId, mapOf<String, Any>("schemaVersion" to 1, "isDeleted" to stock.isDeleted, 
                 "mineName" to stock.mineName, "totalWeight" to stock.totalWeight,
                 "peakWeight" to stock.peakWeight, "lastWarehouse" to (stock.lastWarehouse ?: ""),
                 "updatedAt" to stock.updatedAt, "syncId" to stock.syncId, "lastUpdated" to stock.lastUpdated
@@ -635,7 +640,7 @@ class SyncManager(
 
         val allLists = dao.getAllReminderListsList()
         allLists.forEach { list ->
-            uploadEntity(userId, "reminder_lists", list.syncId, mapOf<String, Any>(
+            uploadEntity(userId, "reminder_lists", list.syncId, mapOf<String, Any>("schemaVersion" to 1, "isDeleted" to list.isDeleted, 
                 "name" to list.name, "color" to list.color, "iconName" to list.iconName,
                 "order" to list.order, "isDefault" to list.isDefault,
                 "syncId" to list.syncId, "lastUpdated" to list.lastUpdated
@@ -691,7 +696,7 @@ class SyncManager(
 
     suspend fun uploadReminderList(list: ReminderList) {
         val userId = firebaseManager.getUserId() ?: return
-        uploadEntity(userId, "reminder_lists", list.syncId, mapOf<String, Any>(
+        uploadEntity(userId, "reminder_lists", list.syncId, mapOf<String, Any>("schemaVersion" to 1, "isDeleted" to list.isDeleted, 
             "name" to list.name, "color" to list.color, "iconName" to list.iconName,
             "order" to list.order, "isDefault" to list.isDefault,
             "syncId" to list.syncId, "lastUpdated" to list.lastUpdated
@@ -700,7 +705,7 @@ class SyncManager(
 
     suspend fun uploadStock(stock: Stock) {
         val userId = firebaseManager.getUserId() ?: return
-        uploadEntity(userId, "stocks", stock.syncId, mapOf<String, Any>(
+        uploadEntity(userId, "stocks", stock.syncId, mapOf<String, Any>("schemaVersion" to 1, "isDeleted" to stock.isDeleted, 
             "mineName" to stock.mineName, "totalWeight" to stock.totalWeight,
             "peakWeight" to stock.peakWeight, "lastWarehouse" to (stock.lastWarehouse ?: ""),
             "updatedAt" to stock.updatedAt, "syncId" to stock.syncId, "lastUpdated" to stock.lastUpdated
@@ -710,7 +715,7 @@ class SyncManager(
     suspend fun uploadStockEntry(entry: StockEntry) {
         val userId = firebaseManager.getUserId() ?: return
         val stock = dao.getStockById(entry.stockId) ?: return
-        uploadEntity(userId, "stock_entries", entry.syncId, mapOf<String, Any>(
+        uploadEntity(userId, "stock_entries", entry.syncId, mapOf<String, Any>("schemaVersion" to 1, "isDeleted" to entry.isDeleted, 
             "stockSyncId" to stock.syncId, "weight" to entry.weight,
             "warehouse" to entry.warehouse, "date" to entry.date,
             "note" to (entry.note ?: ""), "syncId" to entry.syncId, "lastUpdated" to entry.lastUpdated
@@ -783,7 +788,7 @@ class SyncManager(
     }
 
     private suspend fun uploadPartyInternal(userId: String, party: Party) {
-        uploadEntity(userId, "parties", party.syncId, mapOf<String, Any>(
+        uploadEntity(userId, "parties", party.syncId, mapOf<String, Any>("schemaVersion" to 1, "isDeleted" to party.isDeleted, 
             "name" to party.name, "phone" to party.phone, "address" to party.address,
             "type" to party.type.name, "syncId" to party.syncId, "lastUpdated" to party.lastUpdated
         ))
@@ -798,7 +803,7 @@ class SyncManager(
             Log.e("SyncManager", "Refusing to upload corrupted entry: ${entry.syncId}")
             return
         }
-        uploadEntity(userId, "ledger_entries", entry.syncId, mapOf<String, Any>(
+        uploadEntity(userId, "ledger_entries", entry.syncId, mapOf<String, Any>("schemaVersion" to 1, "isDeleted" to entry.isDeleted, 
             "partySyncId" to party.syncId, "date" to entry.date,
             "truckNumber" to (entry.truckNumber ?: ""), "mine" to (entry.mine ?: ""),
             "warehouse" to (entry.warehouse ?: ""), "weight" to weight, "rate" to rate,
@@ -812,7 +817,7 @@ class SyncManager(
             Log.e("SyncManager", "Refusing to upload corrupted payment: ${payment.syncId}")
             return
         }
-        uploadEntity(userId, "payments", payment.syncId, mapOf<String, Any>(
+        uploadEntity(userId, "payments", payment.syncId, mapOf<String, Any>("schemaVersion" to 1, "isDeleted" to payment.isDeleted, 
             "partySyncId" to party.syncId, "date" to payment.date, "amount" to payment.amount,
             "type" to payment.type.name, "note" to (payment.note ?: ""),
             "syncId" to payment.syncId, "lastUpdated" to payment.lastUpdated
@@ -821,7 +826,7 @@ class SyncManager(
 
     private suspend fun uploadExpenseInternal(userId: String, expense: Expense) {
         if (isInvalidDouble(expense.amount)) return
-        uploadEntity(userId, "expenses", expense.syncId, mapOf<String, Any>(
+        uploadEntity(userId, "expenses", expense.syncId, mapOf<String, Any>("schemaVersion" to 1, "isDeleted" to expense.isDeleted, 
             "amount" to expense.amount, "category" to expense.category.name,
             "date" to expense.date, "note" to (expense.note ?: ""),
             "syncId" to expense.syncId, "lastUpdated" to expense.lastUpdated
@@ -829,7 +834,7 @@ class SyncManager(
     }
 
     private suspend fun uploadNoteInternal(userId: String, note: Note, folderSyncId: String?) {
-        uploadEntity(userId, "notes", note.syncId, mapOf<String, Any>(
+        uploadEntity(userId, "notes", note.syncId, mapOf<String, Any>("schemaVersion" to 1, "isDeleted" to note.isDeleted, 
             "title" to note.title, "content" to note.content, "date" to note.date,
             "isPinned" to note.isPinned, "folderSyncId" to (folderSyncId ?: ""),
             "color" to (note.color ?: -1), "textColor" to (note.textColor ?: -1),
@@ -840,14 +845,14 @@ class SyncManager(
     }
 
     private suspend fun uploadFolderInternal(userId: String, folder: Folder) {
-        uploadEntity(userId, "folders", folder.syncId, mapOf<String, Any>(
+        uploadEntity(userId, "folders", folder.syncId, mapOf<String, Any>("schemaVersion" to 1, "isDeleted" to folder.isDeleted, 
             "name" to folder.name, "dateCreated" to folder.dateCreated,
             "syncId" to folder.syncId, "lastUpdated" to folder.lastUpdated
         ))
     }
 
     private suspend fun uploadReminderInternal(userId: String, reminder: Reminder, listSyncId: String) {
-        uploadEntity(userId, "reminders", reminder.syncId, mapOf<String, Any>(
+        uploadEntity(userId, "reminders", reminder.syncId, mapOf<String, Any>("schemaVersion" to 1, "isDeleted" to reminder.isDeleted, 
             "title" to reminder.title, "note" to (reminder.note ?: ""),
             "url" to (reminder.url ?: ""), "listSyncId" to listSyncId,
             "dueDate" to (reminder.dueDate ?: 0L), "isCompleted" to reminder.isCompleted,
@@ -860,7 +865,7 @@ class SyncManager(
     private suspend fun uploadFuelEntryInternal(userId: String, entry: FuelEntry) {
         if (isInvalidDouble(entry.mileage) || isInvalidDouble(entry.liters) || isInvalidDouble(entry.amount)) return
         val vehicleSyncId = dao.getVehicleById(entry.vehicleId)?.syncId ?: ""
-        uploadEntity(userId, "fuel_entries", entry.syncId, mapOf<String, Any>(
+        uploadEntity(userId, "fuel_entries", entry.syncId, mapOf<String, Any>("schemaVersion" to 1, "isDeleted" to entry.isDeleted, 
             "vehicleSyncId" to vehicleSyncId,
             "mileage" to entry.mileage, "liters" to entry.liters, "amount" to entry.amount,
             "date" to entry.date, "syncId" to entry.syncId, "lastUpdated" to entry.lastUpdated
@@ -870,7 +875,7 @@ class SyncManager(
     private suspend fun uploadMaintenanceEntryInternal(userId: String, entry: MaintenanceEntry) {
         if (isInvalidDouble(entry.mileage) || isInvalidDouble(entry.cost)) return
         val vehicleSyncId = dao.getVehicleById(entry.vehicleId)?.syncId ?: ""
-        uploadEntity(userId, "maintenance_entries", entry.syncId, mapOf<String, Any>(
+        uploadEntity(userId, "maintenance_entries", entry.syncId, mapOf<String, Any>("schemaVersion" to 1, "isDeleted" to entry.isDeleted, 
             "vehicleSyncId" to vehicleSyncId,
             "mileage" to entry.mileage, "cost" to entry.cost, "description" to entry.description,
             "type" to entry.type, "date" to entry.date, "syncId" to entry.syncId, "lastUpdated" to entry.lastUpdated
@@ -878,7 +883,7 @@ class SyncManager(
     }
 
     private suspend fun uploadVehicleInternal(userId: String, vehicle: Vehicle) {
-        uploadEntity(userId, "vehicles", vehicle.syncId, mapOf<String, Any>(
+        uploadEntity(userId, "vehicles", vehicle.syncId, mapOf<String, Any>("schemaVersion" to 1, "isDeleted" to vehicle.isDeleted, 
             "name" to vehicle.name, "plateNumber" to vehicle.plateNumber,
             "type" to vehicle.type, "currentMileage" to vehicle.currentMileage,
             "isPrimary" to vehicle.isPrimary,
@@ -887,13 +892,7 @@ class SyncManager(
     }
 
     private suspend fun uploadEntity(userId: String, collection: String, syncId: String, data: Map<String, Any>) {
-        try {
-            firestore.collection("users").document(userId).collection(collection)
-                .document(syncId).set(data, SetOptions.merge()).await()
-        } catch (e: Exception) {
-            Log.e("SyncManager", "Failed to upload $collection/$syncId", e)
-            throw e
-        }
+        enqueueSyncWorker(collection, syncId)
     }
 
     // ── Deletion Helpers ──────────────────────────────────────────────────────
@@ -913,12 +912,19 @@ class SyncManager(
     suspend fun deleteStockEntry(entry: StockEntry) = deleteEntity("stock_entries", entry.syncId)
 
     private suspend fun deleteEntity(collection: String, syncId: String) {
-        val userId = firebaseManager.getUserId() ?: return
-        try {
-            firestore.collection("users").document(userId).collection(collection)
-                .document(syncId).delete().await()
-        } catch (e: Exception) {
-            Log.e("SyncManager", "Failed to delete $collection/$syncId", e)
-        }
+        enqueueSyncWorker(collection, syncId)
+    }
+
+    private fun enqueueSyncWorker(collection: String, syncId: String) {
+        val workManager = androidx.work.WorkManager.getInstance(context)
+        val workData = androidx.work.workDataOf("collection" to collection, "syncId" to syncId)
+        val constraints = androidx.work.Constraints.Builder()
+            .setRequiredNetworkType(androidx.work.NetworkType.CONNECTED)
+            .build()
+        val request = androidx.work.OneTimeWorkRequestBuilder<com.example.awancoalledger.workers.SyncWorker>()
+            .setConstraints(constraints)
+            .setInputData(workData)
+            .build()
+        workManager.enqueueUniqueWork("sync_${collection}_${syncId}", androidx.work.ExistingWorkPolicy.REPLACE, request)
     }
 }

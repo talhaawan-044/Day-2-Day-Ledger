@@ -47,7 +47,8 @@ data class Party(
     val address: String,
     val type: PartyType,
     val syncId: String = java.util.UUID.randomUUID().toString(),
-    val lastUpdated: Long = System.currentTimeMillis()
+    val lastUpdated: Long = System.currentTimeMillis(),
+    val isDeleted: Boolean = false
 )
 
 @Entity(
@@ -74,7 +75,8 @@ data class LedgerEntry(
     val fare: Double? = null,
     val advPayment: Double? = null,
     val syncId: String = java.util.UUID.randomUUID().toString(),
-    val lastUpdated: Long = System.currentTimeMillis()
+    val lastUpdated: Long = System.currentTimeMillis(),
+    val isDeleted: Boolean = false
 )
 
 @Entity(
@@ -97,7 +99,8 @@ data class Payment(
     val type: PaymentType,
     val note: String? = null,
     val syncId: String = java.util.UUID.randomUUID().toString(),
-    val lastUpdated: Long = System.currentTimeMillis()
+    val lastUpdated: Long = System.currentTimeMillis(),
+    val isDeleted: Boolean = false
 )
 
 data class PartyWithDetails(
@@ -122,7 +125,8 @@ data class Expense(
     val date: Long = System.currentTimeMillis(),
     val note: String? = null,
     val syncId: String = java.util.UUID.randomUUID().toString(),
-    val lastUpdated: Long = System.currentTimeMillis()
+    val lastUpdated: Long = System.currentTimeMillis(),
+    val isDeleted: Boolean = false
 )
 
 @Entity(tableName = "reminder_lists")
@@ -134,7 +138,8 @@ data class ReminderList(
     val order: Int = 0,
     val isDefault: Boolean = false,
     val syncId: String = java.util.UUID.randomUUID().toString(),
-    val lastUpdated: Long = System.currentTimeMillis()
+    val lastUpdated: Long = System.currentTimeMillis(),
+    val isDeleted: Boolean = false
 )
 
 @Entity(tableName = "reminders",
@@ -165,7 +170,8 @@ data class Reminder(
     val partyId: Int? = null,
     val dateCreated: Long = System.currentTimeMillis(),
     val syncId: String = java.util.UUID.randomUUID().toString(),
-    val lastUpdated: Long = System.currentTimeMillis()
+    val lastUpdated: Long = System.currentTimeMillis(),
+    val isDeleted: Boolean = false
 )
 
 @Entity(tableName = "stocks")
@@ -177,7 +183,8 @@ data class Stock(
     val lastWarehouse: String? = null,
     val updatedAt: Long = System.currentTimeMillis(),
     val syncId: String = java.util.UUID.randomUUID().toString(),
-    val lastUpdated: Long = System.currentTimeMillis()
+    val lastUpdated: Long = System.currentTimeMillis(),
+    val isDeleted: Boolean = false
 )
 
 @Entity(
@@ -200,7 +207,8 @@ data class StockEntry(
     val date: Long = System.currentTimeMillis(),
     val note: String? = null,
     val syncId: String = java.util.UUID.randomUUID().toString(),
-    val lastUpdated: Long = System.currentTimeMillis()
+    val lastUpdated: Long = System.currentTimeMillis(),
+    val isDeleted: Boolean = false
 )
 
 @Entity(tableName = "notes")
@@ -217,7 +225,8 @@ data class Note(
     val fontSize: Float? = null,
     val bgImageId: Int? = null,
     val syncId: String = java.util.UUID.randomUUID().toString(),
-    val lastUpdated: Long = System.currentTimeMillis()
+    val lastUpdated: Long = System.currentTimeMillis(),
+    val isDeleted: Boolean = false
 )
 
 @Entity(tableName = "folders")
@@ -226,7 +235,8 @@ data class Folder(
     val name: String,
     val dateCreated: Long = System.currentTimeMillis(),
     val syncId: String = java.util.UUID.randomUUID().toString(),
-    val lastUpdated: Long = System.currentTimeMillis()
+    val lastUpdated: Long = System.currentTimeMillis(),
+    val isDeleted: Boolean = false
 )
 
 @Entity(tableName = "vehicles")
@@ -238,7 +248,8 @@ data class Vehicle(
     val currentMileage: Double = 0.0,
     val isPrimary: Boolean = false,
     val syncId: String = java.util.UUID.randomUUID().toString(),
-    val lastUpdated: Long = System.currentTimeMillis()
+    val lastUpdated: Long = System.currentTimeMillis(),
+    val isDeleted: Boolean = false
 )
 @Entity(
     tableName = "fuel_entries",
@@ -252,7 +263,8 @@ data class FuelEntry(
     val amount: Double,
     val date: Long = System.currentTimeMillis(),
     val syncId: String = java.util.UUID.randomUUID().toString(),
-    val lastUpdated: Long = System.currentTimeMillis()
+    val lastUpdated: Long = System.currentTimeMillis(),
+    val isDeleted: Boolean = false
 )
 
 @Entity(
@@ -268,5 +280,6 @@ data class MaintenanceEntry(
     val type: String = "OIL_CHANGE",
     val date: Long = System.currentTimeMillis(),
     val syncId: String = java.util.UUID.randomUUID().toString(),
-    val lastUpdated: Long = System.currentTimeMillis()
+    val lastUpdated: Long = System.currentTimeMillis(),
+    val isDeleted: Boolean = false
 )
