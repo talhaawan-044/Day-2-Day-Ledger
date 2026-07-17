@@ -42,12 +42,16 @@ fun LockScreen(
     LaunchedEffect(isError) {
         if (isError) {
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-            repeat(4) {
-                shakeOffset.animateTo(20f, spring(stiffness = Spring.StiffnessHigh))
-                shakeOffset.animateTo(-20f, spring(stiffness = Spring.StiffnessHigh))
-            }
-            shakeOffset.animateTo(0f)
-            delay(300)
+            // Sophisticated decaying shake animation (iOS style)
+            shakeOffset.animateTo(-30f, tween(50, easing = LinearEasing))
+            shakeOffset.animateTo(30f, tween(50, easing = LinearEasing))
+            shakeOffset.animateTo(-20f, tween(50, easing = LinearEasing))
+            shakeOffset.animateTo(20f, tween(50, easing = LinearEasing))
+            shakeOffset.animateTo(-10f, tween(50, easing = LinearEasing))
+            shakeOffset.animateTo(10f, tween(50, easing = LinearEasing))
+            shakeOffset.animateTo(0f, tween(50, easing = LinearOutSlowInEasing))
+            
+            delay(150)
             isError = false
             pin = ""
         }

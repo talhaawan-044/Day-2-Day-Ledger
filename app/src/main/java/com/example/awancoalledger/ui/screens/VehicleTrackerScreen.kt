@@ -19,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.SolidColor
@@ -356,9 +357,9 @@ fun VehicleCard(vehicle: Vehicle, isSelected: Boolean, onEdit: () -> Unit, modif
     Surface(
         modifier = modifier.fillMaxWidth().height(180.dp),
         color = if (isSelected) PrimaryBlue else MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(32.dp),
+        shape = RoundedCornerShape(24.dp),
         shadowElevation = if (isSelected) 8.dp else 2.dp,
-        border = if (isSelected) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        border = if (isSelected) null else BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             // Decorative background pattern
@@ -453,8 +454,8 @@ fun AddVehiclePlaceholder(onClick: () -> Unit, modifier: Modifier = Modifier) {
         onClick = onClick,
         modifier = modifier.fillMaxWidth().height(180.dp),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-        shape = RoundedCornerShape(32.dp),
-        border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
+        shape = RoundedCornerShape(24.dp),
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     ) {
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
             Icon(
@@ -506,9 +507,9 @@ fun PremiumMaintenanceCard(nextMileage: Double, kmsLeft: Double) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(32.dp),
+        shape = RoundedCornerShape(24.dp),
         shadowElevation = 0.dp,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
 
@@ -550,17 +551,14 @@ fun PremiumMaintenanceCard(nextMileage: Double, kmsLeft: Double) {
                     }
                 }
                 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(24.dp))
                 
-                // Countdown bar
-                Box(modifier = Modifier.fillMaxWidth().height(10.dp).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), RoundedCornerShape(5.dp))) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(animatedProgress)
-                            .fillMaxHeight()
-                            .background(intensityColor, RoundedCornerShape(5.dp))
-                    )
-                }
+                LinearProgressIndicator(
+                    progress = { animatedProgress },
+                    modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
+                    color = intensityColor,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant
+                )
                 
                 Spacer(modifier = Modifier.height(12.dp))
                 

@@ -204,8 +204,19 @@ fun SettingsScreen(
             )
             Spacer(modifier = Modifier.height(20.dp))
 
+            val companyLogoUri by viewModel.companyLogoUri.collectAsState()
+            val isLogoUploading by viewModel.isLogoUploading.collectAsState()
+            
             // Profile Header (Premium Card)
-            ProfileHeader(ownerName, bizName)
+            ProfileHeader(
+                owner = ownerName,
+                biz = bizName,
+                logoUri = companyLogoUri,
+                isUploading = isLogoUploading,
+                onLogoClick = { 
+                    logoPicker.launch(androidx.activity.result.PickVisualMediaRequest(androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly)) 
+                }
+            )
 
             Spacer(modifier = Modifier.height(28.dp))
 
@@ -692,7 +703,7 @@ fun SettingsScreen(
 }
 
 @Composable
-fun ProfileHeader(owner: String, biz: String) {
+fun ProfileHeader(owner: String, biz: String, logoUri: android.net.Uri? = null, isUploading: Boolean = false, onLogoClick: () -> Unit = {}) {
     Surface(
             modifier = Modifier.fillMaxWidth(),
             color = MaterialTheme.colorScheme.surface,
@@ -706,15 +717,27 @@ fun ProfileHeader(owner: String, biz: String) {
                                     .clip(CircleShape)
                                     .background(
                                             Brush.linearGradient(listOf(PrimaryBlue, iOSPurple))
-                                    ),
+                                    )
+                                    .clickable { onLogoClick() },
                     contentAlignment = Alignment.Center
             ) {
-                Text(
-                        owner.take(1).uppercase(),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold
-                )
+                if (isUploading) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp)
+                } else if (logoUri != null) {
+                    coil.compose.AsyncImage(
+                        model = logoUri,
+                        contentDescription = "Company Logo",
+                        contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Text(
+                            owner.take(1).uppercase(),
+                            color = Color.White,
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold
+                    )
+                }
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column {
@@ -742,14 +765,15 @@ fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) 
                 title,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
-                letterSpacing = 1.sp
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(start = 16.dp, bottom = 8.dp),
+                letterSpacing = 0.5.sp
         )
         Surface(
                 modifier = Modifier.fillMaxWidth(),
                 color = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(22.dp)
+                shape = RoundedCornerShape(20.dp),
+                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
         ) { Column { content() } }
     }
 }

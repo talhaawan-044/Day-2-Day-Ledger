@@ -182,6 +182,15 @@ fun HomeScreen(
 
             Spacer(Modifier.height(32.dp))
 
+            // 4 ── Quick Actions Dock
+            QuickActionsDock(
+                onAddExpense = { haptic.performHapticFeedback(HapticFeedbackType.LongPress); onNavigateToExpenses() },
+                onAddParty = { haptic.performHapticFeedback(HapticFeedbackType.LongPress); onNavigateToParties() },
+                onInventory = { haptic.performHapticFeedback(HapticFeedbackType.LongPress); onNavigateToStock() },
+                onGarage = { haptic.performHapticFeedback(HapticFeedbackType.LongPress); onNavigateToVehicleTracker() }
+            )
+
+            Spacer(Modifier.height(32.dp))
 
             // 4b ── Vehicle Status
             VehicleStatusTile(kmsRemaining, nextOilChange) {
@@ -395,7 +404,7 @@ fun NetPositionCard(netCredit: Double, receivable: Double, payable: Double, onCl
                     Modifier.fillMaxWidth()
                             .padding(horizontal = 16.dp)
                             .clip(RoundedCornerShape(32.dp))
-                            .background(PrimaryBlue)
+                            .background(Brush.linearGradient(listOf(Color(0xFF007AFF), Color(0xFF0A64FF))))
                             .clickable(onClick = onClick)
     ) {
         // Subtle noise overlay
@@ -665,13 +674,8 @@ fun InsightCard(
             onClick = onClick,
             modifier = Modifier.size(width = 168.dp, height = 148.dp),
             color = MaterialTheme.colorScheme.surface,
-            shape = RoundedCornerShape(28.dp),
-            border =
-                    BorderStroke(
-                            1.dp,
-                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.12f)
-                    ),
-            shadowElevation = 2.dp
+            shape = RoundedCornerShape(24.dp),
+            border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.SpaceBetween) {
             Surface(color = color.copy(alpha = 0.12f), shape = RoundedCornerShape(12.dp)) {
@@ -750,13 +754,8 @@ fun LatestTransactionsSection(
         Surface(
                 modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
                 color = MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(32.dp),
-                border =
-                        BorderStroke(
-                                1.dp,
-                                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.1f)
-                        ),
-                shadowElevation = 1.dp
+                shape = RoundedCornerShape(24.dp),
+                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
         ) {
             Column {
                 if (recentActivity.isEmpty()) {
@@ -1079,5 +1078,58 @@ fun VehicleStatusTile(kmsLeft: Double, nextMileage: Double, onClick: () -> Unit)
             }
             Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = subTextColor)
         }
+    }
+}
+
+@Composable
+fun QuickActionsDock(
+    onAddExpense: () -> Unit,
+    onAddParty: () -> Unit,
+    onInventory: () -> Unit,
+    onGarage: () -> Unit
+) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        Text(
+            text = "QUICK ACTIONS",
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Black,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 8.dp),
+            letterSpacing = 0.5.sp
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(24.dp),
+            border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 20.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                QuickActionButton("Expense", Icons.Default.Payments, iOSOrange, onAddExpense)
+                QuickActionButton("Contact", Icons.Default.PersonAdd, PrimaryBlue, onAddParty)
+                QuickActionButton("Inventory", Icons.Default.Inventory, iOSPurple, onInventory)
+                QuickActionButton("Garage", Icons.Default.DirectionsCar, SuccessGreen, onGarage)
+            }
+        }
+    }
+}
+
+@Composable
+fun QuickActionButton(label: String, icon: ImageVector, color: Color, onClick: () -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clickable { onClick() }) {
+        Surface(
+            shape = CircleShape,
+            color = color.copy(alpha = 0.12f),
+            modifier = Modifier.size(52.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(icon, contentDescription = label, tint = color, modifier = Modifier.size(26.dp))
+            }
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(label, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
     }
 }

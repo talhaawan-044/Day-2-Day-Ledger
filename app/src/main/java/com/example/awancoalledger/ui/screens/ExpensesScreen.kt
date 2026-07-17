@@ -1,6 +1,9 @@
 package com.example.awancoalledger.ui.screens
 //15,32,387,421
 import android.widget.Toast
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -81,7 +84,11 @@ fun ExpensesScreen(viewModel: LedgerViewModel) {
                 }
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            TotalExpensesHeroCard(displayTotal)
+
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Categories Header & Scroll
             Text(
@@ -768,6 +775,69 @@ fun ExpensePreviewSheet(expense: Expense, onDismiss: () -> Unit, onEdit: () -> U
                         "Edit Expense",
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun TotalExpensesHeroCard(total: Double) {
+    val animatedTotal by animateFloatAsState(
+        targetValue = total.toFloat(),
+        animationSpec = tween(durationMillis = 800, easing = FastOutSlowInEasing)
+    )
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+        shadowElevation = 0.dp
+    ) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            // Subtle decorative background
+            Icon(
+                imageVector = Icons.Default.TrendingDown,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(150.dp)
+                    .align(Alignment.BottomEnd)
+                    .offset(x = 20.dp, y = 20.dp),
+                tint = ErrorRed.copy(alpha = 0.05f)
+            )
+
+            Column(modifier = Modifier.padding(24.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(ErrorRed.copy(alpha = 0.1f), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Payments,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                            tint = ErrorRed
+                        )
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        text = "TOTAL EXPENSES",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Black,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text = "Rs. %,.0f".format(animatedTotal),
+                    fontSize = 36.sp,
+                    fontWeight = FontWeight.Black,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
