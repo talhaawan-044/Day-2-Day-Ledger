@@ -1204,110 +1204,61 @@ fun PremiumAccountCard(
 ) {
     val haptic = LocalHapticFeedback.current
 
-    // Gradient for Logged In state (Emerald/Teal)
-    val syncGradient = listOf(Color(0xFF007AFF), Color(0xFF007AFF))
-
     Surface(
+            onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                if (isLoggedIn) onLogout() else onClick()
+            },
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-            color = Color.Transparent,
-            shape = RoundedCornerShape(28.dp),
-            shadowElevation = 8.dp
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            shape = RoundedCornerShape(24.dp),
+            shadowElevation = 0.dp
     ) {
-        Column(modifier = Modifier.background(color).padding(24.dp)) {
-            Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
+        Row(
+                modifier = Modifier.padding(20.dp),
+                verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                    modifier = Modifier
+                            .size(60.dp)
+                            .background(color = color.copy(alpha = 0.15f), shape = CircleShape),
+                    contentAlignment = Alignment.Center
             ) {
-                // Profile Avatar / Icon with outer glow
-                Box(
-                        modifier =
-                                Modifier.size(64.dp)
-                                        .clip(RoundedCornerShape(20.dp))
-                                        .background(Color.White.copy(alpha = 0.2f)),
-                        contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                            icon,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(32.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(20.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                            title,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 22.sp,
-                            color = Color.White,
-                            letterSpacing = (-0.5).sp
-                    )
-                    Text(
-                            subtitle,
-                            fontSize = 14.sp,
-                            color = Color.White.copy(alpha = 0.8f),
-                            lineHeight = 20.sp
-                    )
-                }
+                Icon(
+                        icon,
+                        contentDescription = null,
+                        tint = color,
+                        modifier = Modifier.size(28.dp)
+                )
             }
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.width(16.dp))
 
-            if (isLoggedIn) {
-                Button(
-                        onClick = onLogout,
-                        modifier = Modifier.fillMaxWidth().height(54.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        colors =
-                                ButtonDefaults.buttonColors(
-                                        containerColor = Color.White.copy(alpha = 0.2f),
-                                        contentColor = Color.White
-                                ),
-                        elevation = ButtonDefaults.buttonElevation(0.dp),
-                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.3f))
-                ) {
-                    Icon(
-                            Icons.Outlined.Logout,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(10.dp))
-                    Text("Sign Out of Sync", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                }
-            } else {
-                Button(
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onClick()
-                        },
-                        modifier = Modifier.fillMaxWidth().height(56.dp),
-                        shape = RoundedCornerShape(18.dp),
-                        colors =
-                                ButtonDefaults.buttonColors(
-                                        containerColor = Color.White,
-                                        contentColor = PrimaryBlue
-                                ),
-                        elevation =
-                                ButtonDefaults.buttonElevation(
-                                        defaultElevation = 4.dp,
-                                        pressedElevation = 8.dp
-                                )
-                ) {
-                    Icon(
-                            Icons.AutoMirrored.Outlined.Login,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(Modifier.width(12.dp))
-                    Text(
-                            "Connect Cloud Account",
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 16.sp
-                    )
-                }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                        title,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        letterSpacing = (-0.5).sp
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                        subtitle,
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = 18.sp
+                )
             }
+            
+            Spacer(modifier = Modifier.width(12.dp))
+            
+            Icon(
+                Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                modifier = Modifier.size(24.dp)
+            )
         }
     }
 }

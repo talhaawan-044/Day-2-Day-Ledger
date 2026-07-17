@@ -18,6 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -821,57 +823,81 @@ fun TotalExpensesHeroCard(total: Double) {
         animationSpec = tween(durationMillis = 800, easing = FastOutSlowInEasing)
     )
 
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
-        shadowElevation = 0.dp
-    ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            // Subtle decorative background
-            Icon(
-                imageVector = Icons.Outlined.TrendingDown,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(150.dp)
-                    .align(Alignment.BottomEnd)
-                    .offset(x = 20.dp, y = 20.dp),
-                tint = ErrorRed.copy(alpha = 0.05f)
+    Box(
+        modifier = Modifier.fillMaxWidth()
+            .shadow(24.dp, RoundedCornerShape(32.dp), spotColor = ErrorRed.copy(alpha = 0.6f))
+            .clip(RoundedCornerShape(32.dp))
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(
+                        Color(0xFF8B0000), // Dark Red
+                        Color(0xFFB71C1C), // Deep Red
+                        Color(0xFFD32F2F)  // Crimson
+                    )
+                )
             )
+    ) {
+        // Inner Glass Box
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(Color.White.copy(alpha = 0.04f))
+                .border(
+                    width = 1.dp,
+                    brush = Brush.linearGradient(
+                        colors = listOf(Color.White.copy(alpha = 0.4f), Color.Transparent, Color.White.copy(alpha = 0.1f)),
+                        start = Offset(0f, 0f),
+                        end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
+                    ),
+                    shape = RoundedCornerShape(32.dp)
+                )
+        )
 
-            Column(modifier = Modifier.padding(24.dp)) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(32.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .size(40.dp)
-                            .background(ErrorRed, RoundedCornerShape(10.dp)),
+                            .size(36.dp)
+                            .background(Color.White.copy(alpha = 0.15f), RoundedCornerShape(12.dp)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Payments,
                             contentDescription = null,
-                            modifier = Modifier.size(20.dp),
+                            modifier = Modifier.size(18.dp),
                             tint = Color.White
                         )
                     }
                     Spacer(Modifier.width(12.dp))
                     Text(
                         text = "TOTAL EXPENSES",
-                        fontSize = 12.sp,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.Black,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        letterSpacing = 1.sp,
+                        color = Color.White.copy(alpha = 0.8f)
                     )
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(32.dp))
 
-                Text(
-                    text = "Rs. %,.0f".format(animatedTotal),
-                    fontSize = 36.sp,
-                    fontWeight = FontWeight.Black,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text(
+                        text = "Rs.",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White.copy(alpha = 0.6f),
+                        modifier = Modifier.padding(bottom = 6.dp)
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        text = String.format(Locale.getDefault(), "%,.0f", animatedTotal),
+                        fontSize = 48.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = (-2).sp,
+                        color = Color.White
+                    )
+                }
             }
         }
     }

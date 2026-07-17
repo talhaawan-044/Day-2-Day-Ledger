@@ -357,19 +357,11 @@ fun VehicleCard(vehicle: Vehicle, isSelected: Boolean, onEdit: () -> Unit, modif
     Surface(
         modifier = modifier.fillMaxWidth().height(180.dp),
         color = if (isSelected) PrimaryBlue else MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(24.dp),
-        shadowElevation = if (isSelected) 8.dp else 2.dp,
-        border = if (isSelected) null else BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        shape = RoundedCornerShape(32.dp),
+        shadowElevation = if (isSelected) 8.dp else 0.dp,
+        border = if (isSelected) null else BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // Decorative background pattern
-            Icon(
-                imageVector = if (vehicle.type == "TRUCK") Icons.Outlined.LocalShipping else Icons.Outlined.DirectionsCar,
-                contentDescription = null,
-                modifier = Modifier.size(200.dp).align(Alignment.BottomEnd).offset(x = 40.dp, y = 40.dp),
-                tint = (if (isSelected) Color.White else PrimaryBlue).copy(alpha = 0.05f)
-            )
-
             Column(modifier = Modifier.padding(24.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -434,11 +426,12 @@ fun VehicleCard(vehicle: Vehicle, isSelected: Boolean, onEdit: () -> Unit, modif
                 
                 Row(verticalAlignment = Alignment.Bottom) {
                     Column {
-                        Text("LAST MILEAGE", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = (if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant).copy(alpha = 0.6f))
+                        Text("LAST MILEAGE", fontSize = 10.sp, fontWeight = FontWeight.Medium, letterSpacing = 0.5.sp, color = (if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant).copy(alpha = 0.6f))
                         Text(
-                            "${vehicle.currentMileage.toInt()} km",
-                            fontSize = 24.sp,
+                            "${String.format(Locale.getDefault(), "%,d", vehicle.currentMileage.toInt())} km",
+                            fontSize = 26.sp,
                             fontWeight = FontWeight.Black,
+                            letterSpacing = (-1).sp,
                             color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface
                         )
                     }

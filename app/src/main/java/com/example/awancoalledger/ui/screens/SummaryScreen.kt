@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -403,14 +404,36 @@ fun NetPositionCard(netCredit: Double, receivable: Double, payable: Double, onCl
             modifier =
                     Modifier.fillMaxWidth()
                             .padding(horizontal = 16.dp)
+                            .shadow(24.dp, RoundedCornerShape(32.dp), spotColor = PrimaryBlue.copy(alpha = 0.5f))
                             .clip(RoundedCornerShape(32.dp))
-                            .background(Brush.linearGradient(listOf(Color(0xFF007AFF), Color(0xFF0A64FF))))
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        Color(0xFF0F2027),
+                                        Color(0xFF203A43),
+                                        Color(0xFF2C5364)
+                                    )
+                                )
+                            )
                             .clickable(onClick = onClick)
     ) {
-        // Subtle noise overlay
-        Box(Modifier.matchParentSize().background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f)))
+        // Inner Glass Box
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(Color.White.copy(alpha = 0.03f))
+                .border(
+                    width = 1.dp,
+                    brush = Brush.linearGradient(
+                        colors = listOf(Color.White.copy(alpha = 0.4f), Color.Transparent, Color.White.copy(alpha = 0.1f)),
+                        start = Offset(0f, 0f),
+                        end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
+                    ),
+                    shape = RoundedCornerShape(32.dp)
+                )
+        )
 
-        Column(modifier = Modifier.fillMaxWidth().padding(24.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(28.dp)) {
             // ── Top row: label + status pill ─────────────────────────────────
             Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -420,66 +443,68 @@ fun NetPositionCard(netCredit: Double, receivable: Double, payable: Double, onCl
                 Column {
                     Text(
                             "NET MARKET CREDIT",
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
+                            color = Color.White.copy(alpha = 0.6f),
                             fontSize = 11.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = 1.sp
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 2.sp
                     )
-                    Spacer(Modifier.height(6.dp))
+                    Spacer(Modifier.height(8.dp))
                     Row(verticalAlignment = Alignment.Bottom) {
                         Text(
                                 "Rs.",
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
-                                fontSize = 18.sp,
+                                color = Color.White.copy(alpha = 0.5f),
+                                fontSize = 20.sp,
                                 fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(bottom = 6.dp)
+                                modifier = Modifier.padding(bottom = 8.dp)
                         )
-                        Spacer(Modifier.width(4.dp))
+                        Spacer(Modifier.width(6.dp))
                         Text(
                                 String.format(
                                         Locale.getDefault(),
                                         "%,.0f",
                                         animatedNet.absoluteValue
                                 ),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontSize = 44.sp,
+                                color = Color.White,
+                                fontSize = 56.sp,
                                 fontWeight = FontWeight.Black,
-                                letterSpacing = (-1.5).sp
+                                letterSpacing = (-2.5).sp,
+                                lineHeight = 56.sp
                         )
                     }
                 }
 
                 Surface(
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.18f),
-                        shape = RoundedCornerShape(14.dp),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
+                        color = Color.White.copy(alpha = 0.08f),
+                        shape = RoundedCornerShape(percent = 50),
+                        border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.2f))
                 ) {
                     Row(
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                                 statusIcon,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.size(13.dp)
+                                tint = if(isSurplus) Color(0xFF4ADE80) else Color(0xFFF87171),
+                                modifier = Modifier.size(14.dp)
                         )
-                        Spacer(Modifier.width(4.dp))
+                        Spacer(Modifier.width(6.dp))
                         Text(
                                 statusLabel,
-                                color = MaterialTheme.colorScheme.onSurface,
+                                color = Color.White,
                                 fontSize = 10.sp,
-                                fontWeight = FontWeight.Black
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 1.sp
                         )
                     }
                 }
             }
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(32.dp))
 
             // ── Bottom mini stats ─────────────────────────────────────────────
-            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), thickness = 0.5.dp)
-            Spacer(Modifier.height(16.dp))
+            HorizontalDivider(color = Color.White.copy(alpha = 0.1f), thickness = 1.dp)
+            Spacer(Modifier.height(20.dp))
 
             Row(modifier = Modifier.fillMaxWidth()) {
                 MiniStatItem(
@@ -487,12 +512,13 @@ fun NetPositionCard(netCredit: Double, receivable: Double, payable: Double, onCl
                         label = "RECEIVABLE",
                         value = receivable,
                         icon = Icons.Outlined.SouthWest,
-                        color = SuccessGreen
+                        color = SuccessGreen,
+                        textColor = Color.White
                 )
                 Box(
                         Modifier.width(0.5.dp)
                                 .height(36.dp)
-                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
+                                .background(Color.White.copy(alpha = 0.2f))
                                 .align(Alignment.CenterVertically)
                 )
                 MiniStatItem(
@@ -500,7 +526,8 @@ fun NetPositionCard(netCredit: Double, receivable: Double, payable: Double, onCl
                         label = "PAYABLE",
                         value = payable,
                         icon = Icons.Outlined.NorthEast,
-                        color = ErrorRed
+                        color = ErrorRed,
+                        textColor = Color.White
                 )
             }
         }
@@ -513,7 +540,8 @@ fun MiniStatItem(
         label: String,
         value: Double,
         icon: ImageVector,
-        color: Color
+        color: Color,
+        textColor: Color = MaterialTheme.colorScheme.onSurface
 ) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -521,7 +549,7 @@ fun MiniStatItem(
             Spacer(Modifier.width(4.dp))
             Text(
                     label,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                    color = textColor.copy(alpha = 0.7f),
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 0.5.sp
@@ -530,7 +558,7 @@ fun MiniStatItem(
         Spacer(Modifier.height(4.dp))
         Text(
                 "${String.format(Locale.getDefault(), "%.1f", value / 1000)}k",
-                color = MaterialTheme.colorScheme.onSurface,
+                color = textColor,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold
         )
