@@ -9,11 +9,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Warehouse
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.Warehouse
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -70,7 +70,7 @@ fun StockDetailScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = PrimaryBlue)
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, null, tint = PrimaryBlue)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
@@ -93,7 +93,7 @@ fun StockDetailScreen(
 
                     item {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.History, null, tint = PrimaryBlue, modifier = Modifier.size(20.dp))
+                            Icon(Icons.Outlined.History, null, tint = PrimaryBlue, modifier = Modifier.size(20.dp))
                             Spacer(Modifier.width(8.dp))
                             Text(
                                 "ENTRY HISTORY",
@@ -152,7 +152,7 @@ fun StockDetailScreen(
                 contentColor = Color.White,
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Icon(Icons.Default.Add, "Add Entry")
+                Icon(Icons.Outlined.Add, "Add Entry")
             }
         }
     }
@@ -260,7 +260,7 @@ fun StockSummaryHeader(stock: Stock) {
             Spacer(Modifier.height(20.dp))
             
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Warehouse, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
+                Icon(Icons.Outlined.Warehouse, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
                 Spacer(Modifier.width(8.dp))
                 Text("Last Warehouse Location: ", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
                 Text(stock.lastWarehouse ?: "N/A", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp, fontWeight = FontWeight.Medium)

@@ -13,9 +13,9 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.*
 import androidx.compose.runtime.*
@@ -273,7 +273,7 @@ fun HomeHeader(
 ) {
     val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
     val isDaytime = hour in 6..18
-    val greetIcon = if (isDaytime) Icons.Default.WbSunny else Icons.Default.NightsStay
+    val greetIcon = if (isDaytime) Icons.Outlined.WbSunny else Icons.Outlined.NightsStay
     val iconTint = if (isDaytime) iOSOrange else iOSPurple
 
     val haptic = LocalHapticFeedback.current
@@ -287,7 +287,7 @@ fun HomeHeader(
             // Date chip
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                        Icons.Default.Schedule,
+                        Icons.Outlined.Schedule,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(12.dp)
@@ -336,10 +336,10 @@ fun HomeHeader(
 fun SyncBadge(status: SyncStatus, onClick: () -> Unit) {
     val (color, label, icon) =
             when (status) {
-                SyncStatus.Synced -> Triple(SuccessGreen, "Synced", Icons.Default.CloudDone)
-                SyncStatus.Syncing -> Triple(PrimaryBlue, "Syncing", Icons.Default.Sync)
-                SyncStatus.LocalOnly -> Triple(iOSOrange, "Offline", Icons.Default.CloudOff)
-                SyncStatus.Error -> Triple(ErrorRed, "Error", Icons.Default.ErrorOutline)
+                SyncStatus.Synced -> Triple(SuccessGreen, "Synced", Icons.Outlined.CloudDone)
+                SyncStatus.Syncing -> Triple(PrimaryBlue, "Syncing", Icons.Outlined.Sync)
+                SyncStatus.LocalOnly -> Triple(iOSOrange, "Offline", Icons.Outlined.CloudOff)
+                SyncStatus.Error -> Triple(ErrorRed, "Error", Icons.Outlined.ErrorOutline)
             }
 
     // Infinite rotation — but only USED when syncing
@@ -389,7 +389,7 @@ fun NetPositionCard(netCredit: Double, receivable: Double, payable: Double, onCl
     val isSurplus = netCredit >= 0
     val statusColor = if (isSurplus) SuccessGreen else ErrorRed
     val statusLabel = if (isSurplus) "SURPLUS" else "DEFICIT"
-    val statusIcon = if (isSurplus) Icons.Default.TrendingUp else Icons.Default.TrendingDown
+    val statusIcon = if (isSurplus) Icons.Outlined.TrendingUp else Icons.Outlined.TrendingDown
 
     // Animate displayed amount on data change
     val animatedNet by
@@ -486,7 +486,7 @@ fun NetPositionCard(netCredit: Double, receivable: Double, payable: Double, onCl
                         modifier = Modifier.weight(1f),
                         label = "RECEIVABLE",
                         value = receivable,
-                        icon = Icons.Default.SouthWest,
+                        icon = Icons.Outlined.SouthWest,
                         color = SuccessGreen
                 )
                 Box(
@@ -499,7 +499,7 @@ fun NetPositionCard(netCredit: Double, receivable: Double, payable: Double, onCl
                         modifier = Modifier.weight(1f),
                         label = "PAYABLE",
                         value = payable,
-                        icon = Icons.Default.NorthEast,
+                        icon = Icons.Outlined.NorthEast,
                         color = ErrorRed
                 )
             }
@@ -620,7 +620,7 @@ fun FinancialInsightsCarousel(
                         value =
                                 "${String.format(Locale.getDefault(), "%.1f", totalIncoming / 1000)}k",
                         subLabel = "Receivable balance",
-                        icon = Icons.Default.ArrowDownward,
+                        icon = Icons.Outlined.ArrowDownward,
                         color = SuccessGreen,
                         onClick = onIncomingClick
                 )
@@ -631,7 +631,7 @@ fun FinancialInsightsCarousel(
                         value =
                                 "${String.format(Locale.getDefault(), "%.1f", monthlyExpenses / 1000)}k",
                         subLabel = "This month's spend",
-                        icon = Icons.Default.ShoppingBag,
+                        icon = Icons.Outlined.ShoppingBag,
                         color = iOSPurple,
                         onClick = onExpensesClick
                 )
@@ -642,7 +642,7 @@ fun FinancialInsightsCarousel(
                         value =
                                 "${String.format(Locale.getDefault(), "%.1f", todayExpenses / 1000)}k",
                         subLabel = "Spent today",
-                        icon = Icons.Default.ReceiptLong,
+                        icon = Icons.Outlined.ReceiptLong,
                         color = iOSOrange,
                         onClick = onExpensesClick
                 )
@@ -652,7 +652,7 @@ fun FinancialInsightsCarousel(
                         title = "Stock on Hand",
                         value = "${totalStock.toInt()} tons",
                         subLabel = "Current inventory",
-                        icon = Icons.Default.LocalShipping,
+                        icon = Icons.Outlined.LocalShipping,
                         color = PrimaryBlue,
                         onClick = onStockClick
                 )
@@ -678,11 +678,11 @@ fun InsightCard(
             border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.SpaceBetween) {
-            Surface(color = color.copy(alpha = 0.12f), shape = RoundedCornerShape(12.dp)) {
+            Surface(color = color, shape = RoundedCornerShape(10.dp)) {
                 Icon(
                         icon,
                         contentDescription = null,
-                        tint = color,
+                        tint = Color.White,
                         modifier = Modifier.padding(8.dp).size(20.dp)
                 )
             }
@@ -741,7 +741,7 @@ fun LatestTransactionsSection(
             TextButton(onClick = onSeeAllClick, contentPadding = PaddingValues(horizontal = 4.dp)) {
                 Text("See All", color = PrimaryBlue, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 Icon(
-                        Icons.Default.ChevronRight,
+                        Icons.Outlined.ChevronRight,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
                         tint = PrimaryBlue
@@ -765,7 +765,7 @@ fun LatestTransactionsSection(
                             horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Icon(
-                                Icons.Default.Inbox,
+                                Icons.Outlined.Inbox,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
                                 modifier = Modifier.size(44.dp)
@@ -818,9 +818,9 @@ fun ActivityRow(activity: RecentActivity, onClick: () -> Unit) {
 
     val (rowIcon, rowColor) =
             when {
-                isPayment -> Icons.Default.AccountBalanceWallet to SuccessGreen
-                isStockArrival -> Icons.Default.Inventory2 to iOSOrange
-                else -> Icons.Default.LocalShipping to PrimaryBlue
+                isPayment -> Icons.Outlined.AccountBalanceWallet to SuccessGreen
+                isStockArrival -> Icons.Outlined.Inventory2 to iOSOrange
+                else -> Icons.Outlined.LocalShipping to PrimaryBlue
             }
 
     val subtitle =
@@ -856,15 +856,14 @@ fun ActivityRow(activity: RecentActivity, onClick: () -> Unit) {
         // Icon badge
         Surface(
                 modifier = Modifier.size(48.dp),
-                color = rowColor.copy(alpha = if (isSystemInDarkTheme()) 0.12f else 0.09f),
-                shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, rowColor.copy(alpha = 0.15f))
+                color = rowColor,
+                shape = RoundedCornerShape(12.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                         rowIcon,
                         contentDescription = null,
-                        tint = rowColor,
+                        tint = Color.White,
                         modifier = Modifier.size(24.dp)
                 )
             }
@@ -921,9 +920,9 @@ fun QuickStatsRow(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        QuickStatChip(Modifier.weight(1f), label = "Parties", value = partiesCount, icon = Icons.Default.People, color = PrimaryBlue, onClick = onPartiesClick)
-        // QuickStatChip(Modifier.weight(1f), label = "Reminders", value = remindersCount, icon = Icons.Default.NotificationsActive, color = iOSOrange, onClick = onRemindersClick)
-        QuickStatChip(Modifier.weight(1f), label = "Notes", value = notesCount, icon = Icons.Default.StickyNote2, color = iOSPurple, onClick = onNotesClick)
+        QuickStatChip(Modifier.weight(1f), label = "Parties", value = partiesCount, icon = Icons.Outlined.People, color = PrimaryBlue, onClick = onPartiesClick)
+        // QuickStatChip(Modifier.weight(1f), label = "Reminders", value = remindersCount, icon = Icons.Outlined.NotificationsActive, color = iOSOrange, onClick = onRemindersClick)
+        QuickStatChip(Modifier.weight(1f), label = "Notes", value = notesCount, icon = Icons.Outlined.StickyNote2, color = iOSPurple, onClick = onNotesClick)
     }
 }
 
@@ -943,10 +942,10 @@ fun QuickStatChip(modifier: Modifier, label: String, value: Int, icon: ImageVect
             Box(
                 modifier = Modifier
                     .size(32.dp)
-                    .background(color.copy(alpha = 0.15f), CircleShape),
+                    .background(color, RoundedCornerShape(8.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(18.dp))
+                Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
             }
             Column(modifier = Modifier.padding(bottom = 2.dp)) {
                 Text("$value", color = MaterialTheme.colorScheme.onSurface, fontSize = 24.sp, fontWeight = FontWeight.Bold)
@@ -994,7 +993,7 @@ fun SyncDetailDialog(status: SyncStatus, lastSyncTime: Long?, onDismiss: () -> U
         message = statusText,
         content = {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(Icons.Default.CloudSync, contentDescription = null, tint = color, modifier = Modifier.size(32.dp))
+                Icon(Icons.Outlined.CloudSync, contentDescription = null, tint = color, modifier = Modifier.size(32.dp))
                 if (lastSyncTime != null) {
                     Text("Last synced: ${timeFmt.format(Date(lastSyncTime))}", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
                 } else {
@@ -1050,7 +1049,7 @@ fun VehicleStatusTile(kmsLeft: Double, nextMileage: Double, onClick: () -> Unit)
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    Icons.Default.DirectionsCar, 
+                    Icons.Outlined.DirectionsCar, 
                     null, 
                     tint = if (isOverdue || isWarning) Color.White else PrimaryBlue,
                     modifier = Modifier.size(24.dp)
@@ -1076,7 +1075,7 @@ fun VehicleStatusTile(kmsLeft: Double, nextMileage: Double, onClick: () -> Unit)
                     color = textColor
                 )
             }
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = subTextColor)
+            Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, null, tint = subTextColor)
         }
     }
 }
@@ -1108,10 +1107,10 @@ fun QuickActionsDock(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 20.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                QuickActionButton("Expense", Icons.Default.Payments, iOSOrange, onAddExpense)
-                QuickActionButton("Contact", Icons.Default.PersonAdd, PrimaryBlue, onAddParty)
-                QuickActionButton("Inventory", Icons.Default.Inventory, iOSPurple, onInventory)
-                QuickActionButton("Garage", Icons.Default.DirectionsCar, SuccessGreen, onGarage)
+                QuickActionButton("Expense", Icons.Outlined.Payments, iOSOrange, onAddExpense)
+                QuickActionButton("Contact", Icons.Outlined.PersonAdd, PrimaryBlue, onAddParty)
+                QuickActionButton("Inventory", Icons.Outlined.Inventory, iOSPurple, onInventory)
+                QuickActionButton("Garage", Icons.Outlined.DirectionsCar, SuccessGreen, onGarage)
             }
         }
     }
@@ -1121,12 +1120,12 @@ fun QuickActionsDock(
 fun QuickActionButton(label: String, icon: ImageVector, color: Color, onClick: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clickable { onClick() }) {
         Surface(
-            shape = CircleShape,
-            color = color.copy(alpha = 0.12f),
+            shape = RoundedCornerShape(14.dp),
+            color = color,
             modifier = Modifier.size(52.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
-                Icon(icon, contentDescription = label, tint = color, modifier = Modifier.size(26.dp))
+                Icon(icon, contentDescription = label, tint = Color.White, modifier = Modifier.size(26.dp))
             }
         }
         Spacer(modifier = Modifier.height(10.dp))

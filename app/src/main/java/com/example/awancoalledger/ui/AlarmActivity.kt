@@ -14,9 +14,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Alarm
-import androidx.compose.material.icons.filled.AlarmOff
-import androidx.compose.material.icons.filled.Snooze
+import androidx.compose.material.icons.outlined.Alarm
+import androidx.compose.material.icons.outlined.AlarmOff
+import androidx.compose.material.icons.outlined.Snooze
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -294,7 +294,7 @@ fun AlarmScreen(
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
-                                Icons.Default.Alarm,
+                                Icons.Outlined.Alarm,
                                 contentDescription = null,
                                 tint = accentColor,
                                 modifier = Modifier
@@ -379,7 +379,7 @@ fun AlarmScreen(
                     shape = RoundedCornerShape(20.dp)
                 ) {
                     Icon(
-                        Icons.Default.AlarmOff,
+                        Icons.Outlined.AlarmOff,
                         contentDescription = null,
                         tint = Color.White,
                         modifier = Modifier.size(24.dp)
@@ -407,7 +407,7 @@ fun AlarmScreen(
                     )
                 ) {
                     Icon(
-                        Icons.Default.Snooze,
+                        Icons.Outlined.Snooze,
                         contentDescription = null,
                         tint = Color.White.copy(alpha = 0.8f),
                         modifier = Modifier.size(22.dp)

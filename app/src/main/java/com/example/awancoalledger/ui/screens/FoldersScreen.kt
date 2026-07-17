@@ -7,8 +7,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -58,10 +58,10 @@ fun FoldersScreen(
                     onBack = onBack,
                     actions = {
                         IconButton(onClick = { showAddFolderDialog = true }) {
-                            Icon(Icons.Default.CreateNewFolder, contentDescription = "New Folder", tint = PrimaryBlue)
+                            Icon(Icons.Outlined.CreateNewFolder, contentDescription = "New Folder", tint = PrimaryBlue)
                         }
                         IconButton(onClick = { onNavigateToEditor(null) }) {
-                            Icon(Icons.Default.EditNote, contentDescription = "New Note", tint = PrimaryBlue)
+                            Icon(Icons.Outlined.EditNote, contentDescription = "New Note", tint = PrimaryBlue)
                         }
                         TextButton(onClick = { isEditMode = !isEditMode }) {
                             Text(if (isEditMode) "Done" else "Edit", color = PrimaryBlue, fontWeight = FontWeight.Bold)
@@ -81,7 +81,7 @@ fun FoldersScreen(
             item {
                 FolderItem(
                     title = "All Notes",
-                    icon = Icons.Default.Description,
+                    icon = Icons.Outlined.Description,
                     count = allNotes.size,
                     showChevron = !isEditMode,
                     onClick = { if (!isEditMode) onNavigateToFolder("all") }
@@ -112,7 +112,7 @@ fun FoldersScreen(
                     val noteCount = allNotes.count { it.folderId == folder.id }
                     FolderItem(
                         title = folder.name,
-                        icon = Icons.Default.Folder,
+                        icon = Icons.Outlined.Folder,
                         count = noteCount,
                         isEditMode = isEditMode,
                         onRename = { folderToRename = folder },
@@ -192,7 +192,7 @@ fun FolderItem(
         ) {
             if (isEditMode && title != "All Notes") {
                 IconButton(onClick = onDelete, modifier = Modifier.size(24.dp)) {
-                    Icon(Icons.Default.RemoveCircle, null, tint = MaterialTheme.colorScheme.error)
+                    Icon(Icons.Outlined.RemoveCircle, null, tint = MaterialTheme.colorScheme.error)
                 }
                 Spacer(Modifier.width(12.dp))
             }
@@ -203,13 +203,13 @@ fun FolderItem(
             
             if (isEditMode && title != "All Notes") {
                 IconButton(onClick = onRename, modifier = Modifier.size(24.dp)) {
-                    Icon(Icons.Default.Edit, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Icon(Icons.Outlined.Edit, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             } else {
                 Text(count.toString(), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 17.sp)
                 if (showChevron) {
                     Spacer(Modifier.width(8.dp))
-                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                    Icon(Icons.AutoMirrored.Outlined.KeyboardArrowRight, null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
                 }
             }
         }

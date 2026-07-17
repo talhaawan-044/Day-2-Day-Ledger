@@ -10,9 +10,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.List
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -136,7 +136,7 @@ fun NotesScreen(
                                     haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
                                     showSortMenu = true 
                                 }) {
-                                    Icon(Icons.Default.Sort, null, tint = PrimaryBlue)
+                                    Icon(Icons.Outlined.Sort, null, tint = PrimaryBlue)
                                 }
                                 DropdownMenu(
                                         expanded = showSortMenu,
@@ -151,7 +151,7 @@ fun NotesScreen(
                                                     ) {
                                                         if (sortOrder == order) {
                                                             Icon(
-                                                                    Icons.Default.Check,
+                                                                    Icons.Outlined.Check,
                                                                     null,
                                                                     tint = PrimaryBlue,
                                                                     modifier = Modifier.size(16.dp)
@@ -186,8 +186,8 @@ fun NotesScreen(
                                         label = "viewToggle"
                                 ) { grid ->
                                     Icon(
-                                            if (grid) Icons.AutoMirrored.Filled.List
-                                            else Icons.Default.GridView,
+                                            if (grid) Icons.AutoMirrored.Outlined.List
+                                            else Icons.Outlined.GridView,
                                             null,
                                             tint = PrimaryBlue
                                     )
@@ -208,11 +208,11 @@ fun NotesScreen(
                                 searchQuery = it
                                 if (it.isNotEmpty()) isSearchFocused = true
                             },
-                            leadingIcon = { Icon(Icons.Default.Search, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp)) },
+                            leadingIcon = { Icon(Icons.Outlined.Search, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp)) },
                             trailingIcon = {
                                 if (searchQuery.isNotEmpty()) {
                                     IconButton(onClick = { searchQuery = "" }) {
-                                        Icon(Icons.Default.Cancel, null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f), modifier = Modifier.size(18.dp))
+                                        Icon(Icons.Outlined.Cancel, null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f), modifier = Modifier.size(18.dp))
                                     }
                                 }
                             },
@@ -250,7 +250,7 @@ fun NotesScreen(
                             showAddFolderDialog = true 
                         }) {
                             Icon(
-                                Icons.Default.CreateNewFolder,
+                                Icons.Outlined.CreateNewFolder,
                                 contentDescription = "New Folder",
                                 tint = PrimaryBlue,
                                 modifier = Modifier.size(28.dp)
@@ -272,7 +272,7 @@ fun NotesScreen(
                             onNavigateToEditor(null)
                         }) {
                             Icon(
-                                    Icons.Default.EditNote,
+                                    Icons.Outlined.EditNote,
                                     contentDescription = "New Note",
                                     tint = PrimaryBlue,
                                     modifier = Modifier.size(30.dp)
@@ -293,8 +293,8 @@ fun NotesScreen(
                         modifier = Modifier.padding(40.dp)
                 ) {
                     Icon(
-                            if (searchQuery.isNotEmpty()) Icons.Default.SearchOff
-                            else Icons.Default.NoteAlt,
+                            if (searchQuery.isNotEmpty()) Icons.Outlined.SearchOff
+                            else Icons.Outlined.NoteAlt,
                             null,
                             tint = MaterialTheme.colorScheme.outline,
                             modifier = Modifier.size(72.dp)
@@ -549,7 +549,7 @@ fun NoteContextMenu(
                 }
                 if (note.isPinned) {
                     Icon(
-                            Icons.Default.PushPin,
+                            Icons.Outlined.PushPin,
                             null,
                             tint = PrimaryBlue,
                             modifier = Modifier.size(16.dp)
@@ -561,13 +561,13 @@ fun NoteContextMenu(
             Spacer(Modifier.height(4.dp))
 
             ContextMenuRow(
-                    icon = Icons.Default.OpenInNew,
+                    icon = Icons.Outlined.OpenInNew,
                     label = "Open Note",
                     tint = MaterialTheme.colorScheme.onSurface,
                     onClick = onOpen
             )
             ContextMenuRow(
-                    icon = if (note.isPinned) Icons.Outlined.PushPin else Icons.Default.PushPin,
+                    icon = if (note.isPinned) Icons.Outlined.PushPin else Icons.Outlined.PushPin,
                     label = if (note.isPinned) "Unpin Note" else "Pin to Top",
                     tint = MaterialTheme.colorScheme.onSurface,
                     onClick = {
@@ -576,7 +576,7 @@ fun NoteContextMenu(
                     }
             )
             ContextMenuRow(
-                    icon = Icons.Default.ContentCopy,
+                    icon = Icons.Outlined.ContentCopy,
                     label = "Duplicate Note",
                     tint = MaterialTheme.colorScheme.onSurface,
                     onClick = {
@@ -598,7 +598,7 @@ fun NoteContextMenu(
             Spacer(Modifier.height(4.dp))
 
             ContextMenuRow(
-                    icon = Icons.Default.Delete,
+                    icon = Icons.Outlined.Delete,
                     label = "Delete Note",
                     tint = MaterialTheme.colorScheme.error,
                     onClick = onDelete
@@ -723,7 +723,7 @@ fun NoteListItem(note: Note, onClick: () -> Unit, onLongPress: () -> Unit) {
         if (note.isPinned) {
             Spacer(Modifier.width(8.dp))
             Icon(
-                    Icons.Default.PushPin,
+                    Icons.Outlined.PushPin,
                     null,
                     tint = fontColor.copy(alpha = 0.4f),
                     modifier = Modifier.size(13.dp)
@@ -800,7 +800,7 @@ fun NoteGridItem(note: Note, onClick: () -> Unit, onLongPress: () -> Unit) {
                     if (note.isPinned) {
                         Spacer(Modifier.width(4.dp))
                         Icon(
-                                Icons.Default.PushPin,
+                                Icons.Outlined.PushPin,
                                 null,
                                 tint = fontColor.copy(alpha = 0.4f),
                                 modifier = Modifier.size(12.dp)

@@ -8,9 +8,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Backspace
-import androidx.compose.material.icons.filled.Fingerprint
-import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.outlined.Backspace
+import androidx.compose.material.icons.outlined.Fingerprint
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -79,7 +79,7 @@ fun LockScreen(
             Spacer(modifier = Modifier.height(100.dp))
 
             Icon(
-                imageVector = Icons.Default.Lock,
+                imageVector = Icons.Outlined.Lock,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.size(24.dp)
@@ -131,7 +131,7 @@ fun LockScreen(
                             when (digit) {
                                 "bio" -> {
                                     KeypadButton(
-                                        icon = Icons.Default.Fingerprint,
+                                        icon = Icons.Outlined.Fingerprint,
                                         onClick = if (biometricEnabled) onBiometricTrigger else ({}),
                                         isFunctional = true,
                                         enabled = biometricEnabled
@@ -139,7 +139,7 @@ fun LockScreen(
                                 }
                                 "back" -> {
                                     KeypadButton(
-                                        icon = Icons.Default.Backspace,
+                                        icon = Icons.Outlined.Backspace,
                                         onClick = {
                                             if (pin.isNotEmpty()) {
                                                 pin = pin.dropLast(1)

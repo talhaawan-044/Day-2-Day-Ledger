@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -55,7 +55,7 @@ fun EntryPreviewSheet(
                     onClick = onDismiss,
                     modifier = Modifier.size(36.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
-                    Icon(Icons.Default.Close, contentDescription = "Close", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+                    Icon(Icons.Outlined.Close, contentDescription = "Close", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
                 }
             }
             
@@ -63,27 +63,27 @@ fun EntryPreviewSheet(
             
             // Content Card with Icons
             Column(modifier = Modifier.clip(RoundedCornerShape(20.dp)).background(Color(0xFF1E1E1E)).padding(16.dp)) {
-                IconPreviewRow(Icons.Default.CalendarToday, Color(0xFF0A84FF), "Date", formatFullDateWithDay(entry.date))
+                IconPreviewRow(Icons.Outlined.CalendarToday, Color(0xFF0A84FF), "Date", formatFullDateWithDay(entry.date))
                 HorizontalDivider(color = Color.White.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
                 
-                IconPreviewRow(Icons.Default.Description, Color(0xFFBF5AF2), "Type", "COAL")
+                IconPreviewRow(Icons.Outlined.Description, Color(0xFFBF5AF2), "Type", "COAL")
                 HorizontalDivider(color = Color.White.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
                 
-                IconPreviewRow(Icons.Default.Place, Color(0xFFFF9F0A), "Mine", entry.mine ?: "-")
+                IconPreviewRow(Icons.Outlined.Place, Color(0xFFFF9F0A), "Mine", entry.mine ?: "-")
                 HorizontalDivider(color = Color.White.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
                 
-                IconPreviewRow(Icons.Default.LocalShipping, Color(0xFF64D2FF), "Truck Number", entry.truckNumber ?: "-")
+                IconPreviewRow(Icons.Outlined.LocalShipping, Color(0xFF64D2FF), "Truck Number", entry.truckNumber ?: "-")
                 HorizontalDivider(color = Color.White.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
                 
-                IconPreviewRow(Icons.Default.Tag, Color(0xFF98989D), "Weight", "${entry.weight ?: 0.0} tons")
+                IconPreviewRow(Icons.Outlined.Tag, Color(0xFF98989D), "Weight", "${entry.weight ?: 0.0} tons")
                 
                 if (entry.fare != null && entry.fare > 0.0) {
                     HorizontalDivider(color = Color.White.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
-                    IconPreviewRow(Icons.Default.LocalShipping, Color(0xFF98989D), "Fare / Freight", "Rs. ${String.format(Locale.getDefault(), "%,.0f", entry.fare)}")
+                    IconPreviewRow(Icons.Outlined.LocalShipping, Color(0xFF98989D), "Fare / Freight", "Rs. ${String.format(Locale.getDefault(), "%,.0f", entry.fare)}")
                 }
                 
                 HorizontalDivider(color = Color.White.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
-                IconPreviewRow(Icons.Default.AttachMoney, Color(0xFF32D74B), "Final Rate", "Rs. ${String.format(Locale.getDefault(), "%,.0f", (entry.weight ?: 0.0) * (entry.rate ?: 0.0))}")
+                IconPreviewRow(Icons.Outlined.AttachMoney, Color(0xFF32D74B), "Final Rate", "Rs. ${String.format(Locale.getDefault(), "%,.0f", (entry.weight ?: 0.0) * (entry.rate ?: 0.0))}")
             }
             
             Spacer(modifier = Modifier.height(32.dp))
@@ -95,7 +95,7 @@ fun EntryPreviewSheet(
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = SuccessGreen.copy(alpha = 0.2f))
             ) {
-                Icon(Icons.Default.Share, contentDescription = null, tint = SuccessGreen)
+                Icon(Icons.Outlined.Share, contentDescription = null, tint = SuccessGreen)
                 Spacer(modifier = Modifier.width(12.dp))
                 Text("Share via WhatsApp", color = SuccessGreen, fontWeight = FontWeight.Bold)
             }
@@ -145,21 +145,21 @@ fun PaymentPreviewSheet(
                     onClick = onDismiss,
                     modifier = Modifier.size(36.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
-                    Icon(Icons.Default.Close, contentDescription = "Close", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+                    Icon(Icons.Outlined.Close, contentDescription = "Close", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
                 }
             }
             
             Spacer(modifier = Modifier.height(24.dp))
             
             Column(modifier = Modifier.clip(RoundedCornerShape(20.dp)).background(Color(0xFF1E1E1E)).padding(16.dp)) {
-                IconPreviewRow(Icons.Default.CalendarToday, Color(0xFF0A84FF), "Date", formatFullDateWithDay(payment.date))
+                IconPreviewRow(Icons.Outlined.CalendarToday, Color(0xFF0A84FF), "Date", formatFullDateWithDay(payment.date))
                 HorizontalDivider(color = Color.White.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
                 
-                IconPreviewRow(Icons.Default.AccountBalanceWallet, Color(0xFFBF5AF2), "Type", if (payment.type == PaymentType.THEY_PAID) "PAYMENT RECEIVED" else "PAYMENT SENT")
+                IconPreviewRow(Icons.Outlined.AccountBalanceWallet, Color(0xFFBF5AF2), "Type", if (payment.type == PaymentType.THEY_PAID) "PAYMENT RECEIVED" else "PAYMENT SENT")
                 
                 if (!payment.note.isNullOrBlank()) {
                     HorizontalDivider(color = Color.White.copy(alpha = 0.05f), modifier = Modifier.padding(vertical = 12.dp))
-                    IconPreviewRow(Icons.Default.Note, Color(0xFFFF9F0A), "Payment Note", payment.note)
+                    IconPreviewRow(Icons.Outlined.Note, Color(0xFFFF9F0A), "Payment Note", payment.note)
                 }
             }
             
@@ -171,7 +171,7 @@ fun PaymentPreviewSheet(
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = SuccessGreen.copy(alpha = 0.2f))
             ) {
-                Icon(Icons.Default.Share, contentDescription = null, tint = SuccessGreen)
+                Icon(Icons.Outlined.Share, contentDescription = null, tint = SuccessGreen)
                 Spacer(modifier = Modifier.width(12.dp))
                 Text("Share via WhatsApp", color = SuccessGreen, fontWeight = FontWeight.Bold)
             }

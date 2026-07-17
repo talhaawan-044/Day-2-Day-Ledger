@@ -12,9 +12,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.filled.Login
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.outlined.Login
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
@@ -44,11 +44,11 @@ import java.util.*
 import androidx.activity.compose.BackHandler
 
 enum class SettingsCategory(val title: String, val icon: androidx.compose.ui.graphics.vector.ImageVector, val color: androidx.compose.ui.graphics.Color, val subtitle: String) {
-    CLOUD_ACCOUNT("Cloud Account", androidx.compose.material.icons.Icons.Default.CloudUpload, PrimaryBlue, "Sync & Backups"),
-    BUSINESS_PROFILE("Business Profile", androidx.compose.material.icons.Icons.Default.Business, PrimaryBlue, "Name, phone, logo"),
-    PRIVACY_SECURITY("Privacy & Security", androidx.compose.material.icons.Icons.Default.Lock, ErrorRed, "App lock, biometrics"),
-    PREFERENCES("Preferences", androidx.compose.material.icons.Icons.Default.SettingsSuggest, iOSPurple, "Dark mode, dock"),
-    DATA_MANAGEMENT("Data Management", androidx.compose.material.icons.Icons.Default.History, iOSOrange, "Backups, recovery")
+    CLOUD_ACCOUNT("Cloud Account", androidx.compose.material.icons.Icons.Outlined.CloudUpload, PrimaryBlue, "Sync & Backups"),
+    BUSINESS_PROFILE("Business Profile", androidx.compose.material.icons.Icons.Outlined.Business, PrimaryBlue, "Name, phone, logo"),
+    PRIVACY_SECURITY("Privacy & Security", androidx.compose.material.icons.Icons.Outlined.Lock, ErrorRed, "App lock, biometrics"),
+    PREFERENCES("Preferences", androidx.compose.material.icons.Icons.Outlined.SettingsSuggest, iOSPurple, "Dark mode, dock"),
+    DATA_MANAGEMENT("Data Management", androidx.compose.material.icons.Icons.Outlined.History, iOSOrange, "Backups, recovery")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -223,11 +223,11 @@ fun SettingsScreen(
             // Sections
             if (currentCategory == null) {
                 val allModules = listOf(
-                    com.example.awancoalledger.NavTab("Contacts", "parties", androidx.compose.material.icons.Icons.Default.People),
-                    com.example.awancoalledger.NavTab("Expenses", "expenses", androidx.compose.material.icons.Icons.Default.Payments),
-                    com.example.awancoalledger.NavTab("Inventory", "inventory", androidx.compose.material.icons.Icons.Default.Layers),
-                    com.example.awancoalledger.NavTab("Notes", "notes", androidx.compose.material.icons.Icons.Default.Description),
-                    com.example.awancoalledger.NavTab("Vehicles", "vehicle_tracker", androidx.compose.material.icons.Icons.Default.DirectionsCar)
+                    com.example.awancoalledger.NavTab("Contacts", "parties", androidx.compose.material.icons.Icons.Outlined.People),
+                    com.example.awancoalledger.NavTab("Expenses", "expenses", androidx.compose.material.icons.Icons.Outlined.Payments),
+                    com.example.awancoalledger.NavTab("Inventory", "inventory", androidx.compose.material.icons.Icons.Outlined.Layers),
+                    com.example.awancoalledger.NavTab("Notes", "notes", androidx.compose.material.icons.Icons.Outlined.Description),
+                    com.example.awancoalledger.NavTab("Vehicles", "vehicle_tracker", androidx.compose.material.icons.Icons.Outlined.DirectionsCar)
                 )
                 val unusedModules = allModules.filter { it.route !in dockItems }
                 if (unusedModules.isNotEmpty()) {
@@ -256,7 +256,7 @@ fun SettingsScreen(
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)) {
                     Surface(onClick = { currentCategory = null }, shape = androidx.compose.foundation.shape.CircleShape, color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.size(40.dp)) {
                         Box(contentAlignment = Alignment.Center) {
-                            androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Default.ArrowBack, contentDescription = "Back")
+                            androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Outlined.ArrowBack, contentDescription = "Back")
                         }
                     }
                     Spacer(modifier = Modifier.width(16.dp))
@@ -269,7 +269,7 @@ fun SettingsScreen(
                     PremiumAccountCard(
                             title = "Guest Mode",
                             subtitle = "Back up your data to the cloud",
-                            icon = Icons.Default.CloudUpload,
+                            icon = Icons.Outlined.CloudUpload,
                             color = PrimaryBlue,
                             onClick = { showLoginDialog = true }
                     )
@@ -277,7 +277,7 @@ fun SettingsScreen(
                     PremiumAccountCard(
                             title = user?.displayName ?: user?.email ?: "Account Sync Active",
                             subtitle = user?.email ?: "Your data is secured in the cloud",
-                            icon = Icons.Default.CloudDone,
+                            icon = Icons.Outlined.CloudDone,
                             color = PrimaryBlue,
                             isLoggedIn = true,
                             onLogout = { showLogoutDialog = true }
@@ -311,28 +311,28 @@ fun SettingsScreen(
                     }
                     SettingsCategory.BUSINESS_PROFILE -> {
             SettingsSection(title = "BUSINESS PROFILE") {
-                SettingsRow(Icons.Default.Business, "Business Name", bizName, color = PrimaryBlue) {
+                SettingsRow(Icons.Outlined.Business, "Business Name", bizName, color = PrimaryBlue) {
                     editingField = "Business Name" to bizName
                 }
-                SettingsRow(Icons.Default.Person, "Owner Name", ownerName, color = iOSOrange) {
+                SettingsRow(Icons.Outlined.Person, "Owner Name", ownerName, color = iOSOrange) {
                     editingField = "Owner Name" to ownerName
                 }
                 SettingsRow(
-                        Icons.Default.Public,
+                        Icons.Outlined.Public,
                         "Country Code",
                         "${countryConfig.name} (${countryConfig.code})",
                         color = PrimaryBlue
                 ) {
                     showCountryDialog = true
                 }
-                SettingsRow(Icons.Default.Phone, "Phone", phone, color = SuccessGreen) {
+                SettingsRow(Icons.Outlined.Phone, "Phone", phone, color = SuccessGreen) {
                     editingField = "Phone" to phone
                 }
                 val isLogoUploading by viewModel.isLogoUploading.collectAsState()
                 val isSignatureUploading by viewModel.isSignatureUploading.collectAsState()
 
                 SettingsRow(
-                        Icons.Default.Image,
+                        Icons.Outlined.Image,
                         "Company Logo",
                         color = ErrorRed,
                         control = {
@@ -381,7 +381,7 @@ fun SettingsScreen(
                                     ) {
                                         Box(contentAlignment = Alignment.Center) {
                                             Icon(
-                                                    Icons.Default.Delete,
+                                                    Icons.Outlined.Delete,
                                                     contentDescription = "Delete",
                                                     tint = ErrorRed,
                                                     modifier = Modifier.size(20.dp)
@@ -407,7 +407,7 @@ fun SettingsScreen(
                             )
                 }
                 SettingsRow(
-                        Icons.Default.Edit,
+                        Icons.Outlined.Edit,
                         "Signature",
                         color = iOSPurple,
                         isLast = true,
@@ -457,7 +457,7 @@ fun SettingsScreen(
                                     ) {
                                         Box(contentAlignment = Alignment.Center) {
                                             Icon(
-                                                    Icons.Default.Delete,
+                                                    Icons.Outlined.Delete,
                                                     contentDescription = "Delete",
                                                     tint = ErrorRed,
                                                     modifier = Modifier.size(20.dp)
@@ -487,13 +487,13 @@ fun SettingsScreen(
                     }
                     SettingsCategory.PRIVACY_SECURITY -> {
             SettingsSection(title = "PRIVACY & SECURITY") {
-                SettingsToggleRow(Icons.Default.Lock, "App Lock", appLock, color = PrimaryBlue) {
+                SettingsToggleRow(Icons.Outlined.Lock, "App Lock", appLock, color = PrimaryBlue) {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     if (it) showPinKeypad = true else viewModel.toggleAppLock(false)
                 }
                 if (appLock) {
                     SettingsToggleRow(
-                            Icons.Default.Fingerprint,
+                            Icons.Outlined.Fingerprint,
                             "Touch ID / Face ID",
                             biometrics,
                             color = SuccessGreen
@@ -502,7 +502,7 @@ fun SettingsScreen(
                         viewModel.toggleBiometrics(it)
                     }
                     SettingsRow(
-                            Icons.Default.Security,
+                            Icons.Outlined.Security,
                             "Change PIN",
                             "****",
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -515,7 +515,7 @@ fun SettingsScreen(
                     SettingsCategory.PREFERENCES -> {
             SettingsSection(title = "PREFERENCES") {
                 SettingsRow(
-                        androidx.compose.material.icons.Icons.Default.ViewCarousel,
+                        androidx.compose.material.icons.Icons.Outlined.ViewCarousel,
                         "Customize Dock",
                         "Rearrange bottom tabs",
                         color = SuccessGreen
@@ -523,7 +523,7 @@ fun SettingsScreen(
                     showDockCustomizationModal = true
                 }
                 SettingsToggleRow(
-                        Icons.Default.DarkMode,
+                        Icons.Outlined.DarkMode,
                         "Dark Mode",
                         darkMode,
                         color = iOSPurple
@@ -532,7 +532,7 @@ fun SettingsScreen(
                     viewModel.toggleDarkMode(it)
                 }
                 SettingsToggleRow(
-                        androidx.compose.material.icons.Icons.Default.BlurOn,
+                        androidx.compose.material.icons.Icons.Outlined.BlurOn,
                         "Frosted Glass (iOS Blur)",
                         frostedGlass,
                         color = PrimaryBlue
@@ -541,7 +541,7 @@ fun SettingsScreen(
                     viewModel.toggleFrostedGlass(it)
                 }
                 SettingsRow(
-                        Icons.Default.SettingsSuggest,
+                        Icons.Outlined.SettingsSuggest,
                         "Oil Change Interval",
                         "${oilInterval} km",
                         color = iOSOrange,
@@ -553,18 +553,18 @@ fun SettingsScreen(
                     SettingsCategory.DATA_MANAGEMENT -> {
             SettingsSection(title = "DATA MANAGEMENT") {
                 SettingsRow(
-                        Icons.Default.History,
+                        Icons.Outlined.History,
                         "Auto-Backups",
                         "View Snapshots",
                         color = iOSOrange
                 ) { showBackupsModal = true }
-                SettingsRow(Icons.Default.CloudDownload, "Manual Export", color = PrimaryBlue) {
+                SettingsRow(Icons.Outlined.CloudDownload, "Manual Export", color = PrimaryBlue) {
                     viewModel.shareBackup(context) { error ->
                         Toast.makeText(context, "Export Failed: $error", Toast.LENGTH_LONG).show()
                     }
                 }
                 SettingsRow(
-                        Icons.Default.Upload,
+                        Icons.Outlined.Upload,
                         "Restore Data",
                         color = ErrorRed,
                         textColor = ErrorRed,
@@ -809,7 +809,7 @@ fun SettingsRow(
                 Icon(
                         icon,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface,
+                        tint = Color.White,
                         modifier = Modifier.size(18.dp)
                 )
             }
@@ -828,7 +828,7 @@ fun SettingsRow(
                     )
                 }
                 Icon(
-                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        Icons.AutoMirrored.Outlined.KeyboardArrowRight,
                         contentDescription = null,
                         tint = Color.LightGray,
                         modifier = Modifier.size(20.dp)
@@ -961,7 +961,7 @@ fun PinKeypadModal(onDismiss: () -> Unit, onComplete: (String) -> Unit) {
                                         Box(contentAlignment = Alignment.Center) {
                                             if (key == "DEL") {
                                                 Icon(
-                                                        Icons.Default.Backspace,
+                                                        Icons.Outlined.Backspace,
                                                         contentDescription = null,
                                                         modifier = Modifier.size(24.dp)
                                                 )
@@ -1033,7 +1033,7 @@ fun AutoBackupsModal(viewModel: LedgerViewModel, onDismiss: () -> Unit) {
                             )
                     else
                             Icon(
-                                    Icons.Default.AddAPhoto,
+                                    Icons.Outlined.AddAPhoto,
                                     contentDescription = "Manual Snapshot",
                                     tint = PrimaryBlue
                             )
@@ -1084,8 +1084,8 @@ fun AutoBackupsModal(viewModel: LedgerViewModel, onDismiss: () -> Unit) {
                                         contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
-                                            if (isManual) Icons.Default.Person
-                                            else Icons.Default.AutoMode,
+                                            if (isManual) Icons.Outlined.Person
+                                            else Icons.Outlined.AutoMode,
                                             null,
                                             tint = if (isManual) iOSOrange else PrimaryBlue,
                                             modifier = Modifier.size(20.dp)
@@ -1101,7 +1101,7 @@ fun AutoBackupsModal(viewModel: LedgerViewModel, onDismiss: () -> Unit) {
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
-                                Icon(Icons.Default.Restore, null, tint = SuccessGreen)
+                                Icon(Icons.Outlined.Restore, null, tint = SuccessGreen)
                             }
                         }
                     }
@@ -1269,7 +1269,7 @@ fun PremiumAccountCard(
                         border = BorderStroke(1.dp, Color.White.copy(alpha = 0.3f))
                 ) {
                     Icon(
-                            Icons.Default.Logout,
+                            Icons.Outlined.Logout,
                             contentDescription = null,
                             modifier = Modifier.size(18.dp)
                     )
@@ -1296,7 +1296,7 @@ fun PremiumAccountCard(
                                 )
                 ) {
                     Icon(
-                            Icons.AutoMirrored.Filled.Login,
+                            Icons.AutoMirrored.Outlined.Login,
                             contentDescription = null,
                             modifier = Modifier.size(20.dp)
                     )
@@ -1381,11 +1381,11 @@ fun DockCustomizationDialog(
 ) {
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
     val allTabs = listOf(
-        com.example.awancoalledger.NavTab("Contacts", "parties", androidx.compose.material.icons.Icons.Default.People),
-        com.example.awancoalledger.NavTab("Expenses", "expenses", androidx.compose.material.icons.Icons.Default.Payments),
-        com.example.awancoalledger.NavTab("Inventory", "inventory", androidx.compose.material.icons.Icons.Default.Layers),
-        com.example.awancoalledger.NavTab("Notes", "notes", androidx.compose.material.icons.Icons.Default.Description),
-        com.example.awancoalledger.NavTab("Vehicles", "vehicle_tracker", androidx.compose.material.icons.Icons.Default.DirectionsCar)
+        com.example.awancoalledger.NavTab("Contacts", "parties", androidx.compose.material.icons.Icons.Outlined.People),
+        com.example.awancoalledger.NavTab("Expenses", "expenses", androidx.compose.material.icons.Icons.Outlined.Payments),
+        com.example.awancoalledger.NavTab("Inventory", "inventory", androidx.compose.material.icons.Icons.Outlined.Layers),
+        com.example.awancoalledger.NavTab("Notes", "notes", androidx.compose.material.icons.Icons.Outlined.Description),
+        com.example.awancoalledger.NavTab("Vehicles", "vehicle_tracker", androidx.compose.material.icons.Icons.Outlined.DirectionsCar)
     )
     
     var selectedItems by remember { mutableStateOf(currentItems) }
@@ -1434,7 +1434,7 @@ fun DockCustomizationDialog(
                                 modifier = Modifier.size(24.dp)
                             ) {
                                 androidx.compose.material3.Icon(
-                                    androidx.compose.material.icons.Icons.Default.RemoveCircle,
+                                    androidx.compose.material.icons.Icons.Outlined.RemoveCircle,
                                     contentDescription = "Remove",
                                     tint = com.example.awancoalledger.ui.theme.ErrorRed
                                 )
@@ -1471,7 +1471,7 @@ fun DockCustomizationDialog(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     androidx.compose.material3.Icon(
-                                        androidx.compose.material.icons.Icons.Default.KeyboardArrowUp,
+                                        androidx.compose.material.icons.Icons.Outlined.KeyboardArrowUp,
                                         contentDescription = "Move Up",
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -1495,7 +1495,7 @@ fun DockCustomizationDialog(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     androidx.compose.material3.Icon(
-                                        androidx.compose.material.icons.Icons.Default.KeyboardArrowDown,
+                                        androidx.compose.material.icons.Icons.Outlined.KeyboardArrowDown,
                                         contentDescription = "Move Down",
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -1556,7 +1556,7 @@ fun DockCustomizationDialog(
                                     enabled = selectedItems.size < 3
                                 ) {
                                     androidx.compose.material3.Icon(
-                                        androidx.compose.material.icons.Icons.Default.AddCircle,
+                                        androidx.compose.material.icons.Icons.Outlined.AddCircle,
                                         contentDescription = "Add",
                                         tint = if (selectedItems.size < 3) com.example.awancoalledger.ui.theme.SuccessGreen else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha=0.3f)
                                     )

@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
@@ -46,6 +46,7 @@ fun ExpensesScreen(viewModel: LedgerViewModel) {
 
     // UI States
     var selectedCategory by remember { mutableStateOf<ExpenseCategory?>(null) }
+    var searchQuery by remember { mutableStateOf("") }
 
     var showAddDialog by remember { mutableStateOf(false) }
     var showExportSheet by remember { mutableStateOf(false) }
@@ -53,10 +54,14 @@ fun ExpensesScreen(viewModel: LedgerViewModel) {
     var editingExpense by remember { mutableStateOf<Expense?>(null) }
     var expenseToDelete by remember { mutableStateOf<Expense?>(null) }
 
-    // Apply Category Filter
-    val displayExpenses =
-            if (selectedCategory == null) allExpenses
-            else allExpenses.filter { it.category == selectedCategory }
+    // Apply Category & Search Filters
+    val displayExpenses = allExpenses.filter { expense ->
+        val matchesCategory = selectedCategory == null || expense.category == selectedCategory
+        val matchesSearch = searchQuery.isBlank() || 
+            expense.note.orEmpty().contains(searchQuery, ignoreCase = true) ||
+            expense.amount.toString().contains(searchQuery)
+        matchesCategory && matchesSearch
+    }
     val displayTotal = displayExpenses.sumOf { it.amount }
 
     Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -77,9 +82,9 @@ fun ExpensesScreen(viewModel: LedgerViewModel) {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             showExportSheet = true
                         },
-                        modifier = Modifier.background(PrimaryBlue.copy(alpha = 0.1f), CircleShape)
+                        modifier = Modifier.background(PrimaryBlue, RoundedCornerShape(8.dp))
                     ) {
-                        Icon(Icons.Default.IosShare, contentDescription = "Export", tint = PrimaryBlue)
+                        Icon(Icons.Outlined.IosShare, contentDescription = "Export", tint = Color.White)
                     }
                 }
             )
@@ -87,6 +92,34 @@ fun ExpensesScreen(viewModel: LedgerViewModel) {
             Spacer(modifier = Modifier.height(16.dp))
             
             TotalExpensesHeroCard(displayTotal)
+
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            // Search Bar
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                modifier = Modifier.fillMaxWidth().height(56.dp).shadow(2.dp, RoundedCornerShape(16.dp)),
+                placeholder = { Text("Search expenses...", color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)) },
+                leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = "Search", tint = MaterialTheme.colorScheme.primary) },
+                trailingIcon = {
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { searchQuery = "" }) {
+                            Icon(Icons.Outlined.Clear, contentDescription = "Clear search", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                },
+                shape = RoundedCornerShape(16.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    disabledContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent
+                ),
+                singleLine = true
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -134,7 +167,7 @@ fun ExpensesScreen(viewModel: LedgerViewModel) {
                             )
             ) {
                 Icon(
-                        Icons.Default.Add,
+                        Icons.Outlined.Add,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.background
                 )
@@ -176,7 +209,7 @@ fun ExpensesScreen(viewModel: LedgerViewModel) {
             ) {
                 if (displayExpenses.isEmpty()) {
                     com.example.awancoalledger.ui.components.EmptyStateCard(
-                        icon = Icons.Default.Payments,
+                        icon = Icons.Outlined.Payments,
                         title = "No Expenses Found",
                         description = "There are no recorded expenses in this period.",
                         actionText = "Add Expense",
@@ -325,7 +358,7 @@ fun ExpensesScreen(viewModel: LedgerViewModel) {
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = PrimaryBlue),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                 ) {
-                    Icon(Icons.Default.DateRange, contentDescription = null)
+                    Icon(Icons.Outlined.DateRange, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Export Current View", fontWeight = FontWeight.Bold)
                 }
@@ -474,20 +507,20 @@ fun ExpenseRow(expense: Expense, onClick: () -> Unit) {
     ) {
         val (icon, tintColor) =
                 when (expense.category) {
-                    ExpenseCategory.FOOD -> Icons.Default.Fastfood to iOSOrange
-                    ExpenseCategory.TRANSPORT -> Icons.Default.DirectionsCar to PrimaryBlue
-                    ExpenseCategory.BUSINESS -> Icons.Default.WorkOutline to iOSPurple
-                    ExpenseCategory.UTILITIES -> Icons.Default.FlashOn to SuccessGreen
-                    else -> Icons.Default.ReceiptLong to Color.Gray
+                    ExpenseCategory.FOOD -> Icons.Outlined.Fastfood to iOSOrange
+                    ExpenseCategory.TRANSPORT -> Icons.Outlined.DirectionsCar to PrimaryBlue
+                    ExpenseCategory.BUSINESS -> Icons.Outlined.WorkOutline to iOSPurple
+                    ExpenseCategory.UTILITIES -> Icons.Outlined.FlashOn to SuccessGreen
+                    else -> Icons.Outlined.ReceiptLong to Color.Gray
                 }
         Box(
                 modifier =
                         Modifier.size(44.dp)
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(tintColor.copy(alpha = 0.15f)),
+                                .background(tintColor),
                 contentAlignment = Alignment.Center
         ) {
-            Icon(icon, contentDescription = null, tint = tintColor, modifier = Modifier.size(24.dp))
+            Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(24.dp))
         }
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
@@ -573,7 +606,7 @@ fun AddExpenseDialog(
                                         .size(32.dp)
                 ) {
                     Icon(
-                            Icons.Default.Close,
+                            Icons.Outlined.Close,
                             contentDescription = null,
                             modifier = Modifier.size(16.dp)
                     )
@@ -607,7 +640,7 @@ fun AddExpenseDialog(
                                 modifier = Modifier.weight(1f)
                         )
                         Icon(
-                                Icons.Default.CalendarToday,
+                                Icons.Outlined.CalendarToday,
                                 contentDescription = null,
                                 tint = PrimaryBlue,
                                 modifier = Modifier.size(20.dp)
@@ -728,7 +761,7 @@ fun ExpensePreviewSheet(expense: Expense, onDismiss: () -> Unit, onEdit: () -> U
                                         .background(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     Icon(
-                            Icons.Default.Close,
+                            Icons.Outlined.Close,
                             contentDescription = "Close",
                             tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(18.dp)
@@ -798,7 +831,7 @@ fun TotalExpensesHeroCard(total: Double) {
         Box(modifier = Modifier.fillMaxWidth()) {
             // Subtle decorative background
             Icon(
-                imageVector = Icons.Default.TrendingDown,
+                imageVector = Icons.Outlined.TrendingDown,
                 contentDescription = null,
                 modifier = Modifier
                     .size(150.dp)
@@ -812,14 +845,14 @@ fun TotalExpensesHeroCard(total: Double) {
                     Box(
                         modifier = Modifier
                             .size(40.dp)
-                            .background(ErrorRed.copy(alpha = 0.1f), CircleShape),
+                            .background(ErrorRed, RoundedCornerShape(10.dp)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Payments,
+                            imageVector = Icons.Outlined.Payments,
                             contentDescription = null,
                             modifier = Modifier.size(20.dp),
-                            tint = ErrorRed
+                            tint = Color.White
                         )
                     }
                     Spacer(Modifier.width(12.dp))

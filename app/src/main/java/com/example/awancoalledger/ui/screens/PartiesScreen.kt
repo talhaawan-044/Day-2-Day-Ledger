@@ -11,9 +11,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
-import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.outlined.ArrowForwardIos
+import androidx.compose.material.icons.automirrored.outlined.Sort
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -82,7 +82,7 @@ fun PartiesScreen(viewModel: LedgerViewModel, onNavigateToLedger: (Int) -> Unit)
                     onValueChange = { searchQuery = it },
                     leadingIcon = {
                         Icon(
-                                Icons.Default.Search,
+                                Icons.Outlined.Search,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -109,7 +109,7 @@ fun PartiesScreen(viewModel: LedgerViewModel, onNavigateToLedger: (Int) -> Unit)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                            Icons.Default.PersonAdd,
+                            Icons.Outlined.PersonAdd,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.background,
                             modifier = Modifier.size(20.dp)
@@ -158,7 +158,7 @@ fun PartiesScreen(viewModel: LedgerViewModel, onNavigateToLedger: (Int) -> Unit)
                             }
                     ) {
                         Icon(
-                                Icons.AutoMirrored.Filled.Sort,
+                                Icons.AutoMirrored.Outlined.Sort,
                                 contentDescription = "Sort",
                                 tint =
                                         if (sortOrder != PartySortOrder.NAME) PrimaryBlue
@@ -168,8 +168,8 @@ fun PartiesScreen(viewModel: LedgerViewModel, onNavigateToLedger: (Int) -> Unit)
                     IconButton(onClick = { viewModel.toggleGridView(!isGridView) }) {
                         Icon(
                                 imageVector =
-                                        if (isGridView) Icons.Default.List
-                                        else Icons.Default.GridView,
+                                        if (isGridView) Icons.Outlined.List
+                                        else Icons.Outlined.GridView,
                                 contentDescription = "Toggle View",
                                 tint =
                                         if (isGridView) PrimaryBlue
@@ -221,7 +221,7 @@ fun PartiesScreen(viewModel: LedgerViewModel, onNavigateToLedger: (Int) -> Unit)
 
             if (filteredAndSortedParties.isEmpty()) {
                 com.example.awancoalledger.ui.components.EmptyStateCard(
-                    icon = Icons.Default.Contacts,
+                    icon = Icons.Outlined.Contacts,
                     title = if (searchQuery.isNotEmpty()) "No Results" else "No Contacts Yet",
                     description = if (searchQuery.isNotEmpty()) "No contacts match \"$searchQuery\"." else "Add your first contact to start tracking.",
                     actionText = if (searchQuery.isEmpty()) "Add Contact" else null,
@@ -379,20 +379,21 @@ fun PartyGridItem(party: Party, balance: Double, onClick: () -> Unit) {
         ) {
             Box(
                     modifier =
-                            Modifier.size(44.dp)
-                                    .clip(CircleShape)
+                            Modifier.size(48.dp)
+                                    .clip(RoundedCornerShape(12.dp))
                                     .background(
                                             if (party.type == PartyType.BUYER)
-                                                    PrimaryBlue.copy(alpha = 0.15f)
-                                            else iOSOrange.copy(alpha = 0.15f)
+                                                    PrimaryBlue
+                                            else iOSOrange
                                     ),
                     contentAlignment = Alignment.Center
             ) {
-                Text(
-                        party.name.take(1).uppercase(),
-                        color = if (party.type == PartyType.BUYER) PrimaryBlue else iOSOrange,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
+                Icon(
+                        if (party.type == PartyType.BUYER) Icons.Outlined.Person
+                        else Icons.Outlined.Storefront,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
                 )
             }
             Spacer(modifier = Modifier.height(12.dp))
@@ -441,17 +442,17 @@ fun PartyCardItem(party: Party, balance: Double, onClick: () -> Unit) {
         Box(
                 modifier =
                         Modifier.size(48.dp)
-                                .clip(CircleShape)
+                                .clip(RoundedCornerShape(12.dp))
                                 .background(
                                         if (party.type == PartyType.BUYER)
-                                                PrimaryBlue.copy(alpha = 0.2f)
-                                        else iOSOrange.copy(alpha = 0.2f)
+                                                PrimaryBlue
+                                        else iOSOrange
                                 ),
                 contentAlignment = Alignment.Center
         ) {
             Text(
                     party.name.take(1).uppercase(),
-                    color = if (party.type == PartyType.BUYER) PrimaryBlue else iOSOrange,
+                    color = Color.White,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
             )
@@ -510,7 +511,7 @@ fun PartyCardItem(party: Party, balance: Double, onClick: () -> Unit) {
 
         Spacer(modifier = Modifier.width(8.dp))
         Icon(
-                Icons.AutoMirrored.Filled.ArrowForwardIos,
+                Icons.AutoMirrored.Outlined.ArrowForwardIos,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
                 modifier = Modifier.size(12.dp)

@@ -12,8 +12,8 @@ import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -85,7 +85,7 @@ fun SwipeableItem(
             val isDeleteVisible = try { state.offset > 0 } catch(e: Exception) { false }
             SwipeAction(
                 label = "Delete",
-                icon = Icons.Default.Delete,
+                icon = Icons.Outlined.Delete,
                 backgroundColor = ErrorRed,
                 modifier = Modifier
                     .width(actionWidth)
@@ -102,7 +102,7 @@ fun SwipeableItem(
             val isEditVisible = try { state.offset < 0 } catch(e: Exception) { false }
             SwipeAction(
                 label = "Edit",
-                icon = Icons.Default.Edit,
+                icon = Icons.Outlined.Edit,
                 backgroundColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 modifier = Modifier
                     .width(actionWidth)

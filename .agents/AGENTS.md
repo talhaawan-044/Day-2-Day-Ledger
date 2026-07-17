@@ -20,7 +20,7 @@
    - It will install alongside the live app and generate a fresh, empty Room database. Do not attempt to migrate live data into it.
 
 4. **UI Updates & Screenshots Workflow:**
-   - The user will drop UI screenshots via KDE connect into `/mnt/DEVELOPMENT/Day-2-Day-Kotlin-Final/App-screenshots-for-ai/` for AI agents to review.
+   - The user will drop UI screenshots via KDE connect into `/mnt/DEVELOPMENT/Day-2-Day-Kotlin-Final/App-screenshots-for-ai/` for AI agents to review. Whenever User mentions screenshots, check this folder.
    - **CRITICAL:** Always check this directory when the user mentions screenshots. Once the screenshot has been analyzed and the corresponding task is complete, the AI **MUST** delete the screenshot to keep the directory clean.
 
 5. **Some UI Instructions:**
@@ -28,3 +28,5 @@
    - Use Curvy style for buttons and other UI elements.
    - Don't use glowy, gradient buttons with shadows.
    - No where in the ui, use glow unless it's the ui element which is under the frosted glass.
+   - This app is ios inspired so we are not gonna use any emojis or generic ai generate icons
+     but ios style vector icons.

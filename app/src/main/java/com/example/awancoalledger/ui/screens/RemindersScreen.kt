@@ -15,8 +15,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.*
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.outlined.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -76,12 +76,12 @@ fun RemindersScreen(
                 title = { Text("Reminders", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
                     IconButton(onClick = { /* More options */ }) {
-                        Icon(Icons.Default.MoreHoriz, contentDescription = "Options")
+                        Icon(Icons.Outlined.MoreHoriz, contentDescription = "Options")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
@@ -91,7 +91,7 @@ fun RemindersScreen(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { showEditor = true },
-                icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                icon = { Icon(Icons.Outlined.Add, contentDescription = null) },
                 text = { Text("New Reminder") },
                 containerColor = PrimaryBlue,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -117,7 +117,7 @@ fun RemindersScreen(
                 ReminderSmartCard(
                     title = "Today",
                     count = todayCount,
-                    icon = Icons.Default.Today,
+                    icon = Icons.Outlined.Today,
                     iconColor = PrimaryBlue,
                     modifier = Modifier.weight(1f),
                     onClick = { 
@@ -128,7 +128,7 @@ fun RemindersScreen(
                 ReminderSmartCard(
                     title = "Scheduled",
                     count = scheduledCount,
-                    icon = Icons.Default.CalendarMonth,
+                    icon = Icons.Outlined.CalendarMonth,
                     iconColor = ErrorRed,
                     modifier = Modifier.weight(1f),
                     onClick = { 
@@ -142,7 +142,7 @@ fun RemindersScreen(
                 ReminderSmartCard(
                     title = "All",
                     count = allCount,
-                    icon = Icons.Default.Inbox,
+                    icon = Icons.Outlined.Inbox,
                     iconColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                     modifier = Modifier.weight(1f),
                     onClick = { 
@@ -153,7 +153,7 @@ fun RemindersScreen(
                 ReminderSmartCard(
                     title = "Flagged",
                     count = flaggedCount,
-                    icon = Icons.Default.Flag,
+                    icon = Icons.Outlined.Flag,
                     iconColor = iOSOrange,
                     modifier = Modifier.weight(1f),
                     onClick = { 
@@ -314,7 +314,7 @@ fun ReminderListItem(
             contentAlignment = Alignment.Center
         ) {
             if (reminder.isCompleted) {
-                Icon(Icons.Default.Check, null, tint = Color.White, modifier = Modifier.size(16.dp))
+                Icon(Icons.Outlined.Check, null, tint = Color.White, modifier = Modifier.size(16.dp))
             }
         }
         
@@ -460,7 +460,7 @@ fun ReminderEditorSheet(
                             modifier = Modifier.padding(vertical = 14.dp, horizontal = 4.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(Icons.Default.Flag, null, tint = when(p) {
+                            Icon(Icons.Outlined.Flag, null, tint = when(p) {
                                 ReminderPriority.HIGH -> ErrorRed
                                 ReminderPriority.MEDIUM -> iOSOrange
                                 ReminderPriority.LOW -> SuccessGreen
@@ -482,7 +482,7 @@ fun ReminderEditorSheet(
                                     modifier = Modifier.padding(top = 2.dp)
                                 )
                             }
-                            if (priority == p) Icon(Icons.Default.Check, null, tint = PrimaryBlue, modifier = Modifier.size(20.dp))
+                            if (priority == p) Icon(Icons.Outlined.Check, null, tint = PrimaryBlue, modifier = Modifier.size(20.dp))
                         }
                     }
                     if (p != ReminderPriority.entries.last()) HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
@@ -501,7 +501,7 @@ fun ReminderEditorSheet(
                     Surface(onClick = { category = c; showCategorySheet = false }, modifier = Modifier.fillMaxWidth(), color = Color.Transparent) {
                         Row(modifier = Modifier.padding(vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
                             Text(c.name, fontSize = 16.sp, modifier = Modifier.weight(1f))
-                            if (category == c) Icon(Icons.Default.Check, null, tint = PrimaryBlue, modifier = Modifier.size(20.dp))
+                            if (category == c) Icon(Icons.Outlined.Check, null, tint = PrimaryBlue, modifier = Modifier.size(20.dp))
                         }
                     }
                     if (c != ReminderCategory.entries.last()) HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
@@ -517,10 +517,10 @@ fun ReminderEditorSheet(
                 ReminderRecurrence.entries.forEach { r ->
                     Surface(onClick = { recurrence = r; showRecurrenceSheet = false }, modifier = Modifier.fillMaxWidth(), color = Color.Transparent) {
                         Row(modifier = Modifier.padding(vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Repeat, null, tint = if (recurrence == r) PrimaryBlue else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), modifier = Modifier.size(20.dp))
+                            Icon(Icons.Outlined.Repeat, null, tint = if (recurrence == r) PrimaryBlue else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), modifier = Modifier.size(20.dp))
                             Spacer(Modifier.width(16.dp))
                             Text(r.name, fontSize = 16.sp, modifier = Modifier.weight(1f))
-                            if (recurrence == r) Icon(Icons.Default.Check, null, tint = PrimaryBlue, modifier = Modifier.size(20.dp))
+                            if (recurrence == r) Icon(Icons.Outlined.Check, null, tint = PrimaryBlue, modifier = Modifier.size(20.dp))
                         }
                     }
                     if (r != ReminderRecurrence.entries.last()) HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
@@ -604,9 +604,9 @@ fun ReminderEditorSheet(
                     color = MaterialTheme.colorScheme.background.copy(alpha = 0.5f)
                 ) {
                     Column {
-                        DetailRow("Date", dueDate?.let { SimpleDateFormat("EEE, MMM dd, yyyy", Locale.getDefault()).format(Date(it)) } ?: "Not Set", Icons.Default.CalendarToday, PrimaryBlue) { showDatePicker = true }
+                        DetailRow("Date", dueDate?.let { SimpleDateFormat("EEE, MMM dd, yyyy", Locale.getDefault()).format(Date(it)) } ?: "Not Set", Icons.Outlined.CalendarToday, PrimaryBlue) { showDatePicker = true }
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
-                        DetailRow("Time", dueDate?.let { SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(it)) } ?: "Not Set", Icons.Default.AccessTime, PrimaryBlue) { showTimePicker = true }
+                        DetailRow("Time", dueDate?.let { SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(it)) } ?: "Not Set", Icons.Outlined.AccessTime, PrimaryBlue) { showTimePicker = true }
                     }
                 }
 
@@ -624,16 +624,16 @@ fun ReminderEditorSheet(
                             ReminderPriority.MEDIUM -> "🟠 Medium"
                             ReminderPriority.LOW -> "🟢 Low"
                             ReminderPriority.NONE -> "None"
-                        }, Icons.Default.Flag, when(priority) {
+                        }, Icons.Outlined.Flag, when(priority) {
                             ReminderPriority.HIGH -> ErrorRed
                             ReminderPriority.MEDIUM -> iOSOrange
                             ReminderPriority.LOW -> SuccessGreen
                             else -> MaterialTheme.colorScheme.onSurfaceVariant
                         }) { showPrioritySheet = true }
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
-                        DetailRow("Category", category.name, Icons.Default.Category, PrimaryBlue) { showCategorySheet = true }
+                        DetailRow("Category", category.name, Icons.Outlined.Category, PrimaryBlue) { showCategorySheet = true }
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
-                        DetailRow("Repeat", recurrence.name, Icons.Default.Repeat, PrimaryBlue) { showRecurrenceSheet = true }
+                        DetailRow("Repeat", recurrence.name, Icons.Outlined.Repeat, PrimaryBlue) { showRecurrenceSheet = true }
                     }
                 }
                 
@@ -668,7 +668,7 @@ fun DetailRow(label: String, value: String, icon: ImageVector, iconColor: Color,
         Text(value, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 16.sp)
         Spacer(modifier = Modifier.width(4.dp))
         Icon(
-            Icons.Default.KeyboardArrowRight, 
+            Icons.Outlined.KeyboardArrowRight, 
             contentDescription = null, 
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f), 
             modifier = Modifier.size(20.dp)

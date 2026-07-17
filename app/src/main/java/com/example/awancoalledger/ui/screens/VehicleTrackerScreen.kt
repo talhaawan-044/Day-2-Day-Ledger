@@ -12,8 +12,8 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.outlined.ArrowBackIos
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -85,7 +85,7 @@ fun VehicleTrackerScreen(viewModel: LedgerViewModel, onNavigateBack: () -> Unit)
                     actions = {
                         IconButton(onClick = { showAddVehicle = true }) {
                             Icon(
-                                imageVector = Icons.Default.AddCircle,
+                                imageVector = Icons.Outlined.AddCircle,
                                 contentDescription = null,
                                 modifier = Modifier.size(28.dp),
                                 tint = PrimaryBlue
@@ -148,7 +148,7 @@ fun VehicleTrackerScreen(viewModel: LedgerViewModel, onNavigateBack: () -> Unit)
                 if (vehicles.isEmpty() || pagerState.currentPage >= vehicles.size) {
                     item {
                         com.example.awancoalledger.ui.components.EmptyStateCard(
-                            icon = Icons.Default.DirectionsCar,
+                            icon = Icons.Outlined.DirectionsCar,
                             title = "No Vehicle Selected",
                             description = "Add a vehicle to start tracking logs"
                         )
@@ -165,7 +165,7 @@ fun VehicleTrackerScreen(viewModel: LedgerViewModel, onNavigateBack: () -> Unit)
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                 ActionButton(
                                     label = "Add Entry",
-                                    icon = Icons.Default.AddCircle,
+                                    icon = Icons.Outlined.AddCircle,
                                     color = PrimaryBlue,
                                     onClick = { 
                                         logToEdit = null
@@ -186,14 +186,14 @@ fun VehicleTrackerScreen(viewModel: LedgerViewModel, onNavigateBack: () -> Unit)
                                     modifier = Modifier.weight(1f),
                                     label = "Monthly Fuel",
                                     value = String.format("Rs. %,.0f", monthlyFuelCost),
-                                    icon = Icons.Default.CurrencyExchange,
+                                    icon = Icons.Outlined.CurrencyExchange,
                                     color = SuccessGreen
                                 )
                                 TrackerStatItem(
                                     modifier = Modifier.weight(1f),
                                     label = "Service Cost",
                                     value = String.format("Rs. %,.0f", monthlyMaintenanceCost),
-                                    icon = Icons.Default.Handyman,
+                                    icon = Icons.Outlined.Handyman,
                                     color = iOSOrange
                                 )
                             }
@@ -205,14 +205,14 @@ fun VehicleTrackerScreen(viewModel: LedgerViewModel, onNavigateBack: () -> Unit)
                                     modifier = Modifier.weight(1f),
                                     label = "Fuel Economy",
                                     value = String.format("%.1f km/L", avgKmPerLiter),
-                                    icon = Icons.Default.AutoGraph,
+                                    icon = Icons.Outlined.AutoGraph,
                                     color = PrimaryBlue
                                 )
                                 TrackerStatItem(
                                     modifier = Modifier.weight(1f),
                                     label = "Total Run",
                                     value = String.format("%,.0f km", currentMileage),
-                                    icon = Icons.Default.Timeline,
+                                    icon = Icons.Outlined.Timeline,
                                     color = iOSPurple
                                 )
                             }
@@ -260,7 +260,7 @@ fun VehicleTrackerScreen(viewModel: LedgerViewModel, onNavigateBack: () -> Unit)
                     if (filteredEntries.isEmpty()) {
                         item {
                             com.example.awancoalledger.ui.components.EmptyStateCard(
-                                icon = Icons.Default.History,
+                                icon = Icons.Outlined.History,
                                 title = "No Logs Found",
                                 description = "No fuel or maintenance logs found for this vehicle."
                             )
@@ -364,7 +364,7 @@ fun VehicleCard(vehicle: Vehicle, isSelected: Boolean, onEdit: () -> Unit, modif
         Box(modifier = Modifier.fillMaxSize()) {
             // Decorative background pattern
             Icon(
-                imageVector = if (vehicle.type == "TRUCK") Icons.Default.LocalShipping else Icons.Default.DirectionsCar,
+                imageVector = if (vehicle.type == "TRUCK") Icons.Outlined.LocalShipping else Icons.Outlined.DirectionsCar,
                 contentDescription = null,
                 modifier = Modifier.size(200.dp).align(Alignment.BottomEnd).offset(x = 40.dp, y = 40.dp),
                 tint = (if (isSelected) Color.White else PrimaryBlue).copy(alpha = 0.05f)
@@ -381,7 +381,7 @@ fun VehicleCard(vehicle: Vehicle, isSelected: Boolean, onEdit: () -> Unit, modif
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = if (vehicle.type == "TRUCK") Icons.Default.LocalShipping else Icons.Default.DirectionsCar,
+                                imageVector = if (vehicle.type == "TRUCK") Icons.Outlined.LocalShipping else Icons.Outlined.DirectionsCar,
                                 contentDescription = null,
                                 tint = if (isSelected) PrimaryBlue else MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.size(24.dp)
@@ -421,7 +421,7 @@ fun VehicleCard(vehicle: Vehicle, isSelected: Boolean, onEdit: () -> Unit, modif
                         }
                         IconButton(onClick = onEdit) {
                             Icon(
-                                Icons.Default.Edit,
+                                Icons.Outlined.Edit,
                                 contentDescription = "Edit",
                                 tint = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(20.dp)
@@ -459,7 +459,7 @@ fun AddVehiclePlaceholder(onClick: () -> Unit, modifier: Modifier = Modifier) {
     ) {
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
             Icon(
-                imageVector = Icons.Default.Add,
+                imageVector = Icons.Outlined.Add,
                 contentDescription = null,
                 modifier = Modifier.size(40.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -515,12 +515,12 @@ fun PremiumMaintenanceCard(nextMileage: Double, kmsLeft: Double) {
 
             Column(modifier = Modifier.padding(24.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(modifier = Modifier.size(40.dp).background(intensityColor.copy(alpha = 0.1f), CircleShape), contentAlignment = Alignment.Center) {
+                    Box(modifier = Modifier.size(40.dp).background(intensityColor, RoundedCornerShape(10.dp)), contentAlignment = Alignment.Center) {
                         Icon(
-                            imageVector = Icons.Default.OilBarrel,
+                            imageVector = Icons.Outlined.OilBarrel,
                             contentDescription = null,
                             modifier = Modifier.size(20.dp),
-                            tint = intensityColor
+                            tint = Color.White
                         )
                     }
                     Spacer(Modifier.width(12.dp))
@@ -586,12 +586,12 @@ fun TrackerStatItem(modifier: Modifier, label: String, value: String, icon: Imag
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Box(modifier = Modifier.size(32.dp).background(color.copy(alpha = 0.1f), CircleShape), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.size(32.dp).background(color, RoundedCornerShape(8.dp)), contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
                     modifier = Modifier.size(16.dp),
-                    tint = color
+                    tint = Color.White
                 )
             }
             Spacer(modifier = Modifier.height(12.dp))
@@ -649,7 +649,7 @@ fun VehicleLogItem(entry: Any, type: String) {
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = if (type == "FUEL") Icons.Default.LocalGasStation else Icons.Default.Handyman,
+                imageVector = if (type == "FUEL") Icons.Outlined.LocalGasStation else Icons.Outlined.Handyman,
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
                 tint = if (type == "FUEL") SuccessGreen else iOSOrange
@@ -724,8 +724,8 @@ fun AddVehicleModal(onDismiss: () -> Unit, onAdd: (String, String, String, Doubl
             Text("VEHICLE TYPE", fontSize = 12.sp, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                TypeButton("TRUCK", Icons.Default.LocalShipping, type == "TRUCK", Modifier.weight(1f)) { type = "TRUCK" }
-                TypeButton("CAR", Icons.Default.DirectionsCar, type == "CAR", Modifier.weight(1f)) { type = "CAR" }
+                TypeButton("TRUCK", Icons.Outlined.LocalShipping, type == "TRUCK", Modifier.weight(1f)) { type = "TRUCK" }
+                TypeButton("CAR", Icons.Outlined.DirectionsCar, type == "CAR", Modifier.weight(1f)) { type = "CAR" }
             }
             
             Spacer(modifier = Modifier.height(32.dp))
@@ -765,7 +765,7 @@ fun EditVehicleModal(vehicle: Vehicle, onDismiss: () -> Unit, onUpdate: (Vehicle
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Text("Edit Vehicle", fontSize = 28.sp, fontWeight = FontWeight.Black)
                 IconButton(onClick = { showDeleteConfirm = true }) {
-                    Icon(Icons.Default.Delete, contentDescription = "Delete", tint = ErrorRed)
+                    Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = ErrorRed)
                 }
             }
             Spacer(modifier = Modifier.height(24.dp))
@@ -793,8 +793,8 @@ fun EditVehicleModal(vehicle: Vehicle, onDismiss: () -> Unit, onUpdate: (Vehicle
             Text("VEHICLE TYPE", fontSize = 12.sp, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                TypeButton("TRUCK", Icons.Default.LocalShipping, type == "TRUCK", Modifier.weight(1f)) { type = "TRUCK" }
-                TypeButton("CAR", Icons.Default.DirectionsCar, type == "CAR", Modifier.weight(1f)) { type = "CAR" }
+                TypeButton("TRUCK", Icons.Outlined.LocalShipping, type == "TRUCK", Modifier.weight(1f)) { type = "TRUCK" }
+                TypeButton("CAR", Icons.Outlined.DirectionsCar, type == "CAR", Modifier.weight(1f)) { type = "CAR" }
             }
             
             Spacer(modifier = Modifier.height(32.dp))
@@ -909,7 +909,7 @@ fun LogEntryModal(
             ) {
                 Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Icons.Default.CalendarToday,
+                        imageVector = Icons.Outlined.CalendarToday,
                         contentDescription = null,
                         modifier = Modifier.size(20.dp),
                         tint = PrimaryBlue

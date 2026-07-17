@@ -10,10 +10,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Redo
-import androidx.compose.material.icons.automirrored.filled.Undo
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.Redo
+import androidx.compose.material.icons.automirrored.outlined.Undo
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -447,7 +447,7 @@ fun NoteEditorScreen(
                             navigationIcon = {
                                 IconButton(onClick = { saveAndGoBack() }) {
                                     Icon(
-                                            Icons.AutoMirrored.Filled.ArrowBack,
+                                            Icons.AutoMirrored.Outlined.ArrowBack,
                                             null,
                                             tint = PrimaryBlue
                                     )
@@ -457,7 +457,7 @@ fun NoteEditorScreen(
                                 // Undo
                                 IconButton(onClick = { undo() }, enabled = canUndo) {
                                     Icon(
-                                            Icons.AutoMirrored.Filled.Undo,
+                                            Icons.AutoMirrored.Outlined.Undo,
                                             null,
                                             tint =
                                                     if (canUndo) PrimaryBlue
@@ -471,7 +471,7 @@ fun NoteEditorScreen(
                                 // Redo
                                 IconButton(onClick = { redo() }, enabled = canRedo) {
                                     Icon(
-                                            Icons.AutoMirrored.Filled.Redo,
+                                            Icons.AutoMirrored.Outlined.Redo,
                                             null,
                                             tint =
                                                     if (canRedo) PrimaryBlue
@@ -490,7 +490,7 @@ fun NoteEditorScreen(
                                         }
                                 ) {
                                     Icon(
-                                            Icons.Default.Search,
+                                            Icons.Outlined.Search,
                                             null,
                                             tint =
                                                     if (showFindBar) PrimaryBlue
@@ -500,7 +500,7 @@ fun NoteEditorScreen(
                                 // Pin
                                 IconButton(onClick = { isPinned = !isPinned }) {
                                     Icon(
-                                            if (isPinned) Icons.Filled.PushPin
+                                            if (isPinned) Icons.Outlined.PushPin
                                             else Icons.Outlined.PushPin,
                                             null,
                                             tint =
@@ -511,7 +511,7 @@ fun NoteEditorScreen(
                                 // More menu
                                 Box {
                                     IconButton(onClick = { showMoreMenu = true }) {
-                                        Icon(Icons.Default.MoreVert, null, tint = PrimaryBlue)
+                                        Icon(Icons.Outlined.MoreVert, null, tint = PrimaryBlue)
                                     }
                                     DropdownMenu(
                                             expanded = showMoreMenu,
@@ -524,7 +524,7 @@ fun NoteEditorScreen(
                                         DropdownMenuItem(
                                                 leadingIcon = {
                                                     Icon(
-                                                            Icons.Default.Share,
+                                                            Icons.Outlined.Share,
                                                             null,
                                                             tint =
                                                                     MaterialTheme.colorScheme
@@ -548,7 +548,7 @@ fun NoteEditorScreen(
                                         DropdownMenuItem(
                                                 leadingIcon = {
                                                     Icon(
-                                                            Icons.Default.ContentCopy,
+                                                            Icons.Outlined.ContentCopy,
                                                             null,
                                                             tint =
                                                                     MaterialTheme.colorScheme
@@ -572,7 +572,7 @@ fun NoteEditorScreen(
                                         DropdownMenuItem(
                                                 leadingIcon = {
                                                     Icon(
-                                                            Icons.Default.FolderOpen,
+                                                            Icons.Outlined.FolderOpen,
                                                             null,
                                                             tint =
                                                                     MaterialTheme.colorScheme
@@ -597,7 +597,7 @@ fun NoteEditorScreen(
                                         DropdownMenuItem(
                                                 leadingIcon = {
                                                     Icon(
-                                                            Icons.Default.Delete,
+                                                            Icons.Outlined.Delete,
                                                             null,
                                                             tint = MaterialTheme.colorScheme.error,
                                                             modifier = Modifier.size(18.dp)
@@ -708,40 +708,40 @@ fun NoteEditorScreen(
                     ) {
                         // Group 1 – Blocks
                         FormatButton(
-                                Icons.Default.Checklist,
+                                Icons.Outlined.Checklist,
                                 fontColor,
                                 isChecklistActive,
                                 "Checklist"
                         ) { toggleLinePrefix("[ ] ") }
                         FormatButton(
-                                Icons.Default.FormatListBulleted,
+                                Icons.Outlined.FormatListBulleted,
                                 fontColor,
                                 isBulletActive,
                                 "Bullet"
                         ) { toggleLinePrefix("• ") }
                         FormatButton(
-                                Icons.Default.FormatListNumbered,
+                                Icons.Outlined.FormatListNumbered,
                                 fontColor,
                                 isNumberedActive,
                                 "Numbered"
                         ) { toggleNumberedList() }
-                        FormatButton(Icons.Default.FormatQuote, fontColor, isQuoteActive, "Quote") {
+                        FormatButton(Icons.Outlined.FormatQuote, fontColor, isQuoteActive, "Quote") {
                             toggleLinePrefix("> ")
                         }
 
                         EditorToolbarDivider()
 
                         // Group 2 – Inline
-                        FormatButton(Icons.Default.FormatBold, fontColor, false, "Bold") {
+                        FormatButton(Icons.Outlined.FormatBold, fontColor, false, "Bold") {
                             wrapSelection("**")
                         }
-                        FormatButton(Icons.Default.FormatItalic, fontColor, false, "Italic") {
+                        FormatButton(Icons.Outlined.FormatItalic, fontColor, false, "Italic") {
                             wrapSelection("_")
                         }
-                        FormatButton(Icons.Default.StrikethroughS, fontColor, false, "Strike") {
+                        FormatButton(Icons.Outlined.StrikethroughS, fontColor, false, "Strike") {
                             wrapSelection("~~")
                         }
-                        FormatButton(Icons.Default.Code, fontColor, false, "Inline Code") {
+                        FormatButton(Icons.Outlined.Code, fontColor, false, "Inline Code") {
                             wrapSelection("`")
                         }
 
@@ -813,7 +813,7 @@ fun NoteEditorScreen(
                                 contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                    Icons.Default.FormatColorText,
+                                    Icons.Outlined.FormatColorText,
                                     null,
                                     tint = fontColor,
                                     modifier = Modifier.size(22.dp)
@@ -994,7 +994,7 @@ private fun FindBar(
                 verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                    Icons.Default.Search,
+                    Icons.Outlined.Search,
                     null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f),
                     modifier = Modifier.size(18.dp)
@@ -1038,7 +1038,7 @@ private fun FindBar(
                         modifier = Modifier.size(36.dp)
                 ) {
                     Icon(
-                            Icons.Default.KeyboardArrowUp,
+                            Icons.Outlined.KeyboardArrowUp,
                             null,
                             tint =
                                     if (matchCount > 0) PrimaryBlue
@@ -1055,7 +1055,7 @@ private fun FindBar(
                         modifier = Modifier.size(36.dp)
                 ) {
                     Icon(
-                            Icons.Default.KeyboardArrowDown,
+                            Icons.Outlined.KeyboardArrowDown,
                             null,
                             tint =
                                     if (matchCount > 0) PrimaryBlue
@@ -1069,7 +1069,7 @@ private fun FindBar(
             }
             IconButton(onClick = onClose, modifier = Modifier.size(36.dp)) {
                 Icon(
-                        Icons.Default.Close,
+                        Icons.Outlined.Close,
                         null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(18.dp)
@@ -1492,7 +1492,7 @@ fun EnhancedBackgroundSheet(
                             ) {
                                 if (isSelected) {
                                     Icon(
-                                        Icons.Default.Check,
+                                        Icons.Outlined.Check,
                                         null,
                                         tint = if (color.luminance() > 0.4f) Color.Black.copy(alpha = 0.75f) else Color.White,
                                         modifier = Modifier.size(20.dp)
@@ -1536,7 +1536,7 @@ fun EnhancedBackgroundSheet(
                                     }
                                     if (isSelected) {
                                         Box(modifier = Modifier.size(28.dp).clip(CircleShape).background(PrimaryBlue), contentAlignment = Alignment.Center) {
-                                            Icon(Icons.Default.Check, null, tint = Color.White, modifier = Modifier.size(18.dp))
+                                            Icon(Icons.Outlined.Check, null, tint = Color.White, modifier = Modifier.size(18.dp))
                                         }
                                     }
                                 }
@@ -1631,7 +1631,7 @@ fun EnhancedColorSheet(
                         ) {
                             if (isSelected) {
                                 Icon(
-                                        Icons.Default.Check,
+                                        Icons.Outlined.Check,
                                         null,
                                         tint =
                                                 if (color.luminance() > 0.4f)
@@ -1697,7 +1697,7 @@ fun FolderPickerSheet(
 
             FolderPickerRow(
                     name = "Uncategorized",
-                    icon = Icons.Default.FolderOff,
+                    icon = Icons.Outlined.FolderOff,
                     isSelected = selectedFolderId == null,
                     onClick = { onSelect(null) }
             )
@@ -1710,7 +1710,7 @@ fun FolderPickerSheet(
             folders.forEach { folder ->
                 FolderPickerRow(
                         name = folder.name,
-                        icon = Icons.Default.Folder,
+                        icon = Icons.Outlined.Folder,
                         isSelected = selectedFolderId == folder.id,
                         onClick = { onSelect(folder.id) }
                 )
@@ -1747,6 +1747,6 @@ private fun FolderPickerRow(
                 modifier = Modifier.weight(1f)
         )
         if (isSelected)
-                Icon(Icons.Default.Check, null, tint = PrimaryBlue, modifier = Modifier.size(18.dp))
+                Icon(Icons.Outlined.Check, null, tint = PrimaryBlue, modifier = Modifier.size(18.dp))
     }
 }

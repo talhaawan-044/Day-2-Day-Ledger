@@ -10,8 +10,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.outlined.List
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -71,7 +72,7 @@ fun InventoryScreen(viewModel: LedgerViewModel, onNavigateToStockDetail: (Int) -
                             onValueChange = { searchQuery = it },
                             leadingIcon = {
                                 Icon(
-                                        Icons.Default.Search,
+                                        Icons.Outlined.Search,
                                         null,
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.size(20.dp)
@@ -91,12 +92,12 @@ fun InventoryScreen(viewModel: LedgerViewModel, onNavigateToStockDetail: (Int) -
                             },
                             modifier =
                                     Modifier.size(36.dp)
-                                            .clip(CircleShape)
+                                            .clip(RoundedCornerShape(8.dp))
                                             .background(MaterialTheme.colorScheme.surfaceVariant)
                     ) {
                         Icon(
-                                if (isGridView) Icons.AutoMirrored.Filled.List
-                                else Icons.Default.GridView,
+                                if (isGridView) Icons.AutoMirrored.Outlined.List
+                                else Icons.Outlined.GridView,
                                 null,
                                 tint = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.size(20.dp)
@@ -149,14 +150,14 @@ fun InventoryScreen(viewModel: LedgerViewModel, onNavigateToStockDetail: (Int) -
                         Box(
                                 modifier =
                                         Modifier.size(48.dp)
-                                                .clip(CircleShape)
-                                                .background(PrimaryBlue.copy(alpha = 0.1f)),
+                                                .clip(RoundedCornerShape(12.dp))
+                                                .background(PrimaryBlue),
                                 contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                    Icons.Default.TrendingUp,
+                                    Icons.Outlined.TrendingUp,
                                     null,
-                                    tint = PrimaryBlue,
+                                    tint = Color.White,
                                     modifier = Modifier.size(24.dp)
                             )
                         }
@@ -183,7 +184,7 @@ fun InventoryScreen(viewModel: LedgerViewModel, onNavigateToStockDetail: (Int) -
                                 ),
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
                 ) {
-                    Icon(Icons.Default.Add, null)
+                    Icon(Icons.Outlined.Add, null)
                     Spacer(Modifier.width(8.dp))
                     Text(
                             "Add New Mine",
@@ -197,7 +198,7 @@ fun InventoryScreen(viewModel: LedgerViewModel, onNavigateToStockDetail: (Int) -
             // Main Content Area
             if (filteredStocks.isEmpty()) {
                 com.example.awancoalledger.ui.components.EmptyStateCard(
-                    icon = Icons.Default.Inventory2,
+                    icon = Icons.Outlined.Inventory2,
                     title = if (searchQuery.isNotEmpty()) "No Results" else "Inventory Empty",
                     description = if (searchQuery.isNotEmpty()) "No inventory items match \"$searchQuery\"." else "Tap 'Add New Mine' to create your first inventory item.",
                     modifier = Modifier.weight(1f)
@@ -276,14 +277,14 @@ fun StockListCard(stock: Stock, modifier: Modifier = Modifier, onClick: () -> Un
             Box(
                     modifier =
                             Modifier.size(44.dp)
-                                    .clip(CircleShape)
-                                    .background(PrimaryBlue.copy(alpha = 0.1f)),
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(PrimaryBlue),
                     contentAlignment = Alignment.Center
             ) {
                 Icon(
-                        Icons.Default.Layers,
+                        Icons.Outlined.Layers,
                         null,
-                        tint = PrimaryBlue,
+                        tint = Color.White,
                         modifier = Modifier.size(22.dp)
                 )
             }
@@ -337,14 +338,14 @@ fun StockGridCard(stock: Stock, modifier: Modifier = Modifier, onClick: () -> Un
             Box(
                     modifier =
                             Modifier.size(40.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(PrimaryBlue.copy(alpha = 0.2f)),
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(PrimaryBlue),
                     contentAlignment = Alignment.Center
             ) {
                 Icon(
-                        Icons.Default.Layers,
+                        Icons.Outlined.Layers,
                         null,
-                        tint = PrimaryBlue,
+                        tint = Color.White,
                         modifier = Modifier.size(24.dp)
                 )
             }

@@ -7,8 +7,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.*
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.outlined.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -121,7 +121,7 @@ fun LedgerDetailScreen(
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     onBack()
                 }) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
+                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
                 }
                 
                 Column(
@@ -191,7 +191,7 @@ fun LedgerDetailScreen(
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         LargeActionButton(
                             label = "New Entry", 
-                            icon = Icons.Default.Add, 
+                            icon = Icons.Outlined.Add, 
                             modifier = Modifier.weight(1f),
                             onClick = { 
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -200,7 +200,7 @@ fun LedgerDetailScreen(
                         )
                         LargeActionButton(
                             label = "Payment", 
-                            icon = Icons.Default.Add, 
+                            icon = Icons.Outlined.Add, 
                             modifier = Modifier.weight(1f),
                             onClick = { 
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -214,7 +214,7 @@ fun LedgerDetailScreen(
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         SecondaryActionButton(
                             label = "Share Ledger", 
-                            icon = Icons.Default.Share, 
+                            icon = Icons.Outlined.Share, 
                             modifier = Modifier.weight(1f),
                             onClick = { 
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -224,7 +224,7 @@ fun LedgerDetailScreen(
                         
                         SecondaryActionButton(
                             label = "Party Info", 
-                            icon = Icons.Default.Info, 
+                            icon = Icons.Outlined.Info, 
                             modifier = Modifier.weight(1f),
                             onClick = { 
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -493,10 +493,10 @@ fun HistoryCardItem(entry: LedgerEntry, partyType: PartyType, balance: Double, o
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
-                modifier = Modifier.size(52.dp).clip(RoundedCornerShape(16.dp)).background(entryColor.copy(alpha = 0.15f)),
+                modifier = Modifier.size(52.dp).clip(RoundedCornerShape(14.dp)).background(entryColor),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Add, contentDescription = null, tint = entryColor, modifier = Modifier.size(26.dp))
+                Icon(Icons.Outlined.Add, contentDescription = null, tint = Color.White, modifier = Modifier.size(26.dp))
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -536,10 +536,10 @@ fun PaymentCardItem(payment: Payment, partyType: PartyType, balance: Double, onC
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
-                modifier = Modifier.size(48.dp).clip(RoundedCornerShape(14.dp)).background(SuccessGreen.copy(alpha = 0.15f)),
+                modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(SuccessGreen),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Description, contentDescription = null, tint = SuccessGreen, modifier = Modifier.size(24.dp))
+                Icon(Icons.Outlined.Description, contentDescription = null, tint = Color.White, modifier = Modifier.size(24.dp))
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -597,7 +597,7 @@ fun PartyPreviewSheet(party: Party, onDismiss: () -> Unit, onEdit: () -> Unit) {
                     contentColor = MaterialTheme.colorScheme.background
                 )
             ) {
-                Icon(Icons.Default.Edit, contentDescription = null, tint = MaterialTheme.colorScheme.background, modifier = Modifier.size(20.dp))
+                Icon(Icons.Outlined.Edit, contentDescription = null, tint = MaterialTheme.colorScheme.background, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Edit Party Info", color = MaterialTheme.colorScheme.background, fontWeight = FontWeight.Bold)
             }
@@ -673,7 +673,7 @@ fun EntryActionSheet(
                     Text("Date", color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
                     Text(formatDisplayDate(selectedDate), color = PrimaryBlue, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Icon(Icons.Default.CalendarToday, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(16.dp))
+                    Icon(Icons.Outlined.CalendarToday, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(16.dp))
                 }
             }
             
@@ -770,7 +770,7 @@ fun ExportActionSheet(
             ) {
                 Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(formatDisplayDate(fromDate), color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                    Icon(Icons.Default.CalendarToday, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(20.dp))
+                    Icon(Icons.Outlined.CalendarToday, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(20.dp))
                 }
             }
             
@@ -786,13 +786,13 @@ fun ExportActionSheet(
             ) {
                 Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(formatDisplayDate(toDate), color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                    Icon(Icons.Default.CalendarToday, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(20.dp))
+                    Icon(Icons.Outlined.CalendarToday, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(20.dp))
                 }
             }
             
             Spacer(modifier = Modifier.height(32.dp))
             
-            ExportActionRow(Icons.Default.Description, "Download PDF", PrimaryBlue) {
+            ExportActionRow(Icons.Outlined.Description, "Download PDF", PrimaryBlue) {
                 ExportUtils.generateAndSharePdf(
                     context = context, 
                     details = details, 
@@ -809,7 +809,7 @@ fun ExportActionSheet(
             
             Spacer(modifier = Modifier.height(12.dp))
             
-            ExportActionRow(Icons.Default.TableChart, "Download Excel", SuccessGreen) {
+            ExportActionRow(Icons.Outlined.TableChart, "Download Excel", SuccessGreen) {
                 ExportUtils.generateAndShareExcel(context, details, fromDate, toDate)
             }
             
@@ -829,15 +829,15 @@ fun ExportActionSheet(
 fun ExportActionRow(icon: ImageVector, label: String, color: Color, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
-        color = color.copy(alpha = 0.1f),
+        color = color,
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth().height(56.dp)
     ) {
         Row(modifier = Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(24.dp))
+            Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(24.dp))
             Spacer(modifier = Modifier.width(16.dp))
-            Text(label, color = color, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-            Icon(Icons.AutoMirrored.Filled.ArrowForwardIos, contentDescription = null, tint = color.copy(alpha = 0.5f), modifier = Modifier.size(16.dp))
+            Text(label, color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+            Icon(Icons.AutoMirrored.Outlined.ArrowForwardIos, contentDescription = null, tint = Color.White.copy(alpha = 0.5f), modifier = Modifier.size(16.dp))
         }
     }
 }
@@ -891,7 +891,7 @@ fun PaymentActionSheet(
                     Text("Date", color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
                     Text(formatDisplayDate(selectedDate), color = PrimaryBlue, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Icon(Icons.Default.CalendarToday, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(16.dp))
+                    Icon(Icons.Outlined.CalendarToday, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(16.dp))
                 }
             }
 
