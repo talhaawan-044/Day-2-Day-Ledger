@@ -270,20 +270,28 @@ fun MainAppContainer(viewModel: LedgerViewModel) {
                 navController = navController, 
                 startDestination = "summary",
                 enterTransition = {
-                    fadeIn(animationSpec = tween(400, easing = LinearOutSlowInEasing)) +
-                    scaleIn(initialScale = 0.92f, animationSpec = tween(400, easing = LinearOutSlowInEasing))
+                    androidx.compose.animation.slideInHorizontally(
+                        initialOffsetX = { it },
+                        animationSpec = androidx.compose.animation.core.spring(dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy, stiffness = androidx.compose.animation.core.Spring.StiffnessLow)
+                    ) + androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(300))
                 },
                 exitTransition = {
-                    fadeOut(animationSpec = tween(300, easing = FastOutLinearInEasing)) +
-                    scaleOut(targetScale = 0.92f, animationSpec = tween(300, easing = FastOutLinearInEasing))
+                    androidx.compose.animation.slideOutHorizontally(
+                        targetOffsetX = { -it / 3 },
+                        animationSpec = androidx.compose.animation.core.spring(dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy, stiffness = androidx.compose.animation.core.Spring.StiffnessLow)
+                    ) + androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(300))
                 },
                 popEnterTransition = {
-                    fadeIn(animationSpec = tween(400, easing = LinearOutSlowInEasing)) +
-                    scaleIn(initialScale = 0.92f, animationSpec = tween(400, easing = LinearOutSlowInEasing))
+                    androidx.compose.animation.slideInHorizontally(
+                        initialOffsetX = { -it / 3 },
+                        animationSpec = androidx.compose.animation.core.spring(dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy, stiffness = androidx.compose.animation.core.Spring.StiffnessLow)
+                    ) + androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(300))
                 },
                 popExitTransition = {
-                    fadeOut(animationSpec = tween(300, easing = FastOutLinearInEasing)) +
-                    scaleOut(targetScale = 0.92f, animationSpec = tween(300, easing = FastOutLinearInEasing))
+                    androidx.compose.animation.slideOutHorizontally(
+                        targetOffsetX = { it },
+                        animationSpec = androidx.compose.animation.core.spring(dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy, stiffness = androidx.compose.animation.core.Spring.StiffnessLow)
+                    ) + androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(300))
                 }
             ) {
                 composable("summary") {

@@ -38,6 +38,8 @@ import com.example.awancoalledger.ui.components.*
 import com.example.awancoalledger.ui.theme.*
 import com.example.awancoalledger.viewmodel.LedgerViewModel
 import com.example.awancoalledger.utils.ExportUtils
+import com.example.awancoalledger.utils.DateUtils
+import com.example.awancoalledger.ui.components.bounceClick
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -486,7 +488,7 @@ fun HistoryCardItem(entry: LedgerEntry, partyType: PartyType, balance: Double, o
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
+            .bounceClick { onClick() }
     ) {
         Row(
             modifier = Modifier.padding(18.dp),
@@ -529,7 +531,7 @@ fun PaymentCardItem(payment: Payment, partyType: PartyType, balance: Double, onC
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
+            .bounceClick { onClick() }
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -935,7 +937,7 @@ fun SegmentControl(label: String, selected: Boolean, modifier: Modifier, onClick
     Box(
         modifier = modifier.fillMaxHeight().clip(RoundedCornerShape(6.dp))
             .background(if (selected) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f) else Color.Transparent)
-            .clickable { onClick() },
+            .bounceClick { onClick() },
         contentAlignment = Alignment.Center
     ) {
         Text(label, color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal)

@@ -1,5 +1,9 @@
 package com.example.awancoalledger.ui.components
-
+import androidx.compose.ui.composed
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -135,4 +139,36 @@ fun EmptyStateCard(
             }
         }
     }
+}
+
+fun Modifier.bounceClick(
+    enabled: Boolean = true,
+    onClick: () -> Unit
+) = composed {
+    val interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+
+    val scale by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (isPressed) 0.95f else 1f,
+        animationSpec = androidx.compose.animation.core.spring(dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy, stiffness = androidx.compose.animation.core.Spring.StiffnessLow),
+        label = "bounceScale"
+    )
+    val alpha by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (isPressed) 0.85f else 1f,
+        animationSpec = androidx.compose.animation.core.spring(dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy, stiffness = androidx.compose.animation.core.Spring.StiffnessLow),
+        label = "bounceAlpha"
+    )
+
+    this
+        .graphicsLayer {
+            scaleX = scale
+            scaleY = scale
+            this.alpha = alpha
+        }
+        .clickable(
+            interactionSource = interactionSource,
+            indication = null,
+            enabled = enabled,
+            onClick = onClick
+        )
 }

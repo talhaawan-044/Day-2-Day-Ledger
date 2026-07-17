@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import com.example.awancoalledger.data.Party
 import com.example.awancoalledger.data.PartyType
 import com.example.awancoalledger.ui.components.*
+import com.example.awancoalledger.ui.components.bounceClick
 import com.example.awancoalledger.ui.theme.*
 import com.example.awancoalledger.viewmodel.LedgerViewModel
 import java.util.*
@@ -436,7 +437,7 @@ fun PartyCardItem(party: Party, balance: Double, onClick: () -> Unit) {
             if (balance == 0.0) "Cleared" else if (isReceivable) "Receivable" else "Payable"
 
     Row(
-            modifier = Modifier.fillMaxWidth().clickable { onClick() }.padding(16.dp),
+            modifier = Modifier.fillMaxWidth().bounceClick { onClick() }.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
     ) {
         Box(

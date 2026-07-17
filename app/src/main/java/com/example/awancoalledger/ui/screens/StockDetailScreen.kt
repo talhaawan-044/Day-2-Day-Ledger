@@ -12,14 +12,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Warehouse
+import androidx.compose.material.icons.outlined.WarningAmber
+import androidx.compose.material.icons.outlined.TrendingUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -28,7 +32,9 @@ import androidx.compose.ui.unit.sp
 import com.example.awancoalledger.data.Stock
 import com.example.awancoalledger.data.StockEntry
 import com.example.awancoalledger.ui.components.*
+import com.example.awancoalledger.ui.theme.ErrorRed
 import com.example.awancoalledger.ui.theme.PrimaryBlue
+import com.example.awancoalledger.ui.theme.SuccessGreen
 import com.example.awancoalledger.viewmodel.LedgerViewModel
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
@@ -199,64 +205,105 @@ fun StockDetailScreen(
 
 @Composable
 fun StockSummaryHeader(stock: Stock) {
-    val df = DecimalFormat("#,###.##")
+    val df = java.text.DecimalFormat("#,###.##")
+    val progress = if (stock.peakWeight > 0) (stock.totalWeight / stock.peakWeight).toFloat() else 0f
+    
+    val isHealthy = progress > 0.3f
+    val statusColor = if (isHealthy) SuccessGreen else ErrorRed
+    val statusText = if (isHealthy) "HEALTHY" else "LOW STOCK"
+    val statusIcon = if (isHealthy) Icons.Outlined.CheckCircle else Icons.Outlined.WarningAmber
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(32.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.surface)
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 8.dp,
+        tonalElevation = 2.dp
     ) {
-        Column(modifier = Modifier.padding(24.dp)) {
+        Column(modifier = Modifier.padding(28.dp)) {
+            // Top Section
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
-                    Text("CURRENT STOCK", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
-                    Row(verticalAlignment = Alignment.Bottom) {
-                        Text(df.format(stock.totalWeight), color = MaterialTheme.colorScheme.onSurface, fontSize = 36.sp, fontWeight = FontWeight.Black, letterSpacing = (-1).sp)
+                Text("CURRENT STOCK", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                
+                // Status Pill
+                Surface(
+                    color = statusColor,
+                    shape = RoundedCornerShape(percent = 50)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(statusIcon, contentDescription = null, modifier = Modifier.size(14.dp), tint = Color.White)
                         Spacer(Modifier.width(4.dp))
-                        Text("t", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 16.sp, modifier = Modifier.padding(bottom = 6.dp))
+                        Text(statusText, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White, letterSpacing = 0.5.sp)
                     }
                 }
-                
-                Column(horizontalAlignment = Alignment.End) {
-                    Text("PEAK RECORD", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
-                    Text("${df.format(stock.peakWeight)} t", color = PrimaryBlue, fontSize = 18.sp, fontWeight = FontWeight.Black)
-                }
+            }
+            Spacer(Modifier.height(12.dp))
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text(
+                    df.format(stock.totalWeight), 
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 44.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = (-1.5).sp
+                )
+                Spacer(Modifier.width(6.dp))
+                Text("t", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 18.sp, modifier = Modifier.padding(bottom = 6.dp))
             }
             
             Spacer(Modifier.height(24.dp))
             
             // Progress System
-            val progress = if (stock.peakWeight > 0) (stock.totalWeight / stock.peakWeight).toFloat() else 0f
             Column {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Inventory Level", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-                    Text("${(progress * 100).toInt()}%", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp, fontWeight = FontWeight.Black)
+                    Text("Inventory Level", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text("${(progress * 100).toInt()}%", color = MaterialTheme.colorScheme.onSurface, fontSize = 12.sp, fontWeight = FontWeight.Black)
                 }
                 Spacer(Modifier.height(10.dp))
                 LinearProgressIndicator(
                     progress = { progress },
-                    modifier = Modifier.fillMaxWidth().height(12.dp).clip(CircleShape),
-                    color = PrimaryBlue,
-                    trackColor = MaterialTheme.colorScheme.surface
+                    modifier = Modifier.fillMaxWidth().height(8.dp).clip(CircleShape),
+                    color = if (isHealthy) PrimaryBlue else ErrorRed,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant
                 )
             }
             
             Spacer(Modifier.height(24.dp))
-            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
             Spacer(Modifier.height(16.dp))
             
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Outlined.Warehouse, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.width(8.dp))
-                Text("Last Warehouse Location: ", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
-                Text(stock.lastWarehouse ?: "N/A", color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+            // Sub-metrics
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Outlined.TrendingUp, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(14.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text("PEAK RECORD", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant, letterSpacing = 0.5.sp)
+                    }
+                    Spacer(Modifier.height(4.dp))
+                    Text("${df.format(stock.peakWeight)} t", fontSize = 20.sp, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onSurface)
+                }
+
+                HorizontalDivider(modifier = Modifier.width(1.dp).height(32.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+
+                Column(horizontalAlignment = Alignment.End) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Outlined.Warehouse, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(14.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text("LAST LOCATION", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant, letterSpacing = 0.5.sp)
+                    }
+                    Spacer(Modifier.height(4.dp))
+                    Text(stock.lastWarehouse ?: "N/A", fontSize = 20.sp, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onSurface)
+                }
             }
         }
     }

@@ -93,7 +93,7 @@ fun ExpensesScreen(viewModel: LedgerViewModel) {
 
             Spacer(modifier = Modifier.height(16.dp))
             
-            TotalExpensesHeroCard(displayTotal)
+            TotalExpensesHeroCard(displayTotal, displayExpenses.size)
 
             Spacer(modifier = Modifier.height(24.dp))
             
@@ -817,86 +817,105 @@ fun ExpensePreviewSheet(expense: Expense, onDismiss: () -> Unit, onEdit: () -> U
 }
 
 @Composable
-fun TotalExpensesHeroCard(total: Double) {
+fun TotalExpensesHeroCard(total: Double, count: Int) {
     val animatedTotal by animateFloatAsState(
         targetValue = total.toFloat(),
-        animationSpec = tween(durationMillis = 800, easing = FastOutSlowInEasing)
+        animationSpec = androidx.compose.animation.core.spring(dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy, stiffness = androidx.compose.animation.core.Spring.StiffnessVeryLow),
+        label = "totalExpenses"
     )
 
-    Box(
-        modifier = Modifier.fillMaxWidth()
-            .shadow(24.dp, RoundedCornerShape(32.dp), spotColor = ErrorRed.copy(alpha = 0.6f))
-            .clip(RoundedCornerShape(32.dp))
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFF8B0000), // Dark Red
-                        Color(0xFFB71C1C), // Deep Red
-                        Color(0xFFD32F2F)  // Crimson
-                    )
-                )
-            )
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = 8.dp,
+        tonalElevation = 2.dp
     ) {
-        // Inner Glass Box
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .background(Color.White.copy(alpha = 0.04f))
-                .border(
-                    width = 1.dp,
-                    brush = Brush.linearGradient(
-                        colors = listOf(Color.White.copy(alpha = 0.4f), Color.Transparent, Color.White.copy(alpha = 0.1f)),
-                        start = Offset(0f, 0f),
-                        end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
-                    ),
-                    shape = RoundedCornerShape(32.dp)
+        Column(modifier = Modifier.padding(28.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "TOTAL EXPENSES",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-        )
-
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(32.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .background(Color.White.copy(alpha = 0.15f), RoundedCornerShape(12.dp)),
-                        contentAlignment = Alignment.Center
+                
+                // Status Pill
+                Surface(
+                    color = ErrorRed,
+                    shape = RoundedCornerShape(percent = 50)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.Payments,
+                            Icons.Outlined.TrendingUp,
                             contentDescription = null,
-                            modifier = Modifier.size(18.dp),
+                            modifier = Modifier.size(14.dp),
                             tint = Color.White
                         )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            "ACTIVE",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            letterSpacing = 0.5.sp
+                        )
                     }
-                    Spacer(Modifier.width(12.dp))
-                    Text(
-                        text = "TOTAL EXPENSES",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 1.sp,
-                        color = Color.White.copy(alpha = 0.8f)
-                    )
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text(
+                    text = "Rs.",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    text = String.format(Locale.getDefault(), "%,.0f", animatedTotal),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 44.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = (-1.5).sp
+                )
+            }
+
+            Spacer(Modifier.height(24.dp))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+            Spacer(Modifier.height(16.dp))
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Outlined.Receipt, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(14.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text("ENTRIES", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant, letterSpacing = 0.5.sp)
+                    }
+                    Spacer(Modifier.height(4.dp))
+                    Text("$count", fontSize = 20.sp, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onSurface)
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                HorizontalDivider(modifier = Modifier.width(1.dp).height(32.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
 
-                Row(verticalAlignment = Alignment.Bottom) {
-                    Text(
-                        text = "Rs.",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White.copy(alpha = 0.6f),
-                        modifier = Modifier.padding(bottom = 6.dp)
-                    )
-                    Spacer(Modifier.width(6.dp))
-                    Text(
-                        text = String.format(Locale.getDefault(), "%,.0f", animatedTotal),
-                        fontSize = 48.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = (-2).sp,
-                        color = Color.White
-                    )
+                Column(horizontalAlignment = Alignment.End) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Outlined.Analytics, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(14.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text("AVG EXPENSE", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant, letterSpacing = 0.5.sp)
+                    }
+                    Spacer(Modifier.height(4.dp))
+                    val avg = if (count > 0) total / count else 0.0
+                    Text(String.format("%,.0f", avg), fontSize = 20.sp, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onSurface)
                 }
             }
         }

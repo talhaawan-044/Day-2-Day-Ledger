@@ -1210,9 +1210,10 @@ fun PremiumAccountCard(
                 if (isLoggedIn) onLogout() else onClick()
             },
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant,
+            color = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(24.dp),
-            shadowElevation = 0.dp
+            shadowElevation = 4.dp,
+            tonalElevation = 2.dp
     ) {
         Row(
                 modifier = Modifier.padding(20.dp),

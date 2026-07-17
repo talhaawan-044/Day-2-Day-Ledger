@@ -44,6 +44,7 @@ import com.example.awancoalledger.ui.components.IOSDialogButton
 import com.example.awancoalledger.ui.components.PaymentPreviewSheet
 import com.example.awancoalledger.ui.components.PremiumLineGraph
 import com.example.awancoalledger.ui.theme.*
+import com.example.awancoalledger.ui.components.bounceClick
 import com.example.awancoalledger.utils.ExportUtils
 import com.example.awancoalledger.viewmodel.LedgerViewModel
 import com.example.awancoalledger.viewmodel.RecentActivity
@@ -396,114 +397,88 @@ fun NetPositionCard(netCredit: Double, receivable: Double, payable: Double, onCl
     val animatedNet by
             animateFloatAsState(
                     targetValue = netCredit.toFloat(),
-                    animationSpec = tween(800, easing = FastOutSlowInEasing),
+                    animationSpec = androidx.compose.animation.core.spring(dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy, stiffness = androidx.compose.animation.core.Spring.StiffnessVeryLow),
                     label = "netCredit"
             )
 
-    Box(
+    Surface(
             modifier =
                     Modifier.fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .shadow(24.dp, RoundedCornerShape(32.dp), spotColor = PrimaryBlue.copy(alpha = 0.5f))
-                            .clip(RoundedCornerShape(32.dp))
-                            .background(
-                                Brush.linearGradient(
-                                    colors = listOf(
-                                        Color(0xFF0F2027),
-                                        Color(0xFF203A43),
-                                        Color(0xFF2C5364)
-                                    )
-                                )
-                            )
-                            .clickable(onClick = onClick)
+                            .padding(horizontal = 16.dp),
+            shape = RoundedCornerShape(24.dp),
+            color = MaterialTheme.colorScheme.surface,
+            shadowElevation = 8.dp,
+            tonalElevation = 2.dp
     ) {
-        // Inner Glass Box
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .background(Color.White.copy(alpha = 0.03f))
-                .border(
-                    width = 1.dp,
-                    brush = Brush.linearGradient(
-                        colors = listOf(Color.White.copy(alpha = 0.4f), Color.Transparent, Color.White.copy(alpha = 0.1f)),
-                        start = Offset(0f, 0f),
-                        end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
-                    ),
-                    shape = RoundedCornerShape(32.dp)
-                )
-        )
 
-        Column(modifier = Modifier.fillMaxWidth().padding(28.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().bounceClick(onClick = onClick).padding(28.dp)) {
             // ── Top row: label + status pill ─────────────────────────────────
             Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
+                    verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
-                    Text(
-                            "NET MARKET CREDIT",
-                            color = Color.White.copy(alpha = 0.6f),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 2.sp
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    Row(verticalAlignment = Alignment.Bottom) {
-                        Text(
-                                "Rs.",
-                                color = Color.White.copy(alpha = 0.5f),
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(bottom = 8.dp)
-                        )
-                        Spacer(Modifier.width(6.dp))
-                        Text(
-                                String.format(
-                                        Locale.getDefault(),
-                                        "%,.0f",
-                                        animatedNet.absoluteValue
-                                ),
-                                color = Color.White,
-                                fontSize = 56.sp,
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = (-2.5).sp,
-                                lineHeight = 56.sp
-                        )
-                    }
-                }
+                Text(
+                        "NET MARKET CREDIT",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                )
 
                 Surface(
-                        color = Color.White.copy(alpha = 0.08f),
-                        shape = RoundedCornerShape(percent = 50),
-                        border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.2f))
+                        color = statusColor,
+                        shape = RoundedCornerShape(percent = 50)
                 ) {
                     Row(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                             verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                                 statusIcon,
                                 contentDescription = null,
-                                tint = if(isSurplus) Color(0xFF4ADE80) else Color(0xFFF87171),
+                                tint = Color.White,
                                 modifier = Modifier.size(14.dp)
                         )
-                        Spacer(Modifier.width(6.dp))
+                        Spacer(Modifier.width(4.dp))
                         Text(
                                 statusLabel,
                                 color = Color.White,
                                 fontSize = 10.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                letterSpacing = 1.sp
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 0.5.sp
                         )
                     }
                 }
             }
+            Spacer(Modifier.height(12.dp))
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text(
+                        "Rs.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                        String.format(
+                                Locale.getDefault(),
+                                "%,.0f",
+                                animatedNet.absoluteValue
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 48.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = (-2).sp,
+                        lineHeight = 48.sp
+                )
+            }
 
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(36.dp))
 
             // ── Bottom mini stats ─────────────────────────────────────────────
-            HorizontalDivider(color = Color.White.copy(alpha = 0.1f), thickness = 1.dp)
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f), thickness = 1.dp)
             Spacer(Modifier.height(20.dp))
 
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -513,12 +488,12 @@ fun NetPositionCard(netCredit: Double, receivable: Double, payable: Double, onCl
                         value = receivable,
                         icon = Icons.Outlined.SouthWest,
                         color = SuccessGreen,
-                        textColor = Color.White
+                        textColor = MaterialTheme.colorScheme.onSurface
                 )
                 Box(
-                        Modifier.width(0.5.dp)
-                                .height(36.dp)
-                                .background(Color.White.copy(alpha = 0.2f))
+                        Modifier.width(1.dp)
+                                .height(40.dp)
+                                .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
                                 .align(Alignment.CenterVertically)
                 )
                 MiniStatItem(
@@ -527,7 +502,7 @@ fun NetPositionCard(netCredit: Double, receivable: Double, payable: Double, onCl
                         value = payable,
                         icon = Icons.Outlined.NorthEast,
                         color = ErrorRed,
-                        textColor = Color.White
+                        textColor = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
@@ -874,7 +849,7 @@ fun ActivityRow(activity: RecentActivity, onClick: () -> Unit) {
     Row(
             modifier =
                     Modifier.fillMaxWidth()
-                            .clickable {
+                            .bounceClick {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 onClick()
                             }
@@ -1146,7 +1121,7 @@ fun QuickActionsDock(
 
 @Composable
 fun QuickActionButton(label: String, icon: ImageVector, color: Color, onClick: () -> Unit) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clickable { onClick() }) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.bounceClick { onClick() }) {
         Surface(
             shape = RoundedCornerShape(14.dp),
             color = color,

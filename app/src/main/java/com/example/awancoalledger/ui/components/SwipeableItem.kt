@@ -146,7 +146,7 @@ fun SwipeAction(
         Box(
             modifier = modifier
                 .background(backgroundColor)
-                .clickable { onClick() },
+                .bounceClick { onClick() },
             contentAlignment = Alignment.Center
         ) {
             Column(

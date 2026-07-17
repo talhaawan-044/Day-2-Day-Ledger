@@ -20,6 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.SolidColor
@@ -355,86 +357,111 @@ fun VehicleTrackerScreen(viewModel: LedgerViewModel, onNavigateBack: () -> Unit)
 @Composable
 fun VehicleCard(vehicle: Vehicle, isSelected: Boolean, onEdit: () -> Unit, modifier: Modifier = Modifier) {
     Surface(
-        modifier = modifier.fillMaxWidth().height(180.dp),
-        color = if (isSelected) PrimaryBlue else MaterialTheme.colorScheme.surface,
+        modifier = modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(32.dp),
-        shadowElevation = if (isSelected) 8.dp else 0.dp,
-        border = if (isSelected) null else BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+        shadowElevation = if (isSelected) 8.dp else 2.dp,
+        border = if (isSelected) BorderStroke(2.dp, PrimaryBlue) else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.padding(24.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier.size(48.dp).background(
-                                (if (isSelected) Color.White else PrimaryBlue).copy(alpha = 0.15f),
-                                CircleShape
-                            ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = if (vehicle.type == "TRUCK") Icons.Outlined.LocalShipping else Icons.Outlined.DirectionsCar,
-                                contentDescription = null,
-                                tint = if (isSelected) PrimaryBlue else MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                        Spacer(Modifier.width(16.dp))
-                        Column {
-                            Text(
-                                vehicle.name,
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Black,
-                                color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                vehicle.plateNumber,
-                                fontSize = 14.sp,
-                                color = (if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface).copy(alpha = 0.7f)
-                            )
-                        }
-                    }
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (vehicle.isPrimary) {
-                            Surface(
-                                color = (if (isSelected) Color.White else PrimaryBlue).copy(alpha = 0.2f),
-                                shape = RoundedCornerShape(8.dp)
-                            ) {
-                                Text(
-                                    "PRIMARY",
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Black,
-                                    color = if (isSelected) Color.White else PrimaryBlue
-                                )
-                            }
-                            Spacer(Modifier.width(8.dp))
-                        }
-                        IconButton(onClick = onEdit) {
-                            Icon(
-                                Icons.Outlined.Edit,
-                                contentDescription = "Edit",
-                                tint = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
-                }
-                
-                Spacer(modifier = Modifier.weight(1f))
-                
-                Row(verticalAlignment = Alignment.Bottom) {
-                    Column {
-                        Text("LAST MILEAGE", fontSize = 10.sp, fontWeight = FontWeight.Medium, letterSpacing = 0.5.sp, color = (if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant).copy(alpha = 0.6f))
-                        Text(
-                            "${String.format(Locale.getDefault(), "%,d", vehicle.currentMileage.toInt())} km",
-                            fontSize = 26.sp,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = (-1).sp,
-                            color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface
+        Column(modifier = Modifier.padding(28.dp)) {
+            // Top Section
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f).padding(end = 16.dp)) {
+                    Box(
+                        modifier = Modifier.size(48.dp).background(
+                            PrimaryBlue.copy(alpha = 0.15f),
+                            CircleShape
+                        ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = if (vehicle.type == "TRUCK") Icons.Outlined.LocalShipping else Icons.Outlined.DirectionsCar,
+                            contentDescription = null,
+                            tint = PrimaryBlue,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
+                    Spacer(Modifier.width(16.dp))
+                    Column {
+                        Text(
+                            vehicle.name,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Black,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            letterSpacing = (-0.5).sp
+                        )
+                        Text(
+                            vehicle.plateNumber,
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                // Actions/Status Pill
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (vehicle.isPrimary) {
+                        Surface(
+                            color = PrimaryBlue,
+                            shape = RoundedCornerShape(percent = 50)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Outlined.Star, contentDescription = null, modifier = Modifier.size(14.dp), tint = Color.White)
+                                Spacer(Modifier.width(4.dp))
+                                Text("PRIMARY", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White, letterSpacing = 0.5.sp)
+                            }
+                        }
+                        Spacer(Modifier.width(8.dp))
+                    }
+                    IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
+                        Icon(
+                            Icons.Outlined.Edit,
+                            contentDescription = "Edit",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+            }
+            
+            Spacer(Modifier.height(24.dp))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+            Spacer(Modifier.height(16.dp))
+            
+            // Sub-metrics
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Outlined.Timeline, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(14.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text("LAST MILEAGE", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant, letterSpacing = 0.5.sp)
+                    }
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        "${String.format(Locale.getDefault(), "%,d", vehicle.currentMileage.toInt())} km",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Black,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+
+                HorizontalDivider(modifier = Modifier.width(1.dp).height(32.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+
+                Column(horizontalAlignment = Alignment.End) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Outlined.EvStation, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(14.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text("VEHICLE TYPE", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant, letterSpacing = 0.5.sp)
+                    }
+                    Spacer(Modifier.height(4.dp))
+                    Text(vehicle.type, fontSize = 20.sp, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onSurface)
                 }
             }
         }
@@ -501,8 +528,8 @@ fun PremiumMaintenanceCard(nextMileage: Double, kmsLeft: Double) {
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(24.dp),
-        shadowElevation = 0.dp,
-        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        shadowElevation = 8.dp,
+        tonalElevation = 2.dp
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
 
@@ -526,9 +553,10 @@ fun PremiumMaintenanceCard(nextMileage: Double, kmsLeft: Double) {
                     Column {
                         Text(
                             text = if (nextMileage > 0) String.format("%,.0f", nextMileage) else "---",
-                            fontSize = 40.sp,
-                            fontWeight = FontWeight.Black,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = 38.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = (-1).sp
                         )
                         Text("TARGET ODOMETER (KM)", fontSize = 10.sp, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
                     }
