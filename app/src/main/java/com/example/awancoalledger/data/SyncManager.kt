@@ -457,24 +457,19 @@ class SyncManager(
                     (data["appLock"] as? Boolean)?.let { if (it != settingsRepository.isAppLockEnabled()) settingsRepository.setAppLockEnabled(it) }
                     (data["biometrics"] as? Boolean)?.let { if (it != settingsRepository.isBiometricsEnabled()) settingsRepository.setBiometricsEnabled(it) }
                     (data["appPin"] as? String)?.let { if (it != settingsRepository.getAppPin()) settingsRepository.setAppPin(it) }
-                    // Rely exclusively on Base64 embedded logo for cross-device sync
-                    (data["logoBase64"] as? String)?.let { b64 ->
-                        if (b64.isNotBlank()) {
-                            val restoredUri = DataExchangeUtils.base64ToFile(context, b64, "company_logo.png")
-                            // Append timestamp to force UI refresh (Coil caching issue)
-                            restoredUri?.let { settingsRepository.setCompanyLogoUri(it.toString() + "?ts=${System.currentTimeMillis()}") }
-                        } else {
+                    (data["logoUri"] as? String)?.let { uriString ->
+                        if (uriString.isBlank()) {
                             settingsRepository.setCompanyLogoUri(null)
+                        } else if (uriString != settingsRepository.getCompanyLogoUri()) {
+                            settingsRepository.setCompanyLogoUri(uriString)
                         }
                     }
 
-                    // Rely exclusively on Base64 embedded signature
-                    (data["signatureBase64"] as? String)?.let { b64 ->
-                        if (b64.isNotBlank()) {
-                            val restoredUri = DataExchangeUtils.base64ToFile(context, b64, "signature.png")
-                            restoredUri?.let { settingsRepository.setSignatureUri(it.toString() + "?ts=${System.currentTimeMillis()}") }
-                        } else {
+                    (data["signatureUri"] as? String)?.let { uriString ->
+                        if (uriString.isBlank()) {
                             settingsRepository.setSignatureUri(null)
+                        } else if (uriString != settingsRepository.getSignatureUri()) {
+                            settingsRepository.setSignatureUri(uriString)
                         }
                     }
 
@@ -780,9 +775,6 @@ class SyncManager(
         } else if (signatureUri.startsWith("http")) {
             data["signatureUri"] = signatureUri
         }
-        // Add Base64 versions to database for reliable restoration across devices
-        data["logoBase64"] = DataExchangeUtils.fileToBase64(context, "company_logo.png") ?: ""
-        data["signatureBase64"] = DataExchangeUtils.fileToBase64(context, "signature.png") ?: ""
 
         uploadEntity(userId, "settings", "business_profile", data)
     }
