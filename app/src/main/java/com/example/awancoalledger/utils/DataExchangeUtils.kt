@@ -82,12 +82,34 @@ object DataExchangeUtils {
         return try {
             val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
             val file = File(context.filesDir, fileName)
-            val outputStream = FileOutputStream(file)
             
-            inputStream?.use { input ->
-                outputStream.use { output ->
-                    input.copyTo(output)
+            if (inputStream != null) {
+                val bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
+                inputStream.close()
+                
+                if (bitmap != null) {
+                    val maxDim = 400
+                    val ratio = Math.min(maxDim.toFloat() / bitmap.width, maxDim.toFloat() / bitmap.height)
+                    val scaledBitmap = if (ratio < 1) {
+                        android.graphics.Bitmap.createScaledBitmap(bitmap, (bitmap.width * ratio).toInt(), (bitmap.height * ratio).toInt(), true)
+                    } else {
+                        bitmap
+                    }
+                    
+                    val outputStream = FileOutputStream(file)
+                    scaledBitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 60, outputStream)
+                    outputStream.flush()
+                    outputStream.close()
+                    
+                    if (scaledBitmap != bitmap) {
+                        scaledBitmap.recycle()
+                    }
+                    bitmap.recycle()
+                } else {
+                    return null
                 }
+            } else {
+                return null
             }
             Uri.fromFile(file)
         } catch (e: Exception) {

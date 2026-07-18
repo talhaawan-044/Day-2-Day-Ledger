@@ -190,6 +190,9 @@ class SyncWorker(
                 } else if (signatureUri.startsWith("http")) {
                     data["signatureUri"] = signatureUri
                 }
+                
+                data["logoBase64"] = DataExchangeUtils.fileToBase64(context, "company_logo.png") ?: ""
+                data["signatureBase64"] = DataExchangeUtils.fileToBase64(context, "signature.png") ?: ""
                 data
             }
             else -> null
