@@ -242,6 +242,17 @@ class LedgerViewModel(
                 viewModelScope.launch {
                     syncManager.stopSync()
                     repository.clearAllData()
+                    settingsRepository.clearAll()
+                    
+                    // Also clear local image files so they don't persist
+                    try {
+                        val logoFile = java.io.File(context.filesDir, "company_logo.png")
+                        if (logoFile.exists()) logoFile.delete()
+                        val sigFile = java.io.File(context.filesDir, "signature.png")
+                        if (sigFile.exists()) sigFile.delete()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
             } else {
                 syncManager.stopSync()

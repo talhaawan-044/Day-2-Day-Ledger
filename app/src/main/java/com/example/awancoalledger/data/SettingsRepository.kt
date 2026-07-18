@@ -60,6 +60,10 @@ class SettingsRepository(context: Context) {
             .apply()
     }
 
+    fun clearAll() {
+        prefs.edit().clear().apply()
+    }
+
     fun getDockItems(): List<String> {
         val saved = prefs.getString("dock_items", null)
         if (saved != null) {
