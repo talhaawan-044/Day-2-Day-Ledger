@@ -9,6 +9,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -164,13 +166,24 @@ fun PartiesScreen(viewModel: LedgerViewModel, onNavigateToLedger: (Int) -> Unit)
                         )
                     }
                 } else {
-                    items(filteredAndSortedParties, key = { it.party.id }) { details ->
+                    itemsIndexed(filteredAndSortedParties, key = { _, it -> it.party.id }) { index, details ->
+                        val isFirst = index == 0
+                        val isLast = index == filteredAndSortedParties.size - 1
+                        val shape = when {
+                            isFirst && isLast -> RoundedCornerShape(32.dp)
+                            isFirst -> RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                            isLast -> RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
+                            else -> RectangleShape
+                        }
+
                         Box(modifier = Modifier.padding(horizontal = 16.dp)) {
                             SwipeableItem(
                                     onEdit = { editingParty = details.party },
                                     onDelete = { partyToDelete = details.party },
+                                    shape = shape,
+                                    backgroundColor = MaterialTheme.colorScheme.surface,
                                     content = {
-                                        PartyCardItem(
+                                        PartyListItem(
                                                 party = details.party,
                                                 balance = viewModel.getBalance(details),
                                                 onClick = {
@@ -178,15 +191,12 @@ fun PartiesScreen(viewModel: LedgerViewModel, onNavigateToLedger: (Int) -> Unit)
                                                             HapticFeedbackType.LongPress
                                                     )
                                                     onNavigateToLedger(details.party.id)
-                                                }
+                                                },
+                                                showDivider = !isLast
                                         )
                                     },
                             )
                         }
-                        HorizontalDivider(
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-                        )
                     }
                 }
             }
@@ -711,3 +721,61 @@ fun PartiesHeader(
         Spacer(modifier = Modifier.height(12.dp))
     }
 }
+
+@Composable
+fun PartyListItem(
+    party: com.example.awancoalledger.data.Party,
+    balance: Double,
+    onClick: () -> Unit,
+    showDivider: Boolean
+) {
+    val isReceivable = balance > 0
+    val statusColor = if (balance == 0.0) MaterialTheme.colorScheme.primary else if (isReceivable) com.example.awancoalledger.ui.theme.SuccessGreen else com.example.awancoalledger.ui.theme.ErrorRed
+    
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(if (party.type == com.example.awancoalledger.data.PartyType.BUYER) MaterialTheme.colorScheme.primary else com.example.awancoalledger.ui.theme.iOSOrange),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    if (party.type == com.example.awancoalledger.data.PartyType.BUYER) Icons.Outlined.Person else Icons.Outlined.Storefront,
+                    contentDescription = null,
+                    tint = androidx.compose.ui.graphics.Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(party.name, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                Text(party.phone, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    if (balance == 0.0) "Cleared" else "Rs. ${String.format(java.util.Locale.getDefault(), "%,.0f", kotlin.math.abs(balance))}",
+                    color = statusColor,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 15.sp
+                )
+                Text(if (balance == 0.0) "" else if (isReceivable) "Receivable" else "Payable", fontSize = 11.sp, color = statusColor.copy(alpha = 0.8f))
+            }
+        }
+        if (showDivider) {
+            HorizontalDivider(modifier = Modifier.padding(start = 76.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+        }
+    }
+}
+
