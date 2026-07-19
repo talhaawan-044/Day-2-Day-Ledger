@@ -129,14 +129,16 @@ fun EmptyStateCard(
         )
         if (actionText != null && onAction != null) {
             Spacer(modifier = Modifier.height(32.dp))
-            Button(
-                onClick = onAction,
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp)
-            ) {
-                Text(actionText, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-            }
+            Text(
+                text = actionText,
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable { onAction() }
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            )
         }
     }
 }

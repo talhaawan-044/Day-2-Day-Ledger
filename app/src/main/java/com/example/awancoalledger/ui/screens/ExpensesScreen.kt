@@ -215,7 +215,7 @@ fun ExpensesScreen(viewModel: LedgerViewModel) {
                         icon = Icons.Outlined.Payments,
                         title = "No Expenses Found",
                         description = "There are no recorded expenses in this period.",
-                        actionText = "Add Expense",
+                        actionText = "Start Tracking Your Expenses",
                         onAction = { showAddDialog = true }
                     )
                 } else {

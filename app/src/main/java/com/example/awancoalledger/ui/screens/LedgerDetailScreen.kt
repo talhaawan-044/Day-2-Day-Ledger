@@ -124,7 +124,7 @@ fun LedgerDetailScreen(
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     onBack()
                 }) {
-                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface)
+                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back", tint = Color.White)
                 }
                 
                 Column(
@@ -133,7 +133,7 @@ fun LedgerDetailScreen(
                 ) {
                     Text(
                         details.party.name, 
-                        color = MaterialTheme.colorScheme.onSurface, 
+                        color = Color.White, 
                         fontWeight = FontWeight.Bold, 
                         fontSize = 20.sp,
                         maxLines = 1,
@@ -141,7 +141,7 @@ fun LedgerDetailScreen(
                     )
                     Text(
                         details.party.type.name, 
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f), 
+                        color = Color.White.copy(alpha = 0.7f), 
                         fontSize = 11.sp, 
                         fontWeight = FontWeight.Black,
                         letterSpacing = 0.5.sp
@@ -161,20 +161,20 @@ fun LedgerDetailScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("NET BALANCE", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text("NET BALANCE", color = Color.White.copy(alpha = 0.8f), fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     Row(verticalAlignment = Alignment.Bottom) {
-                        Text("Rs.", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f), fontSize = 18.sp, modifier = Modifier.padding(bottom = 6.dp, end = 4.dp))
-                        Text(String.format(Locale.getDefault(), "%,.0f", balance.absoluteValue), color = MaterialTheme.colorScheme.onSurface, fontSize = 42.sp, fontWeight = FontWeight.ExtraBold)
+                        Text("Rs.", color = Color.White.copy(alpha = 0.8f), fontSize = 18.sp, modifier = Modifier.padding(bottom = 6.dp, end = 4.dp))
+                        Text(String.format(Locale.getDefault(), "%,.0f", balance.absoluteValue), color = Color.White, fontSize = 42.sp, fontWeight = FontWeight.ExtraBold)
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Surface(
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+                        color = Color.White.copy(alpha = 0.2f),
                         shape = RoundedCornerShape(16.dp),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
                     ) {
                         Text(
                             statusText, 
-                            color = MaterialTheme.colorScheme.onSurface, 
+                            color = Color.White, 
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold
@@ -729,33 +729,26 @@ fun ExportActionSheet(
     var showFromPicker by remember { mutableStateOf(false) }
     var showToPicker by remember { mutableStateOf(false) }
     
-    val fromState = rememberDatePickerState(initialSelectedDateMillis = fromDate)
-    val toState = rememberDatePickerState(initialSelectedDateMillis = toDate)
-
     if (showFromPicker) {
-        DatePickerDialog(
-            onDismissRequest = { showFromPicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    fromState.selectedDateMillis?.let { fromDate = it }
-                    showFromPicker = false
-                }) { Text("OK", color = MaterialTheme.colorScheme.primary) }
-            },
-            dismissButton = { TextButton(onClick = { showFromPicker = false }) { Text("Cancel") } }
-        ) { DatePicker(state = fromState) }
+        IOSDatePickerSheet(
+            initialDate = fromDate,
+            onDismiss = { showFromPicker = false },
+            onDateSelected = {
+                fromDate = it
+                showFromPicker = false
+            }
+        )
     }
 
     if (showToPicker) {
-        DatePickerDialog(
-            onDismissRequest = { showToPicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    toState.selectedDateMillis?.let { toDate = it }
-                    showToPicker = false
-                }) { Text("OK", color = MaterialTheme.colorScheme.primary) }
-            },
-            dismissButton = { TextButton(onClick = { showToPicker = false }) { Text("Cancel") } }
-        ) { DatePicker(state = toState) }
+        IOSDatePickerSheet(
+            initialDate = toDate,
+            onDismiss = { showToPicker = false },
+            onDateSelected = {
+                toDate = it
+                showToPicker = false
+            }
+        )
     }
 
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = MaterialTheme.colorScheme.surface) {

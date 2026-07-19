@@ -160,7 +160,7 @@ fun PartiesScreen(viewModel: LedgerViewModel, onNavigateToLedger: (Int) -> Unit)
                             icon = Icons.Outlined.Contacts,
                             title = if (searchQuery.isNotEmpty()) "No Results" else "No Contacts Yet",
                             description = if (searchQuery.isNotEmpty()) "No contacts match \"$searchQuery\"." else "Add your first contact to start tracking.",
-                            actionText = if (searchQuery.isEmpty()) "Add Contact" else null,
+                            actionText = if (searchQuery.isEmpty()) "Add Your First Party" else null,
                             onAction = if (searchQuery.isEmpty()) { { showAddPartySheet = true } } else null,
                             modifier = Modifier.fillMaxWidth().padding(16.dp)
                         )

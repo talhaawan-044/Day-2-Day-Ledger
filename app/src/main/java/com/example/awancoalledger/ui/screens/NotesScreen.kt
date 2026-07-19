@@ -317,14 +317,16 @@ fun NotesScreen(
                         )
                         if (searchQuery.isEmpty()) {
                             Spacer(Modifier.height(24.dp))
-                            androidx.compose.material3.Button(
-                                onClick = { onNavigateToEditor(null) },
-                                shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
-                                colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                                contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp)
-                            ) {
-                                Text("Compose Note", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                            }
+                            Text(
+                                text = "Create Your First Note",
+                                color = MaterialTheme.colorScheme.primary,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+                                    .clickable { onNavigateToEditor(null) }
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                            )
                         }
                     }
                 }
