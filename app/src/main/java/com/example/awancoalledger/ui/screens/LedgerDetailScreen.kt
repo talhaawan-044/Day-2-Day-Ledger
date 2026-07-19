@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.input.TransformedText
@@ -578,15 +579,19 @@ fun PaymentCardItem(payment: Payment, partyType: PartyType, balance: Double, onC
 @Composable
 fun PartyPreviewSheet(party: Party, onDismiss: () -> Unit, onEdit: () -> Unit) {
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = MaterialTheme.colorScheme.surface) {
-        Column(modifier = Modifier.padding(16.dp).fillMaxWidth().padding(bottom = 32.dp)) {
-            Text("Party Information", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(24.dp))
+        Column(modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth().padding(bottom = 40.dp)) {
+            Text("Party Information", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 24.dp))
             
-            Column(modifier = Modifier.clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)).padding(16.dp)) {
-                PreviewRow("Name", party.name)
-                PreviewRow("Phone", party.phone)
-                PreviewRow("Address", party.address)
-                PreviewRow("Type", party.type.name)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+            ) {
+                PartyDetailRow("Name", party.name, isFirst = true)
+                PartyDetailRow("Phone", if (party.phone.isNullOrBlank()) "Not Provided" else party.phone)
+                PartyDetailRow("Address", if (party.address.isNullOrBlank()) "Not Provided" else party.address)
+                PartyDetailRow("Type", party.type.name, isLast = true)
             }
             
             Spacer(modifier = Modifier.height(32.dp))
@@ -594,25 +599,43 @@ fun PartyPreviewSheet(party: Party, onDismiss: () -> Unit, onEdit: () -> Unit) {
             Button(
                 onClick = onEdit,
                 modifier = Modifier.fillMaxWidth().height(56.dp),
-                shape = RoundedCornerShape(28.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.onBackground,
-                    contentColor = MaterialTheme.colorScheme.background
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             ) {
-                Icon(Icons.Outlined.Edit, contentDescription = null, tint = MaterialTheme.colorScheme.background, modifier = Modifier.size(20.dp))
+                Icon(Icons.Outlined.Edit, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Edit Party Info", color = MaterialTheme.colorScheme.background, fontWeight = FontWeight.Bold)
+                Text("Edit Party Info", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
             }
         }
     }
 }
 
 @Composable
-fun PreviewRow(label: String, value: String, isBold: Boolean = false) {
-    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
-        Text(value, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = if (isBold) FontWeight.Bold else FontWeight.Normal)
+fun PartyDetailRow(label: String, value: String, isFirst: Boolean = false, isLast: Boolean = false) {
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 15.sp)
+            Text(
+                value, 
+                color = if (value == "Not Provided") MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface, 
+                fontSize = 15.sp, 
+                fontWeight = if (value != "Not Provided" && label == "Name") FontWeight.SemiBold else FontWeight.Normal,
+                textAlign = TextAlign.End,
+                modifier = Modifier.weight(1f).padding(start = 16.dp)
+            )
+        }
+        if (!isLast) {
+            HorizontalDivider(modifier = Modifier.padding(start = 16.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f), thickness = 0.5.dp)
+        }
     }
 }
 

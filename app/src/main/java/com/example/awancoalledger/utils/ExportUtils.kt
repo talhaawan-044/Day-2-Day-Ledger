@@ -314,20 +314,20 @@ object ExportUtils {
                 return when {
                     bal > 0 -> {
                         if (partyType == PartyType.BUYER) {
-                            Triple("Rs. $absAmount", "⬆️ RECEIVABLE", colorSuccess)
+                            Triple("Rs. $absAmount", "RECEIVABLE", colorSuccess)
                         } else {
-                            Triple("Rs. $absAmount", "⬆️ PAYABLE", colorError)
+                            Triple("Rs. $absAmount", "PAYABLE", colorError)
                         }
                     }
                     bal < 0 -> {
                         if (partyType == PartyType.BUYER) {
-                            Triple("Rs. $absAmount", "⬇️ PAYABLE", colorError)
+                            Triple("Rs. $absAmount", "PAYABLE", colorError)
                         } else {
-                            Triple("Rs. $absAmount", "⬇️ RECEIVABLE", colorSuccess)
+                            Triple("Rs. $absAmount", "RECEIVABLE", colorSuccess)
                         }
                     }
                     else -> {
-                        Triple("Rs. 0", "✅ CLEAR", colorSuccess)
+                        Triple("Rs. 0", "CLEAR", colorSuccess)
                     }
                 }
             }
@@ -362,8 +362,8 @@ object ExportUtils {
             }
 
             // Box 2: FINAL BALANCE - MUCH BIGGER AND MORE PROMINENT
-            val finalBoxColor = 0xFFFEF3C7.toInt() // Light amber background for emphasis
-            drawBoxWithShadow(310f, y, 575f, y + 135f, 12f, finalBoxColor, colorWarning)
+            val finalBoxColor = 0xFFF1F5F9.toInt() // Very light gray
+            drawBoxWithShadow(310f, y, 575f, y + 135f, 12f, finalBoxColor, colorSlate300)
 
             // "FINAL BALANCE" header with icon
             paint.resetText()
@@ -379,8 +379,8 @@ object ExportUtils {
             canvas.drawText("(As of $endStr)", 325f, y + 38f, paint)
 
             // Draw separator line
-            paint.color = colorWarning
-            paint.strokeWidth = 2f
+            paint.color = colorSlate300
+            paint.strokeWidth = 1f
             canvas.drawLine(325f, y + 45f, 560f, y + 45f, paint)
 
             // HUGE balance amount - 3x larger than before
@@ -430,12 +430,12 @@ object ExportUtils {
 
             fun drawTableHeader(yPos: Float) {
                 // Header background with gradient
-                paint.color = colorSlate900
+                paint.color = colorSlate100
                 canvas.drawRect(20f, yPos - 25f, 575f, yPos + 10f, paint)
 
                 // Header text properties
                 paint.resetText()
-                paint.color = Color.WHITE
+                paint.color = colorSlate900
                 paint.textSize = 11f
                 paint.typeface = tfBold
                 paint.textAlign = Paint.Align.CENTER
@@ -453,13 +453,18 @@ object ExportUtils {
                 paint.textAlign = Paint.Align.LEFT // Reset
 
                 // Column separator lines
-                paint.color = 0x40FFFFFF.toInt() // Semi-transparent white
+                paint.color = colorSlate300
                 paint.strokeWidth = 1f
                 canvas.drawLine(div1, yPos - 25f, div1, yPos + 10f, paint)
                 canvas.drawLine(div2, yPos - 25f, div2, yPos + 10f, paint)
                 canvas.drawLine(div3, yPos - 25f, div3, yPos + 10f, paint)
                 canvas.drawLine(div4, yPos - 25f, div4, yPos + 10f, paint)
                 canvas.drawLine(div5, yPos - 25f, div5, yPos + 10f, paint)
+
+                // Bottom border for header
+                paint.color = colorSlate300
+                paint.strokeWidth = 1f
+                canvas.drawLine(20f, yPos + 10f, 575f, yPos + 10f, paint)
             }
 
             drawTableHeader(y)
@@ -1032,9 +1037,9 @@ object ExportUtils {
             y += 90f
 
             // Table Header
-            paint.color = colorSlate900
+            paint.color = colorSlate100
             canvas.drawRect(20f, y, 575f, y + 30f, paint)
-            paint.color = Color.WHITE
+            paint.color = colorSlate900
             paint.resetText()
             paint.textSize = 11f
             paint.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)

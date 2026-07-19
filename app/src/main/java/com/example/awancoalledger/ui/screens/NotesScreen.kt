@@ -307,14 +307,15 @@ fun NotesScreen(
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.SemiBold
                         )
-                        Spacer(Modifier.height(8.dp))
-                        Text(
-                                if (searchQuery.isNotEmpty()) "No notes match \"$searchQuery\"."
-                                else "Create your first note.",
+                        if (searchQuery.isNotEmpty()) {
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                "No notes match \"$searchQuery\".",
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                                 fontSize = 15.sp,
                                 textAlign = TextAlign.Center
-                        )
+                            )
+                        }
                         if (searchQuery.isEmpty()) {
                             Spacer(Modifier.height(24.dp))
                             Text(
