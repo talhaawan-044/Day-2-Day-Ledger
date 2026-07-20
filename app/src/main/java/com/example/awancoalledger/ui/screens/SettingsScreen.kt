@@ -1657,7 +1657,7 @@ fun AccentColorRow(viewModel: SettingsViewModel, haptic: androidx.compose.ui.hap
         "#FF9500" to "Orange",
         "#FF3B30" to "Red",
         "#5A595E" to "Grey",
-        "#ffff61ff" to "Yellow"
+        "#e3d714" to "Yellow"
     )
 
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp)) {
