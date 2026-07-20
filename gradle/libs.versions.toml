@@ -12,7 +12,6 @@ room = "2.8.4"
 navigation = "2.8.5"
 ksp = "2.3.2"
 lifecycle = "2.8.7"
-poi = "5.2.5"
 biometric = "1.2.0-alpha05"
 playServicesLocation = "21.3.0"
 kotlinxCoroutinesPlayServices = "1.9.0"
@@ -47,7 +46,6 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
-poi-ooxml = { group = "org.apache.poi", name = "poi-ooxml", version.ref = "poi" }
 # Removed redundant androidx-ui entry here to avoid conflicts with androidx-compose-ui
 androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }

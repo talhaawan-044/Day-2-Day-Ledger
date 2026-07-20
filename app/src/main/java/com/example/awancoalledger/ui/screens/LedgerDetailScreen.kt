@@ -363,12 +363,12 @@ fun LedgerDetailScreen(
             )
         }
 
-        if (editingEntry != null) {
+        editingEntry?.let { entry ->
             EntryActionSheet(
-                entry = editingEntry,
+                entry = entry,
                 onDismiss = { editingEntry = null },
                 onAdd = { date, truck, mine, warehouse, weight, rate, fare, adv ->
-                    viewModel.updateEntry(editingEntry!!.copy(
+                    viewModel.updateEntry(entry.copy(
                         date = date,
                         truckNumber = truck, mine = mine, warehouse = warehouse,
                         weight = weight, rate = rate, fare = fare, advPayment = adv
@@ -389,25 +389,25 @@ fun LedgerDetailScreen(
             )
         }
 
-        if (editingPayment != null) {
+        editingPayment?.let { payment ->
             PaymentActionSheet(
-                payment = editingPayment,
+                payment = payment,
                 partyType = details?.party?.type ?: PartyType.BUYER,
                 onDismiss = { editingPayment = null },
                 onAdd = { date, amount, type, note ->
-                    viewModel.updatePayment(editingPayment!!.copy(date = date, amount = amount, type = type, note = note))
+                    viewModel.updatePayment(payment.copy(date = date, amount = amount, type = type, note = note))
                     editingPayment = null
                 }
             )
         }
 
-        if (editingParty != null) {
+        editingParty?.let { party ->
             PartyActionSheet(
-                party = editingParty,
+                party = party,
                 countryConfig = countryConfig,
                 onDismiss = { editingParty = null },
                 onAction = { name, phone, address, type ->
-                    viewModel.updateParty(editingParty!!.copy(name = name, phone = phone, address = address, type = type))
+                    viewModel.updateParty(party.copy(name = name, phone = phone, address = address, type = type))
                     editingParty = null
                 }
             )

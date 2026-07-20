@@ -24,3 +24,4 @@ local.properties
 keystore.properties
 
 /App-screenshots-for-ai/
+app/google-services.json

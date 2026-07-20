@@ -254,6 +254,7 @@ fun SettingsScreen(
                 }
                 Spacer(modifier = Modifier.height(40.dp))
             } else {
+                val category = currentCategory ?: return@Column
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)) {
                     Surface(onClick = { currentCategory = null }, shape = androidx.compose.foundation.shape.CircleShape, color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.size(40.dp)) {
                         Box(contentAlignment = Alignment.Center) {
@@ -261,9 +262,9 @@ fun SettingsScreen(
                         }
                     }
                     Spacer(modifier = Modifier.width(16.dp))
-                    Text(currentCategory!!.title, color = MaterialTheme.colorScheme.onBackground, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+                    Text(category.title, color = MaterialTheme.colorScheme.onBackground, fontSize = 28.sp, fontWeight = FontWeight.Bold)
                 }
-                when(currentCategory!!) {
+                when(category) {
                     SettingsCategory.CLOUD_ACCOUNT -> {
             SettingsSection(title = "CLOUD ACCOUNT") {
                 if (user == null || isAnonymous) {
@@ -582,9 +583,9 @@ fun SettingsScreen(
         }
 
         // Modals
-        if (editingField != null) {
-            EditFieldDialog(editingField!!, onDismiss = { editingField = null }) {
-                when (editingField!!.first) {
+        editingField?.let { field ->
+            EditFieldDialog(field, onDismiss = { editingField = null }) {
+                when (field.first) {
                     "Business Name" -> viewModel.updateBusinessName(it)
                     "Owner Name" -> viewModel.updateOwnerName(it)
                     "Phone" -> viewModel.updateBusinessPhone(it)
@@ -1164,7 +1165,7 @@ fun AutoBackupsModal(viewModel: LedgerViewModel, onDismiss: () -> Unit) {
             ) { Text("Done") }
         }
 
-        if (snapshotToRestore != null) {
+        snapshotToRestore?.let { snapshot ->
             IOSAlertDialog(
                     onDismissRequest = { snapshotToRestore = null },
                     title = "Restore Snapshot?",
@@ -1180,7 +1181,7 @@ fun AutoBackupsModal(viewModel: LedgerViewModel, onDismiss: () -> Unit) {
                                 onClick = {
                                     viewModel.restoreSnapshot(
                                             context,
-                                            snapshotToRestore!!,
+                                            snapshot,
                                             onSuccess = {
                                                 Toast.makeText(
                                                                 context,

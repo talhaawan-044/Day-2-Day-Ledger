@@ -249,6 +249,7 @@ class SyncManager(
                     if (local == null || lastUpdated > local.lastUpdated) {
                         val tw = (data["totalWeight"] as? Double) ?: (data["totalWeight"] as? Long)?.toDouble() ?: 0.0
                         val pw = (data["peakWeight"] as? Double) ?: (data["peakWeight"] as? Long)?.toDouble() ?: 0.0
+                        if (isInvalidDouble(tw) || isInvalidDouble(pw)) return@forEach
                         dao.insertStock(Stock(
                             id = local?.id ?: 0,
                             mineName = data["mineName"] as? String ?: "", totalWeight = tw, peakWeight = pw,
@@ -286,6 +287,7 @@ class SyncManager(
                                 if (sData != null) {
                                     val tw = (sData["totalWeight"] as? Double) ?: (sData["totalWeight"] as? Long)?.toDouble() ?: 0.0
                                     val pw = (sData["peakWeight"] as? Double) ?: (sData["peakWeight"] as? Long)?.toDouble() ?: 0.0
+                                    if (isInvalidDouble(tw) || isInvalidDouble(pw)) return@forEach
                                     val newStock = Stock(
                                         mineName = sData["mineName"] as? String ?: "",
                                         totalWeight = tw, peakWeight = pw,
@@ -311,6 +313,7 @@ class SyncManager(
                     val local = dao.getStockEntryBySyncId(syncId)
                     if (local == null || lastUpdated > local.lastUpdated) {
                         val w = (data["weight"] as? Double) ?: (data["weight"] as? Long)?.toDouble() ?: 0.0
+                        if (isInvalidDouble(w)) return@forEach
                         dao.insertStockEntry(StockEntry(
                             id = local?.id ?: 0,
                             stockId = stock.id, weight = w, warehouse = data["warehouse"] as? String ?: "",
@@ -565,6 +568,7 @@ class SyncManager(
                     val local = dao.getVehicleBySyncId(syncId)
                     if (local == null || lastUpdated > local.lastUpdated) {
                         val mileage = (data["currentMileage"] as? Double) ?: (data["currentMileage"] as? Long)?.toDouble() ?: 0.0
+                        if (isInvalidDouble(mileage)) return@forEach
                         dao.insertVehicle(Vehicle(
                             id = local?.id ?: 0,
                             name = data["name"] as? String ?: "", plateNumber = data["plateNumber"] as? String ?: "",

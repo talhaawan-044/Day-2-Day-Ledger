@@ -379,9 +379,9 @@ fun ExpensesScreen(viewModel: LedgerViewModel) {
         )
     }
 
-    if (previewingExpense != null) {
+    previewingExpense?.let { expense ->
         ExpensePreviewSheet(
-                expense = previewingExpense!!,
+                expense = expense,
                 onDismiss = { previewingExpense = null },
                 onEdit = {
                     editingExpense = previewingExpense
@@ -390,12 +390,12 @@ fun ExpensesScreen(viewModel: LedgerViewModel) {
         )
     }
 
-    if (editingExpense != null) {
+    editingExpense?.let { expense ->
         AddExpenseDialog(
-                expense = editingExpense,
+                expense = expense,
                 onDismiss = { editingExpense = null },
                 onConfirm = { amount, category, note, date ->
-                    viewModel.deleteExpense(editingExpense!!)
+                    viewModel.deleteExpense(expense)
                     viewModel.addExpense(amount, category, note, date)
                     editingExpense = null
                 }

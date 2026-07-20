@@ -175,15 +175,15 @@ fun StockDetailScreen(
         )
     }
 
-    if (editingEntry != null) {
+    editingEntry?.let { entry ->
         AddStockEntryDialog(
             mineName = stock?.mineName ?: "Stock",
-            initialWeight = editingEntry?.weight?.toString() ?: "",
-            initialWarehouse = editingEntry?.warehouse ?: "",
+            initialWeight = entry.weight.toString(),
+            initialWarehouse = entry.warehouse,
             isEdit = true,
             onDismiss = { editingEntry = null },
             onConfirm = { weight, warehouse ->
-                viewModel.deleteStockEntry(editingEntry!!)
+                viewModel.deleteStockEntry(entry)
                 viewModel.addStockEntry(mine = stock?.mineName ?: "", weight = weight, warehouse = warehouse)
                 editingEntry = null
             }

@@ -213,14 +213,14 @@ fun PartiesScreen(viewModel: LedgerViewModel, onNavigateToLedger: (Int) -> Unit)
             )
         }
 
-        if (editingParty != null) {
+        editingParty?.let { party ->
             PartyActionSheet(
-                    party = editingParty,
+                    party = party,
                     countryConfig = countryConfig,
                     onDismiss = { editingParty = null },
                     onAction = { name, phone, address, type ->
                         viewModel.updateParty(
-                                editingParty!!.copy(
+                                party.copy(
                                         name = name,
                                         phone = phone,
                                         address = address,

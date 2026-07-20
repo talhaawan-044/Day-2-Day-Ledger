@@ -304,11 +304,11 @@ fun VehicleTrackerScreen(viewModel: LedgerViewModel, onNavigateBack: () -> Unit)
         }
 
         // --- Modals ---
-        if (alertMessage != null) {
+        alertMessage?.let { msg ->
             IOSAlertDialog(
                 onDismissRequest = { viewModel.dismissVehicleAlert() },
                 title = "Vehicle Alert",
-                message = alertMessage!!,
+                message = msg,
                 buttons = {
                     IOSDialogButton(text = "OK", fontWeight = FontWeight.Bold, isLast = true, onClick = { viewModel.dismissVehicleAlert() })
                 }
@@ -329,8 +329,7 @@ fun VehicleTrackerScreen(viewModel: LedgerViewModel, onNavigateBack: () -> Unit)
             )
         }
 
-        if (logToDelete != null) {
-            val entry = logToDelete!!
+        logToDelete?.let { entry ->
             val title = if (entry is FuelEntry) "Delete Fuel Entry" else "Delete Service Log"
             val message = if (entry is FuelEntry) "Remove this fuel purchase of ${entry.liters}L?" else "Remove this service log?"
             

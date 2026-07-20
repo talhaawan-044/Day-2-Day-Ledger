@@ -72,9 +72,7 @@ dependencies {
     // Lifecycle
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     
-    // Excel Export
-    implementation(libs.poi.ooxml)
-    
+
     // Biometric
     implementation(libs.androidx.biometric)
 

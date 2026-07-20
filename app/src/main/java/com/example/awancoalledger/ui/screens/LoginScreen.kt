@@ -158,9 +158,9 @@ fun LoginDialog(
                 }
 
 
-                if (error != null) {
+                error?.let { err ->
                     Text(
-                        text = error!!,
+                        text = err,
                         color = Color(0xFFFF453A),
                         fontSize = 13.sp,
                         modifier = Modifier.padding(top = 12.dp),

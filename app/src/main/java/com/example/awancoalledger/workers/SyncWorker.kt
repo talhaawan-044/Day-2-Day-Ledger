@@ -122,6 +122,7 @@ class SyncWorker(
             }
             "stocks" -> {
                 val s = dao.getStockBySyncId(syncId) ?: return null
+                if (isInvalidDouble(s.totalWeight) || isInvalidDouble(s.peakWeight)) return null
                 mapOf("schemaVersion" to 1, "isDeleted" to s.isDeleted, 
                     "mineName" to s.mineName, "totalWeight" to s.totalWeight,
                     "peakWeight" to s.peakWeight, "lastWarehouse" to (s.lastWarehouse ?: ""),
@@ -129,6 +130,7 @@ class SyncWorker(
             }
             "stock_entries" -> {
                 val e = dao.getStockEntryBySyncId(syncId) ?: return null
+                if (isInvalidDouble(e.weight)) return null
                 val stock = dao.getStockById(e.stockId) ?: return null
                 mapOf("schemaVersion" to 1, "isDeleted" to e.isDeleted, 
                     "stockSyncId" to stock.syncId, "weight" to e.weight,
@@ -155,6 +157,7 @@ class SyncWorker(
             }
             "vehicles" -> {
                 val v = dao.getVehicleBySyncId(syncId) ?: return null
+                if (isInvalidDouble(v.currentMileage)) return null
                 mapOf("schemaVersion" to 1, "isDeleted" to v.isDeleted, 
                     "name" to v.name, "plateNumber" to v.plateNumber,
                     "type" to v.type, "currentMileage" to v.currentMileage,

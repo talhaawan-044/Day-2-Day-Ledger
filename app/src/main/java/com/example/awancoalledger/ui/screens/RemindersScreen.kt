@@ -212,10 +212,11 @@ fun RemindersScreen(
             },
             onSave = { title, desc, date, priority, category, recurrence ->
                 haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                if (selectedReminder == null) {
+                val currentReminder = selectedReminder
+                if (currentReminder == null) {
                     viewModel.addReminder(title, desc, date, priority, category)
                 } else {
-                    viewModel.updateReminder(selectedReminder!!.copy(
+                    viewModel.updateReminder(currentReminder.copy(
                         title = title, note = desc, dueDate = date, remindTime = date,
                         priority = priority, category = category, recurrence = recurrence
                     ))
@@ -329,18 +330,18 @@ fun ReminderListItem(
                 color = if (reminder.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface,
                 textDecoration = if (reminder.isCompleted) androidx.compose.ui.text.style.TextDecoration.LineThrough else null
             )
-            if (!reminder.note.isNullOrBlank()) {
+            reminder.note?.takeIf { it.isNotBlank() }?.let { note ->
                 Text(
-                    reminder.note!!, 
+                    note, 
                     fontSize = 14.sp, 
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f), 
                     maxLines = 2,
                     modifier = Modifier.padding(top = 2.dp)
                 )
             }
-            if (reminder.dueDate != null) {
-                val isOverdue = reminder.dueDate!! < System.currentTimeMillis() && !reminder.isCompleted
-                val dateStr = SimpleDateFormat("EEE, MMM dd", Locale.getDefault()).format(Date(reminder.dueDate!!))
+            reminder.dueDate?.let { dueDate ->
+                val isOverdue = dueDate < System.currentTimeMillis() && !reminder.isCompleted
+                val dateStr = SimpleDateFormat("EEE, MMM dd", Locale.getDefault()).format(Date(dueDate))
                 Text(
                     dateStr, 
                     fontSize = 13.sp, 
