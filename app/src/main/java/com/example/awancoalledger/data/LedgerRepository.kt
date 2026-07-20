@@ -1,14 +1,27 @@
 package com.example.awancoalledger.data
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import com.example.awancoalledger.utils.BackupData
 
 class LedgerRepository(private val ledgerDao: LedgerDao) {
 
     // Parties
     fun getAllParties(): Flow<List<Party>> = ledgerDao.getAllParties()
-    fun getAllPartiesWithDetails(): Flow<List<PartyWithDetails>> = ledgerDao.getAllPartiesWithDetails()
-    fun getPartyWithDetails(partyId: Int): Flow<PartyWithDetails?> = ledgerDao.getPartyWithDetails(partyId)
+    fun getAllPartiesWithDetails(): Flow<List<PartyWithDetails>> = ledgerDao.getAllPartiesWithDetails().map { list ->
+        list.map { details ->
+            details.copy(
+                entries = details.entries.filter { !it.isDeleted },
+                payments = details.payments.filter { !it.isDeleted }
+            )
+        }
+    }
+    fun getPartyWithDetails(partyId: Int): Flow<PartyWithDetails?> = ledgerDao.getPartyWithDetails(partyId).map { details ->
+        details?.copy(
+            entries = details.entries.filter { !it.isDeleted },
+            payments = details.payments.filter { !it.isDeleted }
+        )
+    }
     suspend fun getPartyById(id: Int): Party? = ledgerDao.getPartyById(id)
     suspend fun upsertParty(party: Party) = ledgerDao.upsertParty(party)
     suspend fun deleteParty(party: Party) = ledgerDao.upsertParty(party.copy(isDeleted = true, lastUpdated = System.currentTimeMillis()))
@@ -96,19 +109,19 @@ class LedgerRepository(private val ledgerDao: LedgerDao) {
     @androidx.room.Transaction
     suspend fun restoreData(data: BackupData) {
         ledgerDao.clearAllData()
-        data.parties.forEach { ledgerDao.upsertParty(it) }
-        data.entries.forEach { ledgerDao.insertEntry(it) }
-        data.payments.forEach { ledgerDao.insertPayment(it) }
-        data.expenses.forEach { ledgerDao.insertExpense(it) }
-        data.reminderLists.forEach { ledgerDao.insertReminderList(it) }
-        data.reminders.forEach { ledgerDao.insertReminder(it) }
-        data.stocks.forEach { ledgerDao.insertStock(it) }
-        data.stockEntries.forEach { ledgerDao.insertStockEntry(it) }
-        data.notes.forEach { ledgerDao.insertNote(it) }
-        data.folders.forEach { ledgerDao.insertFolder(it) }
-        data.fuelEntries.forEach { ledgerDao.insertFuelEntry(it) }
-        data.maintenanceEntries.forEach { ledgerDao.insertMaintenanceEntry(it) }
-        data.vehicles.forEach { ledgerDao.insertVehicle(it) }
+        data.parties.orEmpty().forEach { ledgerDao.upsertParty(it) }
+        data.entries.orEmpty().forEach { ledgerDao.insertEntry(it) }
+        data.payments.orEmpty().forEach { ledgerDao.insertPayment(it) }
+        data.expenses.orEmpty().forEach { ledgerDao.insertExpense(it) }
+        data.reminderLists.orEmpty().forEach { ledgerDao.insertReminderList(it) }
+        data.reminders.orEmpty().forEach { ledgerDao.insertReminder(it) }
+        data.stocks.orEmpty().forEach { ledgerDao.insertStock(it) }
+        data.stockEntries.orEmpty().forEach { ledgerDao.insertStockEntry(it) }
+        data.notes.orEmpty().forEach { ledgerDao.insertNote(it) }
+        data.folders.orEmpty().forEach { ledgerDao.insertFolder(it) }
+        data.fuelEntries.orEmpty().forEach { ledgerDao.insertFuelEntry(it) }
+        data.maintenanceEntries.orEmpty().forEach { ledgerDao.insertMaintenanceEntry(it) }
+        data.vehicles.orEmpty().forEach { ledgerDao.insertVehicle(it) }
     }
 
     // Vehicle Tracking

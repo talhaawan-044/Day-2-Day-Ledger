@@ -37,7 +37,7 @@ import coil.compose.AsyncImage
 import com.example.awancoalledger.data.*
 import com.example.awancoalledger.ui.components.*
 import com.example.awancoalledger.ui.theme.*
-import com.example.awancoalledger.viewmodel.LedgerViewModel
+import com.example.awancoalledger.viewmodel.features.SettingsViewModel
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -45,24 +45,24 @@ import java.util.*
 import androidx.activity.compose.BackHandler
 import com.example.awancoalledger.ui.components.IOSDialogButton
 enum class SettingsCategory(val title: String, val icon: androidx.compose.ui.graphics.vector.ImageVector, val color: androidx.compose.ui.graphics.Color, val subtitle: String) {
-    CLOUD_ACCOUNT("Cloud Account", androidx.compose.material.icons.Icons.Outlined.CloudUpload, androidx.compose.ui.graphics.Color(0xFF007AFF), "Sync & Backups"),
+    BACKUPS_AND_SYNC("Backups & Sync", androidx.compose.material.icons.Icons.Outlined.CloudUpload, androidx.compose.ui.graphics.Color(0xFF007AFF), "Sync & Recovery"),
     BUSINESS_PROFILE("Business Profile", androidx.compose.material.icons.Icons.Outlined.Business, androidx.compose.ui.graphics.Color(0xFF007AFF), "Name, phone, logo"),
     PRIVACY_SECURITY("Privacy & Security", androidx.compose.material.icons.Icons.Outlined.Lock, ErrorRed, "App lock, biometrics"),
-    PREFERENCES("Preferences", androidx.compose.material.icons.Icons.Outlined.SettingsSuggest, iOSPurple, "Dark mode, dock"),
-    DATA_MANAGEMENT("Data Management", androidx.compose.material.icons.Icons.Outlined.History, iOSOrange, "Backups, recovery")
+    PREFERENCES("Preferences", androidx.compose.material.icons.Icons.Outlined.SettingsSuggest, iOSPurple, "Dark mode, dock")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-        viewModel: LedgerViewModel,
+    authViewModel: com.example.awancoalledger.viewmodel.features.AuthViewModel,
+
+        viewModel: SettingsViewModel,
         onNavigateToShortcut: (String) -> Unit = {}
 ) {
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
 
-    val reminders by viewModel.allReminders.collectAsState(initial = emptyList())
-    val activeRemindersCount = reminders.count { !it.isCompleted }
+    val activeRemindersCount = 0
 
     val bizName by viewModel.businessName.collectAsState(initial = "")
     val ownerName by viewModel.ownerName.collectAsState(initial = "")
@@ -77,8 +77,8 @@ fun SettingsScreen(
     val signatureUri by viewModel.signatureUri.collectAsState(initial = null)
     val oilInterval by viewModel.oilChangeInterval.collectAsState()
 
-    val isAnonymous by viewModel.isAnonymous.collectAsState(initial = true)
-    val showConflictDialog by viewModel.showConflictDialog.collectAsState()
+    val isAnonymous by authViewModel.isAnonymous.collectAsState(initial = true)
+    val showConflictDialog by authViewModel.showConflictDialog.collectAsState()
 
     // Launchers
     val logoPicker =
@@ -91,7 +91,7 @@ fun SettingsScreen(
                 uri?.let { viewModel.updateSignatureUri(context, it) }
             }
 
-    val user by viewModel.currentUser.collectAsState(initial = null)
+    val user by authViewModel.currentUser.collectAsState(initial = null)
     var showRestoreWarning by remember { mutableStateOf(false) }
 
     val googleSignInLauncher =
@@ -111,7 +111,7 @@ fun SettingsScreen(
                             com.google.firebase.auth.GoogleAuthProvider.getCredential(idToken, null)
 
                     if (isAnonymous) {
-                        viewModel.linkAccount(credential) { success, error ->
+                        authViewModel.linkAccount(credential) { success, error ->
                             if (success) {
                                 Toast.makeText(
                                                 context,
@@ -129,11 +129,11 @@ fun SettingsScreen(
                             }
                         }
                     } else {
-                        viewModel.signInWithFirebase(credential) { success, isNewUser ->
+                        authViewModel.signInWithFirebase(credential) { success, isNewUser ->
                             if (success) {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 if (isNewUser) {
-                                    viewModel.confirmLogin(true)
+                                    authViewModel.confirmLogin(true)
                                     Toast.makeText(
                                                     context,
                                                     "Cloud Sync Enabled!",
@@ -141,7 +141,7 @@ fun SettingsScreen(
                                             )
                                             .show()
                                 } else {
-                                    viewModel.confirmLogin(false)
+                                    authViewModel.confirmLogin(false)
                                 }
                             } else {
                                 Toast.makeText(context, "Sign In Failed", Toast.LENGTH_SHORT).show()
@@ -157,7 +157,7 @@ fun SettingsScreen(
     val restoreLauncher =
             rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
                 uri?.let {
-                    viewModel.restoreDatabase(
+                    authViewModel.restoreDatabase(
                             context = context,
                             uri = it,
                             onSuccess = {
@@ -197,32 +197,46 @@ fun SettingsScreen(
                                 .verticalScroll(rememberScrollState())
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            val backDispatcher = androidx.activity.compose.LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-            com.example.awancoalledger.ui.components.ScreenHeader(
-                title = "Settings",
-                onBack = { backDispatcher?.onBackPressed() },
-                modifier = Modifier.padding(horizontal = 0.dp) // already padded in parent
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-
-            val companyLogoUri by viewModel.companyLogoUri.collectAsState()
-            val isLogoUploading by viewModel.isLogoUploading.collectAsState()
-            
-            // Profile Header (Premium Card)
-            ProfileHeader(
-                owner = ownerName,
-                biz = bizName,
-                logoUri = companyLogoUri,
-                isUploading = isLogoUploading,
-                onLogoClick = { 
-                    logoPicker.launch(androidx.activity.result.PickVisualMediaRequest(androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly)) 
+            AnimatedContent(
+                targetState = currentCategory,
+                label = "SettingsNav",
+                transitionSpec = {
+                    if (targetState != null && initialState == null) {
+                        slideInHorizontally(initialOffsetX = { it }) + fadeIn() togetherWith slideOutHorizontally(targetOffsetX = { -it / 2 }) + fadeOut()
+                    } else if (targetState == null && initialState != null) {
+                        slideInHorizontally(initialOffsetX = { -it / 2 }) + fadeIn() togetherWith slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
+                    } else {
+                        fadeIn() togetherWith fadeOut()
+                    }
                 }
-            )
+            ) { targetCategory ->
+                if (targetCategory == null) {
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        val backDispatcher = androidx.activity.compose.LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+                        com.example.awancoalledger.ui.components.ScreenHeader(
+                            title = "Settings",
+                            onBack = { backDispatcher?.onBackPressed() },
+                            modifier = Modifier.padding(horizontal = 0.dp) // already padded in parent
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
 
-            Spacer(modifier = Modifier.height(28.dp))
+                        val companyLogoUri by viewModel.companyLogoUri.collectAsState()
+                        val isLogoUploading by viewModel.isLogoUploading.collectAsState()
+                        
+                        // Profile Header (Premium Card)
+                        ProfileHeader(
+                            owner = ownerName,
+                            biz = bizName,
+                            logoUri = companyLogoUri,
+                            isUploading = isLogoUploading,
+                            onLogoClick = { 
+                                logoPicker.launch(androidx.activity.result.PickVisualMediaRequest(androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly)) 
+                            }
+                        )
 
-            // Sections
-            if (currentCategory == null) {
+                        Spacer(modifier = Modifier.height(28.dp))
+
+                        // Sections
                 val allModules = listOf(
                     com.example.awancoalledger.NavTab("Contacts", "parties", androidx.compose.material.icons.Icons.Outlined.People),
                     com.example.awancoalledger.NavTab("Expenses", "expenses", androidx.compose.material.icons.Icons.Outlined.Payments),
@@ -234,7 +248,7 @@ fun SettingsScreen(
                 if (unusedModules.isNotEmpty()) {
                     SettingsSection(title = "SHORTCUTS") {
                         unusedModules.forEachIndexed { index, tab ->
-                            SettingsRow(icon = tab.icon, title = tab.title, value = "Access " + tab.title, color = MaterialTheme.colorScheme.primary, isLast = index == unusedModules.size - 1) {
+                            SettingsRow(icon = tab.icon, title = tab.title, value = "ntss " + tab.title, color = MaterialTheme.colorScheme.primary, isLast = index == unusedModules.size - 1) {
                                 val currentTime = System.currentTimeMillis()
                                 if (currentTime - lastClickTime > 1000) {
                                     lastClickTime = currentTime
@@ -247,26 +261,26 @@ fun SettingsScreen(
                 
                 SettingsSection(title = "CATEGORIES") {
                     SettingsCategory.values().forEachIndexed { index, category ->
-                        SettingsRow(icon = category.icon, title = category.title, value = category.subtitle, color = if (category == SettingsCategory.CLOUD_ACCOUNT || category == SettingsCategory.BUSINESS_PROFILE) MaterialTheme.colorScheme.primary else category.color, isLast = index == SettingsCategory.values().size - 1) {
+                        SettingsRow(icon = category.icon, title = category.title, value = category.subtitle, color = if (category == SettingsCategory.BACKUPS_AND_SYNC || category == SettingsCategory.BUSINESS_PROFILE) MaterialTheme.colorScheme.primary else category.color, isLast = index == SettingsCategory.values().size - 1) {
                             currentCategory = category
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(40.dp))
-            } else {
-                val category = currentCategory ?: return@Column
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)) {
-                    Surface(onClick = { currentCategory = null }, shape = androidx.compose.foundation.shape.CircleShape, color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.size(40.dp)) {
-                        Box(contentAlignment = Alignment.Center) {
-                            androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Outlined.ArrowBack, contentDescription = "Back")
-                        }
                     }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Text(category.title, color = MaterialTheme.colorScheme.onBackground, fontSize = 28.sp, fontWeight = FontWeight.Bold)
-                }
-                when(category) {
-                    SettingsCategory.CLOUD_ACCOUNT -> {
-            SettingsSection(title = "CLOUD ACCOUNT") {
+                } else {
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)) {
+                            Surface(onClick = { currentCategory = null }, shape = androidx.compose.foundation.shape.CircleShape, color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.size(40.dp)) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Outlined.ArrowBack, contentDescription = "Back")
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(targetCategory.title, color = MaterialTheme.colorScheme.onBackground, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+                        }
+                        when(targetCategory) {
+                    SettingsCategory.BACKUPS_AND_SYNC -> {
+            SettingsSection(title = "CLOUD BACKUP") {
                 if (user == null || isAnonymous) {
                     PremiumAccountCard(
                             title = "Guest Mode",
@@ -287,6 +301,27 @@ fun SettingsScreen(
                 }
             }
 
+            SettingsSection(title = "LOCAL BACKUPS & DATA") {
+                SettingsRow(
+                        Icons.Outlined.History,
+                        "Auto-Backups",
+                        "View Snapshots",
+                        color = iOSOrange
+                ) { showBackupsModal = true }
+                SettingsRow(Icons.Outlined.CloudDownload, "Manual Export", color = MaterialTheme.colorScheme.primary) {
+                    authViewModel.shareBackup(context) { error ->
+                        Toast.makeText(context, "Export Failed: $error", Toast.LENGTH_LONG).show()
+                    }
+                }
+                SettingsRow(
+                        Icons.Outlined.Upload,
+                        "Restore Data",
+                        color = ErrorRed,
+                        textColor = ErrorRed,
+                        isLast = true
+                ) { restoreLauncher.launch(arrayOf("application/json", "*/*")) }
+            }
+
             if (showLogoutDialog) {
                 IOSAlertDialog(
                         title = "Sign Out",
@@ -299,7 +334,7 @@ fun SettingsScreen(
                                     text = "Sign Out",
                                     onClick = {
                                         showLogoutDialog = false
-                                        viewModel.signOut(context)
+                                        authViewModel.signOut(context)
                                     },
                                     color = ErrorRed,
                                     fontWeight = FontWeight.Bold,
@@ -537,7 +572,7 @@ fun SettingsScreen(
                 }
                 SettingsToggleRow(
                         androidx.compose.material.icons.Icons.Outlined.BlurOn,
-                        "Frosted Glass (iOS Blur)",
+                        "Frosted Glass Dock",
                         frostedGlass,
                         color = MaterialTheme.colorScheme.primary
                 ) {
@@ -554,28 +589,7 @@ fun SettingsScreen(
             }
 
                     }
-                    SettingsCategory.DATA_MANAGEMENT -> {
-            SettingsSection(title = "DATA MANAGEMENT") {
-                SettingsRow(
-                        Icons.Outlined.History,
-                        "Auto-Backups",
-                        "View Snapshots",
-                        color = iOSOrange
-                ) { showBackupsModal = true }
-                SettingsRow(Icons.Outlined.CloudDownload, "Manual Export", color = MaterialTheme.colorScheme.primary) {
-                    viewModel.shareBackup(context) { error ->
-                        Toast.makeText(context, "Export Failed: $error", Toast.LENGTH_LONG).show()
-                    }
-                }
-                SettingsRow(
-                        Icons.Outlined.Upload,
-                        "Restore Data",
-                        color = ErrorRed,
-                        textColor = ErrorRed,
-                        isLast = true
-                ) { restoreLauncher.launch(arrayOf("application/json", "*/*")) }
-            }
-
+                        }
                     }
                 }
             }
@@ -589,7 +603,7 @@ fun SettingsScreen(
                     "Business Name" -> viewModel.updateBusinessName(it)
                     "Owner Name" -> viewModel.updateOwnerName(it)
                     "Phone" -> viewModel.updateBusinessPhone(it)
-                    "Oil Interval" -> viewModel.updateOilChangeInterval(it.toIntOrNull() ?: 3000)
+                    "Oil Interval" -> viewModel.setOilChangeIntervalKm(it.toIntOrNull() ?: 3000)
                 }
                 editingField = null
             }
@@ -603,7 +617,7 @@ fun SettingsScreen(
         }
 
         if (showBackupsModal) {
-            AutoBackupsModal(viewModel = viewModel, onDismiss = { showBackupsModal = false })
+            AutoBackupsModal(viewModel = viewModel, authViewModel = authViewModel, onDismiss = { showBackupsModal = false })
         }
 
         if (showDockCustomizationModal) {
@@ -616,17 +630,17 @@ fun SettingsScreen(
 
         if (showLoginDialog) {
             LoginDialog(
-                    viewModel = viewModel,
+                    viewModel = authViewModel,
                     onDismiss = { showLoginDialog = false },
                     onGoogleSignIn = {
                         showLoginDialog = false
                         googleSignInLauncher.launch(
-                                viewModel.getGoogleSignInClient(context).signInIntent
+                                authViewModel.getGoogleSignInClient(context).signInIntent
                         )
                     },
                     onAuthSuccess = { isNewUser ->
                         if (isNewUser) {
-                            viewModel.confirmLogin(true)
+                            authViewModel.confirmLogin(true)
                             Toast.makeText(context, "Cloud Sync Enabled!", Toast.LENGTH_SHORT)
                                     .show()
                         } else {
@@ -650,7 +664,7 @@ fun SettingsScreen(
                                 isLast = true,
                                 onClick = {
                                     showRestoreWarning = false
-                                    viewModel.confirmLogin(false)
+                                    authViewModel.confirmLogin(false)
                                     Toast.makeText(
                                                     context,
                                                     "Restoring from Cloud...",
@@ -665,14 +679,14 @@ fun SettingsScreen(
 
         if (showConflictDialog) {
             IOSAlertDialog(
-                    onDismissRequest = { viewModel.handleCollisionCancel() },
+                    onDismissRequest = { authViewModel.handleCollisionCancel() },
                     title = "Account Already Exists",
                     message =
                             "This Google account already has backed-up data. Do you want to Erase Guest Data & Restore Cloud Data or Cancel?",
                     buttons = {
                         IOSDialogButton(
                                 text = "Cancel",
-                                onClick = { viewModel.handleCollisionCancel() }
+                                onClick = { authViewModel.handleCollisionCancel() }
                         )
                         IOSDialogButton(
                                 text = "Restore Cloud Data",
@@ -680,7 +694,7 @@ fun SettingsScreen(
                                 fontWeight = FontWeight.Bold,
                                 isLast = true,
                                 onClick = {
-                                    viewModel.handleCollisionRestore(context) {
+                                    authViewModel.handleCollisionRestore(context) {
                                         Toast.makeText(
                                                         context,
                                                         "Data Restored from Cloud!",
@@ -807,14 +821,16 @@ fun ProfileHeader(owner: String, biz: String, logoUri: android.net.Uri? = null, 
 @Composable
 fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) {
     Column(modifier = Modifier.padding(bottom = 24.dp)) {
-        Text(
+        if (title.isNotEmpty()) {
+            Text(
                 title,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(start = 16.dp, bottom = 8.dp),
                 letterSpacing = 0.5.sp
-        )
+            )
+        }
         Surface(
                 modifier = Modifier.fillMaxWidth(),
                 color = MaterialTheme.colorScheme.surface,
@@ -1032,7 +1048,7 @@ fun PinKeypadModal(onDismiss: () -> Unit, onComplete: (String) -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AutoBackupsModal(viewModel: LedgerViewModel, onDismiss: () -> Unit) {
+fun AutoBackupsModal(viewModel: SettingsViewModel, authViewModel: com.example.awancoalledger.viewmodel.features.AuthViewModel, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val snapshots by viewModel.autoSnapshots.collectAsState()
     var snapshotToRestore by remember { mutableStateOf<File?>(null) }
@@ -1179,7 +1195,7 @@ fun AutoBackupsModal(viewModel: LedgerViewModel, onDismiss: () -> Unit) {
                                 fontWeight = FontWeight.Bold,
                                 isLast = true,
                                 onClick = {
-                                    viewModel.restoreSnapshot(
+                                    authViewModel.restoreSnapshot(
                                             context,
                                             snapshot,
                                             onSuccess = {
@@ -1632,7 +1648,7 @@ fun DockCustomizationDialog(
 }
 
 @Composable
-fun AccentColorRow(viewModel: LedgerViewModel, haptic: androidx.compose.ui.hapticfeedback.HapticFeedback) {
+fun AccentColorRow(viewModel: SettingsViewModel, haptic: androidx.compose.ui.hapticfeedback.HapticFeedback) {
     val currentHex by viewModel.accentColorHex.collectAsState()
     
     val accentColors = listOf(
@@ -1640,7 +1656,8 @@ fun AccentColorRow(viewModel: LedgerViewModel, haptic: androidx.compose.ui.hapti
         "#56D25B" to "Green",
         "#FF9500" to "Orange",
         "#FF3B30" to "Red",
-        "#5856D6" to "Purple"
+        "#5A595E" to "Grey",
+        "#ffff61ff" to "Yellow"
     )
 
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp)) {

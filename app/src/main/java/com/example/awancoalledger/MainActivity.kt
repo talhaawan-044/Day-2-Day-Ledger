@@ -119,16 +119,17 @@ class MainActivity : FragmentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
-            val viewModel: LedgerViewModel = viewModel(factory = factory)
-            val isDarkMode by viewModel.isDarkMode.collectAsState()
-            val accentColorHex by viewModel.accentColorHex.collectAsState()
+            val settingsViewModel: com.example.awancoalledger.viewmodel.features.SettingsViewModel = viewModel(factory = factory)
+            val authViewModel: com.example.awancoalledger.viewmodel.features.AuthViewModel = viewModel(factory = factory)
+            val isDarkMode by settingsViewModel.isDarkMode.collectAsState()
+            val accentColorHex by settingsViewModel.accentColorHex.collectAsState()
             
             AwanCoalLedgerTheme(darkTheme = isDarkMode, accentColorHex = accentColorHex) {
-                val isLocked by viewModel.isLocked.collectAsState()
-                val ownerName by viewModel.ownerName.collectAsState()
-                val biometricsEnabled by viewModel.isBiometricsEnabled.collectAsState()
+                val isLocked by settingsViewModel.isLocked.collectAsState()
+                val ownerName by settingsViewModel.ownerName.collectAsState()
+                val biometricsEnabled by settingsViewModel.isBiometricsEnabled.collectAsState()
                 
-                val needsRestart by viewModel.needsRestart.collectAsState()
+                val needsRestart by authViewModel.needsRestart.collectAsState()
                 
                 if (needsRestart) {
                     IOSAlertDialog(
@@ -154,17 +155,17 @@ class MainActivity : FragmentActivity() {
 
                 if (isLocked) {
                     LockScreen(
-                        onUnlock = { pin -> viewModel.unlock(pin) },
+                        onUnlock = { pin -> settingsViewModel.unlock(pin) },
                         ownerName = ownerName,
                         biometricEnabled = biometricsEnabled,
                         onBiometricTrigger = {
                             showBiometricPrompt {
-                                viewModel.unlockWithBiometrics()
+                                settingsViewModel.unlockWithBiometrics()
                             }
                         }
                     )
                 } else {
-                    MainAppContainer(viewModel)
+                    MainAppContainer(factory)
                 }
             }
         }
@@ -192,18 +193,21 @@ class MainActivity : FragmentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainAppContainer(viewModel: LedgerViewModel) {
+fun MainAppContainer(factory: LedgerViewModelFactory) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val frostedGlass by viewModel.isFrostedGlassEnabled.collectAsState()
     val hazeState = remember { HazeState() }
+    val settingsViewModel: com.example.awancoalledger.viewmodel.features.SettingsViewModel = viewModel(factory = factory)
+    val dashboardViewModel: com.example.awancoalledger.viewmodel.features.DashboardViewModel = viewModel(factory = factory)
+    val frostedGlass by settingsViewModel.isFrostedGlassEnabled.collectAsState()
+    val dockItems by settingsViewModel.dockItems.collectAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
     // Hide bottom bar on detail screens
     val showBottomBar = currentRoute in listOf("summary", "parties", "expenses", "inventory", "notes", "settings", "vehicle_tracker")
 
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
-    val dockItems by viewModel.dockItems.collectAsState()
+
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -270,37 +274,17 @@ fun MainAppContainer(viewModel: LedgerViewModel) {
             NavHost(
                 navController = navController, 
                 startDestination = "summary",
-                enterTransition = {
-                    androidx.compose.animation.slideInHorizontally(
-                        initialOffsetX = { it },
-                        animationSpec = androidx.compose.animation.core.spring(dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy, stiffness = androidx.compose.animation.core.Spring.StiffnessLow)
-                    ) + androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(300))
-                },
-                exitTransition = {
-                    androidx.compose.animation.slideOutHorizontally(
-                        targetOffsetX = { -it / 3 },
-                        animationSpec = androidx.compose.animation.core.spring(dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy, stiffness = androidx.compose.animation.core.Spring.StiffnessLow)
-                    ) + androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(300))
-                },
-                popEnterTransition = {
-                    androidx.compose.animation.slideInHorizontally(
-                        initialOffsetX = { -it / 3 },
-                        animationSpec = androidx.compose.animation.core.spring(dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy, stiffness = androidx.compose.animation.core.Spring.StiffnessLow)
-                    ) + androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(300))
-                },
-                popExitTransition = {
-                    androidx.compose.animation.slideOutHorizontally(
-                        targetOffsetX = { it },
-                        animationSpec = androidx.compose.animation.core.spring(dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy, stiffness = androidx.compose.animation.core.Spring.StiffnessLow)
-                    ) + androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(300))
-                }
+                enterTransition = { androidx.compose.animation.EnterTransition.None },
+                exitTransition = { androidx.compose.animation.ExitTransition.None },
+                popEnterTransition = { androidx.compose.animation.EnterTransition.None },
+                popExitTransition = { androidx.compose.animation.ExitTransition.None }
             ) {
                 composable("summary") {
+                    val vm: com.example.awancoalledger.viewmodel.features.DashboardViewModel = viewModel(factory = factory)
                     HomeScreen(
-                        viewModel = viewModel,
+                        viewModel = vm,
                         onNavigateToLedger = { partyId ->
                             haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                            viewModel.selectParty(partyId)
                             navController.navigate("ledger/$partyId")
                         },
                         onNavigateToParties = {
@@ -351,21 +335,23 @@ fun MainAppContainer(viewModel: LedgerViewModel) {
                     )
                 }
                 composable("parties") {
-                    PartiesScreen(viewModel, onNavigateToLedger = { partyId ->
+                    val vm: com.example.awancoalledger.viewmodel.features.PartiesViewModel = viewModel(factory = factory)
+                    PartiesScreen(vm, onNavigateToLedger = { partyId ->
                         haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                        viewModel.selectParty(partyId)
                         navController.navigate("ledger/$partyId")
                     })
                 }
-                composable("expenses") { ExpensesScreen(viewModel) }
+                composable("expenses") { val vm: com.example.awancoalledger.viewmodel.features.ExpensesViewModel = viewModel(factory = factory); ExpensesScreen(vm) }
                 composable("inventory") { 
-                    InventoryScreen(viewModel, onNavigateToStockDetail = { stockId ->
+                    val vm: com.example.awancoalledger.viewmodel.features.StockViewModel = viewModel(factory = factory)
+                    InventoryScreen(vm, onNavigateToStockDetail = { stockId ->
                         haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
                         navController.navigate("stock_detail/$stockId")
                     }) 
                 }
                 composable("notes") { 
-                    FoldersScreen(viewModel, onNavigateToFolder = { folderId ->
+                    val vm: com.example.awancoalledger.viewmodel.features.NotesViewModel = viewModel(factory = factory)
+                    FoldersScreen(vm, onNavigateToFolder = { folderId ->
                         haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
                         navController.navigate("folder_notes/$folderId")
                     }, onNavigateToEditor = { noteId ->
@@ -381,7 +367,8 @@ fun MainAppContainer(viewModel: LedgerViewModel) {
                 ) { backStackEntry ->
                     val folderIdStr = backStackEntry.arguments?.getString("folderId") ?: "all"
                     val folderId = if (folderIdStr == "all") null else folderIdStr.toIntOrNull()
-                    NotesScreen(viewModel, folderId, onNavigateToEditor = { noteId ->
+                    val vm: com.example.awancoalledger.viewmodel.features.NotesViewModel = viewModel(factory = factory)
+                    NotesScreen(vm, folderId, onNavigateToEditor = { noteId ->
                         haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
                         val route = if (noteId == null) {
                             "note_editor/new" + (if (folderId != null) "?folderId=$folderId" else "")
@@ -393,12 +380,15 @@ fun MainAppContainer(viewModel: LedgerViewModel) {
                 }
                 
                 composable("settings") { 
+                    val vm: com.example.awancoalledger.viewmodel.features.SettingsViewModel = viewModel(factory = factory)
+                    val authVm: com.example.awancoalledger.viewmodel.features.AuthViewModel = viewModel(factory = factory)
                     SettingsScreen(
-                        viewModel, 
+                        authVm,
+                        vm, 
                         onNavigateToShortcut = { route -> navController.navigate(route) }
                     ) 
                 }
-                composable("vehicle_tracker") { VehicleTrackerScreen(viewModel, onNavigateBack = { navController.popBackStack() }) }
+                composable("vehicle_tracker") { val vm: com.example.awancoalledger.viewmodel.features.VehicleViewModel = viewModel(factory = factory); VehicleTrackerScreen(vm, onNavigateBack = { navController.popBackStack() }) }
                 // composable("reminders") { RemindersScreen(viewModel, onBack = { navController.popBackStack() }) }
                 
                 composable(
@@ -411,7 +401,8 @@ fun MainAppContainer(viewModel: LedgerViewModel) {
                     val noteIdStr = backStackEntry.arguments?.getString("noteId") ?: "new"
                     val noteId = if (noteIdStr == "new") null else noteIdStr.toIntOrNull()
                     val folderId = backStackEntry.arguments?.getString("folderId")?.toIntOrNull()
-                    NoteEditorScreen(viewModel, noteId, folderId, onBack = {
+                    val vm: com.example.awancoalledger.viewmodel.features.NotesViewModel = viewModel(factory = factory)
+                    NoteEditorScreen(vm, noteId, folderId, onBack = {
                         navController.popBackStack()
                     })
                 }
@@ -421,7 +412,8 @@ fun MainAppContainer(viewModel: LedgerViewModel) {
                     arguments = listOf(navArgument("stockId") { type = NavType.IntType })
                 ) { backStackEntry ->
                     val stockId = backStackEntry.arguments?.getInt("stockId") ?: 0
-                    StockDetailScreen(viewModel, stockId, onBack = {
+                    val vm: com.example.awancoalledger.viewmodel.features.StockViewModel = viewModel(factory = factory)
+                    StockDetailScreen(vm, stockId, onBack = {
                         navController.popBackStack()
                     })
                 }
@@ -431,7 +423,9 @@ fun MainAppContainer(viewModel: LedgerViewModel) {
                     arguments = listOf(navArgument("partyId") { type = NavType.IntType })
                 ) { backStackEntry ->
                     val partyId = backStackEntry.arguments?.getInt("partyId") ?: 0
-                    LedgerDetailScreen(viewModel, partyId, onBack = {
+                    val vm: com.example.awancoalledger.viewmodel.features.LedgerDetailViewModel = viewModel(factory = factory)
+                    vm.selectParty(partyId)
+                    LedgerDetailScreen(vm, partyId, onBack = {
                         navController.popBackStack()
                     })
                 }

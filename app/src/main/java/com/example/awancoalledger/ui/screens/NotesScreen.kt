@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.awancoalledger.data.Note
 import com.example.awancoalledger.ui.components.*
-import com.example.awancoalledger.viewmodel.LedgerViewModel
+import com.example.awancoalledger.viewmodel.features.NotesViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import java.text.SimpleDateFormat
@@ -74,7 +74,7 @@ fun formatSmartDate(timestamp: Long): String {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotesScreen(
-        viewModel: LedgerViewModel,
+        viewModel: NotesViewModel,
         folderId: Int?,
         onNavigateToEditor: (Int?) -> Unit,
         onBack: () -> Unit
@@ -488,7 +488,7 @@ fun SectionHeader(label: String, count: Int) {
 @Composable
 fun NoteContextMenu(
         note: Note,
-        viewModel: LedgerViewModel,
+        viewModel: NotesViewModel,
         onDismiss: () -> Unit,
         onDelete: () -> Unit,
         onOpen: () -> Unit

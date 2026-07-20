@@ -47,9 +47,9 @@ import com.example.awancoalledger.ui.components.PremiumLineGraph
 import com.example.awancoalledger.ui.theme.*
 import com.example.awancoalledger.ui.components.bounceClick
 import com.example.awancoalledger.utils.ExportUtils
-import com.example.awancoalledger.viewmodel.LedgerViewModel
-import com.example.awancoalledger.viewmodel.RecentActivity
-import com.example.awancoalledger.viewmodel.SyncStatus
+import com.example.awancoalledger.viewmodel.features.DashboardViewModel
+import com.example.awancoalledger.viewmodel.features.RecentActivity
+import com.example.awancoalledger.viewmodel.features.SyncStatus
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.absoluteValue
@@ -76,7 +76,7 @@ private val rowDateFmt = SimpleDateFormat("MMM dd", Locale.getDefault())
 )
 @Composable
 fun HomeScreen(
-        viewModel: LedgerViewModel,
+        viewModel: DashboardViewModel,
         onNavigateToLedger: (Int) -> Unit,
         onNavigateToParties: () -> Unit,
         onNavigateToStock: () -> Unit,

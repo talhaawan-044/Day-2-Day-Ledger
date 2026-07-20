@@ -38,13 +38,13 @@ import com.example.awancoalledger.data.MaintenanceEntry
 import com.example.awancoalledger.data.Vehicle
 import com.example.awancoalledger.ui.components.*
 import com.example.awancoalledger.ui.theme.*
-import com.example.awancoalledger.viewmodel.LedgerViewModel
+import com.example.awancoalledger.viewmodel.features.VehicleViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun VehicleTrackerScreen(viewModel: LedgerViewModel, onNavigateBack: () -> Unit) {
+fun VehicleTrackerScreen(viewModel: VehicleViewModel, onNavigateBack: () -> Unit) {
     val haptic = LocalHapticFeedback.current
     
     val vehicles by viewModel.allVehicles.collectAsState()

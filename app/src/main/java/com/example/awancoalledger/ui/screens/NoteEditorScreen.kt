@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.sp
 import com.example.awancoalledger.ui.components.DeleteConfirmationDialog
 import com.example.awancoalledger.ui.components.NoteBackgrounds
 import com.example.awancoalledger.ui.components.NoteBackgroundRenderer
-import com.example.awancoalledger.viewmodel.LedgerViewModel
+import com.example.awancoalledger.viewmodel.features.NotesViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlinx.coroutines.delay
@@ -57,7 +57,7 @@ private val FONT_SIZE_STEPS = listOf(13f, 15f, 17f, 20f, 24f, 30f)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteEditorScreen(
-        viewModel: LedgerViewModel,
+        viewModel: NotesViewModel,
         noteId: Int?,
         initialFolderId: Int? = null,
         onBack: () -> Unit

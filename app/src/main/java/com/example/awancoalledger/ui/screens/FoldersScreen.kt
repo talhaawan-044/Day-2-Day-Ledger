@@ -22,14 +22,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.awancoalledger.data.Folder
 import com.example.awancoalledger.ui.components.*
-import com.example.awancoalledger.viewmodel.LedgerViewModel
+import com.example.awancoalledger.viewmodel.features.NotesViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun FoldersScreen(
-    viewModel: LedgerViewModel,
+    viewModel: NotesViewModel,
     onNavigateToFolder: (String) -> Unit,
     onNavigateToEditor: (Int?) -> Unit,
     onBack: () -> Unit

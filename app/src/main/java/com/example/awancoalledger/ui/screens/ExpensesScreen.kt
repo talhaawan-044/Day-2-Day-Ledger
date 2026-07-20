@@ -34,13 +34,13 @@ import com.example.awancoalledger.data.ExpenseCategory
 import com.example.awancoalledger.ui.components.*
 import com.example.awancoalledger.ui.theme.*
 import com.example.awancoalledger.utils.capitalize
-import com.example.awancoalledger.viewmodel.LedgerViewModel
+import com.example.awancoalledger.viewmodel.features.ExpensesViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExpensesScreen(viewModel: LedgerViewModel) {
+fun ExpensesScreen(viewModel: ExpensesViewModel) {
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
 

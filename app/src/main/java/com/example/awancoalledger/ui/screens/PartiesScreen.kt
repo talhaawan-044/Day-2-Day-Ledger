@@ -37,7 +37,7 @@ import com.example.awancoalledger.data.PartyType
 import com.example.awancoalledger.ui.components.*
 import com.example.awancoalledger.ui.components.bounceClick
 import com.example.awancoalledger.ui.theme.*
-import com.example.awancoalledger.viewmodel.LedgerViewModel
+import com.example.awancoalledger.viewmodel.features.PartiesViewModel
 import java.util.*
 import kotlin.math.absoluteValue
 
@@ -49,7 +49,7 @@ enum class PartySortOrder {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PartiesScreen(viewModel: LedgerViewModel, onNavigateToLedger: (Int) -> Unit) {
+fun PartiesScreen(viewModel: PartiesViewModel, onNavigateToLedger: (Int) -> Unit) {
     val allPartiesWithDetails by viewModel.allPartiesWithDetails.collectAsState()
 
     var showAddPartySheet by remember { mutableStateOf(false) }
@@ -177,6 +177,7 @@ fun PartiesScreen(viewModel: LedgerViewModel, onNavigateToLedger: (Int) -> Unit)
                         }
 
                         Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                            val balance = remember(details) { viewModel.getBalance(details) }
                             SwipeableItem(
                                     onEdit = { editingParty = details.party },
                                     onDelete = { partyToDelete = details.party },
@@ -185,7 +186,7 @@ fun PartiesScreen(viewModel: LedgerViewModel, onNavigateToLedger: (Int) -> Unit)
                                     content = {
                                         PartyListItem(
                                                 party = details.party,
-                                                balance = viewModel.getBalance(details),
+                                                balance = balance,
                                                 onClick = {
                                                     haptic.performHapticFeedback(
                                                             HapticFeedbackType.LongPress
@@ -729,7 +730,8 @@ fun PartyListItem(
     onClick: () -> Unit,
     showDivider: Boolean
 ) {
-    val isReceivable = balance > 0
+    val isBuyer = party.type == com.example.awancoalledger.data.PartyType.BUYER
+    val isReceivable = if (isBuyer) balance >= 0 else balance < 0
     val statusColor = if (balance == 0.0) MaterialTheme.colorScheme.primary else if (isReceivable) com.example.awancoalledger.ui.theme.SuccessGreen else com.example.awancoalledger.ui.theme.ErrorRed
     
     Column(

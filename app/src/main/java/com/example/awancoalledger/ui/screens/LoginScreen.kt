@@ -32,11 +32,12 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.awancoalledger.ui.components.*
 
 import com.example.awancoalledger.ui.theme.*
-import com.example.awancoalledger.viewmodel.LedgerViewModel
+import com.example.awancoalledger.viewmodel.features.AuthViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginDialog(
-    viewModel: LedgerViewModel,
+    viewModel: AuthViewModel,
     onDismiss: () -> Unit,
     onGoogleSignIn: () -> Unit,
     onAuthSuccess: (Boolean) -> Unit
@@ -47,239 +48,206 @@ fun LoginDialog(
     var fullName by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
-    
+
     val context = LocalContext.current
     val isAnonymous by viewModel.isAnonymous.collectAsState(initial = true)
+    
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    Dialog(
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            decorFitsSystemWindows = false
-        )
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        dragHandle = { BottomSheetDefaults.DragHandle() }
     ) {
-        Box(modifier = Modifier.fillMaxSize().background(Color(0xFF0A0A0A))) {
-            // Header Section (Solid Blue/Dark Gradient)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(280.dp)
-                    .background(Color(0xFF001F3F))
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Header Icon
+            Surface(
+                modifier = Modifier.size(64.dp).padding(bottom = 16.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = Color(0xFF0A84FF).copy(alpha = 0.1f)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Rounded.CloudQueue,
+                        contentDescription = null,
+                        tint = Color(0xFF0A84FF),
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            }
+
+            Text(
+                text = if (isSignUp) "Create Account" else "Welcome Back",
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .systemBarsPadding()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Custom Close Button (Top Left - iOS style)
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    TextButton(onClick = onDismiss) {
-                        Text(
-                            text = "Cancel",
-                            color = Color(0xFF0A84FF),
-                            fontSize = 17.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                }
+            Text(
+                text = "Sign in to keep your records in sync.",
+                fontSize = 15.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 32.dp)
+            )
 
-                Spacer(modifier = Modifier.height(30.dp))
+            // Form Fields
+            if (isSignUp) {
+                OutlinedTextField(
+                    value = fullName,
+                    onValueChange = { fullName = it },
+                    label = { Text("Full Name") },
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFF0A84FF),
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                    )
+                )
+            }
 
-                // App Identity
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Surface(
-                        modifier = Modifier.size(80.dp),
-                        shape = RoundedCornerShape(20.dp),
-                        color = Color.White.copy(alpha = 0.05f),
-                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                Icons.Rounded.CloudQueue,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(40.dp)
-                            )
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email Address") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF0A84FF),
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                )
+            )
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF0A84FF),
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                )
+            )
+
+            if (error != null) {
+                Text(
+                    text = error!!,
+                    color = Color(0xFFFF3B30), // iOS Red
+                    fontSize = 13.sp,
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            // Primary Button
+            Button(
+                onClick = {
+                    isLoading = true
+                    error = null
+                    if (isAnonymous) {
+                        val credential = com.google.firebase.auth.EmailAuthProvider.getCredential(email, password)
+                        viewModel.linkAccount(credential) { success, msg ->
+                            isLoading = false
+                            if (success) {
+                                onDismiss()
+                                onAuthSuccess(true)
+                            } else if (msg == "COLLISION") {
+                                onDismiss()
+                            } else {
+                                error = msg
+                            }
                         }
-                    }
-                    
-                    Spacer(modifier = Modifier.height(24.dp))
-                    
-                    Text(
-                        text = if (isSignUp) "Join Awan Ledger" else "Welcome Back",
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        letterSpacing = (-1).sp,
-                        textAlign = TextAlign.Center
-                    )
-                    
-                    Text(
-                        text = if (isSignUp) "Secure your data across all your devices." else "Sign in to keep your records in sync.",
-                        fontSize = 16.sp,
-                        color = Color.White.copy(alpha = 0.5f),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(start = 20.dp, top = 8.dp, end = 20.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(48.dp))
-
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    if (isSignUp) {
-                        PremiumInput(
-                            label = "Full Name",
-                            value = fullName,
-                            onValueChange = { fullName = it }
-                        )
-                    }
-                    PremiumInput(
-                        label = "Email Address",
-                        value = email,
-                        onValueChange = { email = it },
-                        keyboardType = KeyboardType.Email
-                    )
-                    PremiumInput(
-                        label = "Password",
-                        value = password,
-                        onValueChange = { password = it },
-                        visualTransformation = PasswordVisualTransformation()
-                    )
-                }
-
-
-                error?.let { err ->
-                    Text(
-                        text = err,
-                        color = Color(0xFFFF453A),
-                        fontSize = 13.sp,
-                        modifier = Modifier.padding(top = 12.dp),
-                        textAlign = TextAlign.Center
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // Primary Action Button
-                Button(
-                    onClick = {
-                        isLoading = true
-                        error = null
-                        if (isAnonymous) {
-                            val credential = com.google.firebase.auth.EmailAuthProvider.getCredential(email, password)
-                            viewModel.linkAccount(credential) { success, msg ->
+                    } else {
+                        if (isSignUp) {
+                            viewModel.signUpWithEmail(email, password, fullName) { success, isNewUser, msg ->
                                 isLoading = false
                                 if (success) {
                                     onDismiss()
-                                    onAuthSuccess(true)
-                                } else if (msg == "COLLISION") {
-                                    onDismiss()
+                                    onAuthSuccess(isNewUser)
                                 } else {
                                     error = msg
                                 }
                             }
                         } else {
-                            if (isSignUp) {
-                                viewModel.signUpWithEmail(email, password, fullName) { success, isNewUser, msg ->
-                                    isLoading = false
-                                    if (success) {
-                                        onDismiss()
-                                        onAuthSuccess(isNewUser)
-                                    } else {
-                                        error = msg
-                                    }
-                                }
-                            } else {
-                                viewModel.signInWithEmail(email, password) { success, isNewUser, msg ->
-                                    isLoading = false
-                                    if (success) {
-                                        onDismiss()
-                                        onAuthSuccess(isNewUser)
-                                    } else {
-                                        error = msg
-                                    }
+                            viewModel.signInWithEmail(email, password) { success, isNewUser, msg ->
+                                isLoading = false
+                                if (success) {
+                                    onDismiss()
+                                    onAuthSuccess(isNewUser)
+                                } else {
+                                    error = msg
                                 }
                             }
                         }
-                    },
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF007AFF)),
-                    enabled = !isLoading
-                ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp)
-                    } else {
-                        Text(
-                            text = if (isSignUp) "Create Account" else "Sign In",
-                            fontSize = 17.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.White
-                        )
                     }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Secondary Action
-                Text(
-                    text = if (isSignUp) "Already have an account? Sign In" else "New here? Create Account",
-                    color = Color(0xFF007AFF),
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.clickable { 
-                        isSignUp = !isSignUp
-                        error = null
-                    }
-                )
-
-                Spacer(modifier = Modifier.height(48.dp))
-
-                // Social Dividers
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 20.dp)) {
-                    HorizontalDivider(modifier = Modifier.weight(1f), color = Color.White.copy(alpha = 0.1f))
+                },
+                modifier = Modifier.fillMaxWidth().height(54.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0A84FF)),
+                enabled = !isLoading
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                } else {
                     Text(
-                        "OR",
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        color = Color.White.copy(alpha = 0.2f),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
+                        text = if (isSignUp) "Create Account" else "Sign In",
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
-                    HorizontalDivider(modifier = Modifier.weight(1f), color = Color.White.copy(alpha = 0.1f))
                 }
+            }
 
-                Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-                // Google Button (Refined iOS style)
-                Surface(
-                    onClick = onGoogleSignIn,
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    color = Color.White.copy(alpha = 0.08f),
-                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(Icons.Outlined.AccountCircle, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text("Continue with Google", color = Color.White, fontSize = 17.sp, fontWeight = FontWeight.Medium)
-                    }
-                }
-                
-                Spacer(modifier = Modifier.height(60.dp))
+            // Toggle Button
+            Text(
+                text = if (isSignUp) "Already have an account? Sign In" else "New here? Create Account",
+                color = Color(0xFF0A84FF),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable { isSignUp = !isSignUp; error = null }
+                    .padding(8.dp)
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Divider
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
+                Text("OR", modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
+                HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Google Button
+            OutlinedButton(
+                onClick = onGoogleSignIn,
+                modifier = Modifier.fillMaxWidth().height(54.dp),
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
+            ) {
+                Icon(Icons.Outlined.AccountCircle, contentDescription = null, modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.width(12.dp))
+                Text("Continue with Google", fontSize = 17.sp, fontWeight = FontWeight.Medium)
             }
         }
     }

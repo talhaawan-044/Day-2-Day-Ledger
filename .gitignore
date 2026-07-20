@@ -25,3 +25,12 @@ keystore.properties
 
 /App-screenshots-for-ai/
 app/google-services.json
+
+# Local database backups and exports
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sb
+ledger_backup.*
+*.json

@@ -37,7 +37,7 @@ import androidx.compose.ui.graphics.Brush
 import com.example.awancoalledger.data.*
 import com.example.awancoalledger.ui.components.*
 import com.example.awancoalledger.ui.theme.*
-import com.example.awancoalledger.viewmodel.LedgerViewModel
+import com.example.awancoalledger.viewmodel.features.RemindersViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import java.text.SimpleDateFormat
@@ -46,7 +46,7 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RemindersScreen(
-    viewModel: LedgerViewModel,
+    viewModel: RemindersViewModel,
     onBack: () -> Unit
 ) {
     val activeReminders by viewModel.activeReminders.collectAsState()

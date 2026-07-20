@@ -1,5 +1,7 @@
 package com.example.awancoalledger.ui.screens
 
+import kotlinx.coroutines.flow.map
+
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -38,7 +40,9 @@ import com.example.awancoalledger.data.Payment
 import com.example.awancoalledger.data.PaymentType
 import com.example.awancoalledger.ui.components.*
 import com.example.awancoalledger.ui.theme.*
-import com.example.awancoalledger.viewmodel.LedgerViewModel
+import com.example.awancoalledger.viewmodel.features.LedgerDetailViewModel
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import com.example.awancoalledger.utils.ExportUtils
 import com.example.awancoalledger.utils.DateUtils
 import com.example.awancoalledger.ui.components.bounceClick
@@ -61,7 +65,7 @@ private fun formatFullDateWithDay(dateMillis: Long): String {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LedgerDetailScreen(
-    viewModel: LedgerViewModel,
+    viewModel: LedgerDetailViewModel,
     partyId: Int,
     onBack: () -> Unit
 ) {
@@ -728,16 +732,16 @@ fun EntryActionSheet(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExportActionSheet(
-    viewModel: com.example.awancoalledger.viewmodel.LedgerViewModel,
+    viewModel: LedgerDetailViewModel,
     details: PartyWithDetails,
     balance: Double,
     onDismiss: () -> Unit
 ) {
-    val businessName by viewModel.businessName.collectAsState()
-    val ownerName by viewModel.ownerName.collectAsState()
-    val businessPhone by viewModel.businessPhone.collectAsState(initial = "")
-    val logoUri by viewModel.companyLogoUri.collectAsState()
-    val signatureUri by viewModel.signatureUri.collectAsState()
+    val businessName by viewModel.settingsRepository.getSettingsFlow().map { viewModel.settingsRepository.getBusinessName() }.collectAsState(initial = "")
+    val ownerName by viewModel.settingsRepository.getSettingsFlow().map { viewModel.settingsRepository.getOwnerName() }.collectAsState(initial = "")
+    val businessPhone by viewModel.settingsRepository.getSettingsFlow().map { viewModel.settingsRepository.getBusinessPhone() }.collectAsState(initial = "")
+    val logoUri by viewModel.settingsRepository.getSettingsFlow().map { viewModel.settingsRepository.getCompanyLogoUri() }.collectAsState(initial = null)
+    val signatureUri by viewModel.settingsRepository.getSettingsFlow().map { viewModel.settingsRepository.getSignatureUri() }.collectAsState(initial = null)
     val context = androidx.compose.ui.platform.LocalContext.current
     var fromDate by remember {
         mutableLongStateOf(
@@ -871,7 +875,7 @@ fun PaymentActionSheet(
 ) {
     var selectedDate by remember { mutableLongStateOf(payment?.date ?: System.currentTimeMillis()) }
     var amount by remember { mutableStateOf(payment?.amount?.toString() ?: "") }
-    var type by remember { mutableStateOf(payment?.type ?: PaymentType.THEY_PAID) }
+    var type by remember { mutableStateOf(payment?.type ?: if (partyType == com.example.awancoalledger.data.PartyType.BUYER) com.example.awancoalledger.data.PaymentType.THEY_PAID else com.example.awancoalledger.data.PaymentType.I_PAID) }
     var note by remember { mutableStateOf(payment?.note ?: "") }
     
     var showDatePicker by remember { mutableStateOf(false) }

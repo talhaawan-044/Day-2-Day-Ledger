@@ -35,7 +35,7 @@ import com.example.awancoalledger.data.StockEntry
 import com.example.awancoalledger.ui.components.*
 import com.example.awancoalledger.ui.theme.ErrorRed
 import com.example.awancoalledger.ui.theme.SuccessGreen
-import com.example.awancoalledger.viewmodel.LedgerViewModel
+import com.example.awancoalledger.viewmodel.features.StockViewModel
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -43,12 +43,12 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StockDetailScreen(
-    viewModel: LedgerViewModel,
+    viewModel: StockViewModel,
     stockId: Int,
     onBack: () -> Unit
 ) {
-    val stocks by viewModel.allStocks.collectAsState()
-    val entries by viewModel.selectedStockEntries.collectAsState()
+    val stocks by viewModel.stocks.collectAsState()
+    val entries by viewModel.stockEntries.collectAsState()
     val stock = stocks.find { it.id == stockId }
     var entryToDelete by remember { mutableStateOf<StockEntry?>(null) }
     var editingEntry by remember { mutableStateOf<StockEntry?>(null) }

@@ -53,6 +53,16 @@ class SettingsRepository(context: Context) {
     fun isGridView(): Boolean = prefs.getBoolean("is_grid_view", false)
     fun setGridView(value: Boolean) = prefs.edit().putBoolean("is_grid_view", value).apply()
 
+    
+    fun isPartiesGridView(): Boolean = prefs.getBoolean("parties_grid_view", true)
+    fun setPartiesGridView(value: Boolean) = prefs.edit().putBoolean("parties_grid_view", value).apply()
+
+    fun isNotesGridView(): Boolean = prefs.getBoolean("notes_grid_view", true)
+    fun setNotesGridView(value: Boolean) = prefs.edit().putBoolean("notes_grid_view", value).apply()
+
+    fun isStockGridView(): Boolean = prefs.getBoolean("stock_grid_view", false)
+    fun setStockGridView(value: Boolean) = prefs.edit().putBoolean("stock_grid_view", value).apply()
+
     fun clearImageUris() {
         prefs.edit()
             .remove("company_logo_uri")

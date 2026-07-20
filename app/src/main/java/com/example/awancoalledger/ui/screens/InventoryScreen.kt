@@ -27,17 +27,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.awancoalledger.data.Stock
 import com.example.awancoalledger.ui.components.*
-import com.example.awancoalledger.viewmodel.LedgerViewModel
+import com.example.awancoalledger.viewmodel.features.StockViewModel
 import java.text.DecimalFormat
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InventoryScreen(viewModel: LedgerViewModel, onNavigateToStockDetail: (Int) -> Unit) {
-    val stocks by viewModel.allStocks.collectAsState()
+fun InventoryScreen(viewModel: StockViewModel, onNavigateToStockDetail: (Int) -> Unit) {
+    val stocks by viewModel.stocks.collectAsState()
     val totalWeight by viewModel.totalInventoryWeight.collectAsState()
 
     var searchQuery by remember { mutableStateOf("") }
-    var isGridView by remember { mutableStateOf(false) }
+    val isGridView by viewModel.isGridView.collectAsState()
     var showAddStockDialog by remember { mutableStateOf(false) }
 
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
@@ -88,7 +88,7 @@ fun InventoryScreen(viewModel: LedgerViewModel, onNavigateToStockDetail: (Int) -
                                         androidx.compose.ui.hapticfeedback.HapticFeedbackType
                                                 .LongPress
                                 )
-                                isGridView = !isGridView
+                                viewModel.toggleGridView(!isGridView)
                             },
                             modifier =
                                     Modifier.size(36.dp)
