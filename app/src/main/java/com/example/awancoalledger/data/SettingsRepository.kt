@@ -29,7 +29,7 @@ class SettingsRepository(context: Context) {
     fun isBiometricsEnabled(): Boolean = prefs.getBoolean("biometrics", false)
     fun setBiometricsEnabled(value: Boolean) = prefs.edit().putBoolean("biometrics", value).apply()
 
-    fun isDarkMode(): Boolean = prefs.getBoolean("dark_mode", true)
+    fun isDarkMode(): Boolean = prefs.getBoolean("dark_mode", false)
     fun setDarkMode(value: Boolean) = prefs.edit().putBoolean("dark_mode", value).apply()
 
     fun isFrostedGlassEnabled(): Boolean = prefs.getBoolean("frosted_glass", true)

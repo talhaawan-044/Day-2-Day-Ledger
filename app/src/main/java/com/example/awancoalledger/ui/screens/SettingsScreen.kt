@@ -71,7 +71,7 @@ fun SettingsScreen(
     val address by viewModel.businessAddress.collectAsState(initial = "")
     val appLock by viewModel.isAppLockEnabled.collectAsState(initial = false)
     val biometrics by viewModel.isBiometricsEnabled.collectAsState(initial = false)
-    val darkMode by viewModel.isDarkMode.collectAsState(initial = true)
+    val darkMode by viewModel.isDarkMode.collectAsState(initial = false)
     val frostedGlass by viewModel.isFrostedGlassEnabled.collectAsState(initial = true)
     val logoUri by viewModel.companyLogoUri.collectAsState(initial = null)
     val signatureUri by viewModel.signatureUri.collectAsState(initial = null)
