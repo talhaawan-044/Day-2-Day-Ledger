@@ -17,7 +17,6 @@ class LedgerViewModelFactory(
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
-            modelClass.isAssignableFrom(LedgerViewModel::class.java) -> LedgerViewModel(repository, settingsRepository, scheduler, firebaseManager, syncManager) as T
             modelClass.isAssignableFrom(com.example.awancoalledger.viewmodel.features.DashboardViewModel::class.java) -> com.example.awancoalledger.viewmodel.features.DashboardViewModel(repository, settingsRepository, syncManager, firebaseManager) as T
             modelClass.isAssignableFrom(com.example.awancoalledger.viewmodel.features.PartiesViewModel::class.java) -> com.example.awancoalledger.viewmodel.features.PartiesViewModel(repository, settingsRepository, syncManager) as T
             modelClass.isAssignableFrom(com.example.awancoalledger.viewmodel.features.AuthViewModel::class.java) -> com.example.awancoalledger.viewmodel.features.AuthViewModel(firebaseManager, syncManager, repository, settingsRepository) as T

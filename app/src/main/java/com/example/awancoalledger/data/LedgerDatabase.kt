@@ -41,7 +41,6 @@ abstract class LedgerDatabase : RoomDatabase() {
                     "ledger_database"
                 )
                 .addMigrations(MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18)
-                .fallbackToDestructiveMigration()
                 .build()
                 INSTANCE = instance
                 instance

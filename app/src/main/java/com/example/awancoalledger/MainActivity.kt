@@ -64,7 +64,6 @@ import com.example.awancoalledger.ui.theme.AwanCoalLedgerTheme
 import com.example.awancoalledger.ui.theme.DarkBg
 import com.example.awancoalledger.ui.theme.PrimaryBlue
 import com.example.awancoalledger.ui.theme.SurfaceColor
-import com.example.awancoalledger.viewmodel.LedgerViewModel
 import com.example.awancoalledger.viewmodel.LedgerViewModelFactory
 import androidx.compose.animation.*
 
