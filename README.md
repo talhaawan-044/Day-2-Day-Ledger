@@ -1,4 +1,4 @@
-# Day 2 Day Ledger (v2.2.0)
+# Day 2 Day Ledger (v2.3.0)
 
 A comprehensive, offline-first business management application built for the modern coal trading industry. Day 2 Day Ledger replaces paper khatas and scattered spreadsheets with a single, secure Android app. Featuring a stunning, premium iOS-inspired aesthetic, it handles party ledgers, inventory tracking, expense management, fleet maintenance, reminders, and notes -- all synced to the cloud when you choose.
 
@@ -11,6 +11,17 @@ A comprehensive, offline-first business management application built for the mod
   <img src="https://img.shields.io/badge/Min_SDK-26-10B981?style=for-the-badge" />
   <img src="https://img.shields.io/badge/Target_SDK-35-3B82F6?style=for-the-badge" />
 </p>
+
+---
+
+## What's New in Version 2.3.0
+
+This release introduces an interactive activity tracking system, highly requested quality-of-life enhancements for cloud syncing, and refreshed high-fidelity iOS-style aesthetics across the application.
+
+- **Activity Tracker & Notifications:** A new robust logging system capturing all major actions (CRUD operations on ledgers, parties, expenses). Notifications are stored securely in the local Room DB and can be reviewed in a dedicated Activity Sheet.
+- **Interactive Sync Logs:** Cloud sync is no longer a black box. Tapping on a "Sync Completed" log now displays a detailed summary of exact entity counts (parties, expenses, vehicles, etc.) that were successfully pushed to Firebase.
+- **Enhanced Auth & Email Verification:** Overhauled Firebase Authentication error handling and added seamless support for resending verification emails, gracefully managing API key restrictions.
+- **Showcase & UI Polish:** Minor layout tweaks across summary screens and a complete refresh of the app showcase screenshots to reflect the latest UI state.
 
 ---
 
