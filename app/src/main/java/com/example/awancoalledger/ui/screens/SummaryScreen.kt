@@ -48,8 +48,8 @@ import com.example.awancoalledger.ui.theme.*
 import com.example.awancoalledger.ui.components.bounceClick
 import com.example.awancoalledger.utils.ExportUtils
 import com.example.awancoalledger.viewmodel.features.DashboardViewModel
-import com.example.awancoalledger.viewmodel.features.RecentActivity
-import com.example.awancoalledger.viewmodel.features.SyncStatus
+import com.example.awancoalledger.data.RecentActivity
+import com.example.awancoalledger.viewmodel.SyncStatus
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.absoluteValue
@@ -92,6 +92,7 @@ fun HomeScreen(
     val receivable by viewModel.totalReceivable.collectAsState()
     val payable by viewModel.totalPayable.collectAsState()
     val syncStatus by viewModel.syncStatus.collectAsState()
+    val syncErrorMessage by viewModel.syncErrorMessage.collectAsState()
     val lastSyncTime by viewModel.lastSyncTime.collectAsState()
     val totalStockWeight by viewModel.totalInventoryWeight.collectAsState()
     val monthlyExpenses by viewModel.monthlyExpenses.collectAsState()
@@ -225,6 +226,7 @@ fun HomeScreen(
             SyncDetailDialog(
                 status = syncStatus,
                 lastSyncTime = lastSyncTime,
+                errorMessage = syncErrorMessage,
                 onDismiss = { showSyncDialog = false },
                 onForceSync = { viewModel.forceSync(); showSyncDialog = false }
             )
@@ -985,13 +987,13 @@ fun MiniActionFab(label: String, icon: ImageVector, color: Color, onClick: () ->
 // ─── Sync Detail Dialog ───────────────────────────────────────────────────────
 
 @Composable
-fun SyncDetailDialog(status: SyncStatus, lastSyncTime: Long?, onDismiss: () -> Unit, onForceSync: () -> Unit) {
+fun SyncDetailDialog(status: SyncStatus, lastSyncTime: Long?, errorMessage: String? = null, onDismiss: () -> Unit, onForceSync: () -> Unit) {
     val timeFmt = remember { SimpleDateFormat("hh:mm a, MMM dd", Locale.getDefault()) }
     val (color, statusText) = when (status) {
         SyncStatus.Synced -> SuccessGreen to "All data synced"
         SyncStatus.Syncing -> MaterialTheme.colorScheme.primary to "Syncing in progress..."
         SyncStatus.LocalOnly -> iOSOrange to "Offline – not signed in"
-        SyncStatus.Error -> ErrorRed to "Sync failed"
+        SyncStatus.Error -> ErrorRed to (errorMessage ?: "Sync failed")
     }
     IOSAlertDialog(
         onDismissRequest = onDismiss,

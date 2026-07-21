@@ -18,16 +18,7 @@ enum class SyncStatus {
     Synced, Syncing, LocalOnly, Error
 }
 
-data class RecentActivity(
-    val id: String = java.util.UUID.randomUUID().toString(),
-    val partyName: String,
-    val partyType: PartyType,
-    val amount: Double,
-    val date: Long,
-    val isPayment: Boolean,
-    val entry: LedgerEntry? = null,
-    val payment: Payment? = null
-)
+
 
 class LedgerViewModel(
     private val repository: LedgerRepository,
@@ -284,8 +275,7 @@ class LedgerViewModel(
         .map { settingsRepository.isAppLockEnabled() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), settingsRepository.isAppLockEnabled())
 
-    val ownerName = settingsRepository.getSettingsFlow()
-        .map { settingsRepository.getOwnerName() }
+    val ownerName = settingsRepository.getOwnerNameFlow()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), settingsRepository.getOwnerName())
 
     val businessName = settingsRepository.getSettingsFlow()
@@ -300,12 +290,8 @@ class LedgerViewModel(
         .map { settingsRepository.getBusinessAddress() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), settingsRepository.getBusinessAddress())
 
-    val countryConfig = settingsRepository.getSettingsFlow()
-        .map { 
-            val code = settingsRepository.getDefaultCountryCode()
-            SUPPORTED_COUNTRIES.find { it.code == code } 
-                ?: com.example.awancoalledger.data.CountryConfig("Custom", code, 15)
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SUPPORTED_COUNTRIES.find { it.code == settingsRepository.getDefaultCountryCode() } ?: com.example.awancoalledger.data.CountryConfig("Custom", settingsRepository.getDefaultCountryCode(), 15))
+    val countryConfig = settingsRepository.getCountryConfigFlow()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SUPPORTED_COUNTRIES.find { it.code == settingsRepository.getDefaultCountryCode() } ?: com.example.awancoalledger.data.CountryConfig("Custom", settingsRepository.getDefaultCountryCode(), 15))
 
     val isBiometricsEnabled = settingsRepository.getSettingsFlow()
         .map { settingsRepository.isBiometricsEnabled() }
@@ -638,7 +624,7 @@ class LedgerViewModel(
 
     val totalReceivable = allPartiesWithDetails.map { detailsList ->
         detailsList.sumOf { details ->
-            val balance = getBalance(details)
+            val balance = details.getBalance()
             if (details.party.type == PartyType.BUYER) {
                 if (balance > 0) balance else 0.0 // Buyer owes us
             } else {
@@ -649,7 +635,7 @@ class LedgerViewModel(
 
     val totalPayable = allPartiesWithDetails.map { detailsList ->
         detailsList.sumOf { details ->
-            val balance = getBalance(details)
+            val balance = details.getBalance()
             if (details.party.type == PartyType.BUYER) {
                 if (balance < 0) balance.absoluteValue else 0.0 // Buyer: they paid advance (we owe them)
             } else {
@@ -706,21 +692,7 @@ class LedgerViewModel(
         }
     }
 
-    fun getBalance(details: PartyWithDetails): Double {
-        val totalTruckValue = details.entries.sumOf { 
-            ((it.weight ?: 0.0) * (it.rate ?: 0.0)) + (it.fare ?: 0.0)
-        }
-        val totalTheyPaid = details.payments.filter { it.type == PaymentType.THEY_PAID }.sumOf { it.amount }
-        val totalIPaid = details.payments.filter { it.type == PaymentType.I_PAID }.sumOf { it.amount }
-        
-        return if (details.party.type == PartyType.BUYER) {
-            // Buyer: He owes for coal (+), he pays me (-), I give him money (+)
-            totalTruckValue - totalTheyPaid + totalIPaid
-        } else {
-            // Supplier: I owe him for coal (+), I pay him (-), he gives me money (+)
-            totalTruckValue - totalIPaid + totalTheyPaid
-        }
-    }
+
 
     fun addParty(name: String, phone: String, address: String, type: PartyType) {
         viewModelScope.launch {

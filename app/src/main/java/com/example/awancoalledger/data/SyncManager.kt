@@ -28,8 +28,17 @@ class SyncManager(
     private val listeners = mutableListOf<com.google.firebase.firestore.ListenerRegistration>()
     private val syncMutex = kotlinx.coroutines.sync.Mutex()
 
-    private fun isInvalidDouble(value: Double?): Boolean {
-        return value == null || value.isNaN() || value.isInfinite()
+    private val _syncErrors = kotlinx.coroutines.flow.MutableSharedFlow<String>(replay = 1, onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST)
+    val syncErrors: kotlinx.coroutines.flow.SharedFlow<String> = _syncErrors
+
+    private fun reportSyncError(entityType: String) {
+        _syncErrors.tryEmit("Data validation error in $entityType. Sync skipped.")
+    }
+
+    private fun isInvalidDouble(value: Double?, entityType: String): Boolean {
+        val invalid = value == null || value.isNaN() || value.isInfinite()
+        if (invalid) reportSyncError(entityType)
+        return invalid
     }
 
     // ── Real-time Firestore listeners (download direction) ─────────────────────
@@ -124,7 +133,7 @@ class SyncManager(
                         val fare = (data["fare"] as? Double) ?: (data["fare"] as? Long)?.toDouble() ?: 0.0
                         val advPayment = (data["advPayment"] as? Double) ?: (data["advPayment"] as? Long)?.toDouble() ?: 0.0
                         
-                        if (isInvalidDouble(weight) || isInvalidDouble(rate) || isInvalidDouble(fare) || isInvalidDouble(advPayment)) {
+                        if (isInvalidDouble(weight, "Ledger Entry") || isInvalidDouble(rate, "Ledger Entry") || isInvalidDouble(fare, "Ledger Entry") || isInvalidDouble(advPayment, "Ledger Entry")) {
                             Log.w("SyncManager", "Skipping corrupted entry: $syncId")
                             return@forEach
                         }
@@ -191,7 +200,7 @@ class SyncManager(
                         }
 
                         val amount = (data["amount"] as? Double) ?: (data["amount"] as? Long)?.toDouble() ?: 0.0
-                        if (isInvalidDouble(amount)) { Log.w("SyncManager", "Skipping corrupted payment: $syncId"); return@forEach }
+                        if (isInvalidDouble(amount, "Payment")) { Log.w("SyncManager", "Skipping corrupted payment: $syncId"); return@forEach }
                         
                         dao.insertPayment(Payment(
                             id = local?.id ?: 0,
@@ -249,7 +258,7 @@ class SyncManager(
                     if (local == null || lastUpdated > local.lastUpdated) {
                         val tw = (data["totalWeight"] as? Double) ?: (data["totalWeight"] as? Long)?.toDouble() ?: 0.0
                         val pw = (data["peakWeight"] as? Double) ?: (data["peakWeight"] as? Long)?.toDouble() ?: 0.0
-                        if (isInvalidDouble(tw) || isInvalidDouble(pw)) return@forEach
+                        if (isInvalidDouble(tw, "Stock") || isInvalidDouble(pw, "Stock")) return@forEach
                         dao.insertStock(Stock(
                             id = local?.id ?: 0,
                             mineName = data["mineName"] as? String ?: "", totalWeight = tw, peakWeight = pw,
@@ -287,7 +296,7 @@ class SyncManager(
                                 if (sData != null) {
                                     val tw = (sData["totalWeight"] as? Double) ?: (sData["totalWeight"] as? Long)?.toDouble() ?: 0.0
                                     val pw = (sData["peakWeight"] as? Double) ?: (sData["peakWeight"] as? Long)?.toDouble() ?: 0.0
-                                    if (isInvalidDouble(tw) || isInvalidDouble(pw)) return@forEach
+                                    if (isInvalidDouble(tw, "Stock Entry") || isInvalidDouble(pw, "Stock Entry")) return@forEach
                                     val newStock = Stock(
                                         mineName = sData["mineName"] as? String ?: "",
                                         totalWeight = tw, peakWeight = pw,
@@ -313,7 +322,7 @@ class SyncManager(
                     val local = dao.getStockEntryBySyncId(syncId)
                     if (local == null || lastUpdated > local.lastUpdated) {
                         val w = (data["weight"] as? Double) ?: (data["weight"] as? Long)?.toDouble() ?: 0.0
-                        if (isInvalidDouble(w)) return@forEach
+                        if (isInvalidDouble(w, "Expense")) return@forEach
                         dao.insertStockEntry(StockEntry(
                             id = local?.id ?: 0,
                             stockId = stock.id, weight = w, warehouse = data["warehouse"] as? String ?: "",
@@ -507,7 +516,7 @@ class SyncManager(
                         val mileage = (data["mileage"] as? Double) ?: (data["mileage"] as? Long)?.toDouble() ?: 0.0
                         val liters = (data["liters"] as? Double) ?: (data["liters"] as? Long)?.toDouble() ?: 0.0
                         val amount = (data["amount"] as? Double) ?: (data["amount"] as? Long)?.toDouble() ?: 0.0
-                        if (isInvalidDouble(mileage) || isInvalidDouble(liters) || isInvalidDouble(amount)) return@forEach
+                        if (isInvalidDouble(mileage, "Fuel Entry") || isInvalidDouble(liters, "Fuel Entry") || isInvalidDouble(amount, "Fuel Entry")) return@forEach
                         dao.insertFuelEntry(FuelEntry(
                             id = local?.id ?: 0,
                             vehicleId = vehicleId,
@@ -539,7 +548,7 @@ class SyncManager(
                         
                         val mileage = (data["mileage"] as? Double) ?: (data["mileage"] as? Long)?.toDouble() ?: 0.0
                         val cost = (data["cost"] as? Double) ?: (data["cost"] as? Long)?.toDouble() ?: 0.0
-                        if (isInvalidDouble(mileage) || isInvalidDouble(cost)) return@forEach
+                        if (isInvalidDouble(mileage, "Maintenance") || isInvalidDouble(cost, "Maintenance")) return@forEach
                         dao.insertMaintenanceEntry(MaintenanceEntry(
                             id = local?.id ?: 0,
                             vehicleId = vehicleId,
@@ -568,7 +577,7 @@ class SyncManager(
                     val local = dao.getVehicleBySyncId(syncId)
                     if (local == null || lastUpdated > local.lastUpdated) {
                         val mileage = (data["currentMileage"] as? Double) ?: (data["currentMileage"] as? Long)?.toDouble() ?: 0.0
-                        if (isInvalidDouble(mileage)) return@forEach
+                        if (isInvalidDouble(mileage, "Vehicle")) return@forEach
                         dao.insertVehicle(Vehicle(
                             id = local?.id ?: 0,
                             name = data["name"] as? String ?: "", plateNumber = data["plateNumber"] as? String ?: "",
@@ -800,7 +809,7 @@ class SyncManager(
         val rate = entry.rate ?: 0.0
         val fare = entry.fare ?: 0.0
         val advPayment = entry.advPayment ?: 0.0
-        if (isInvalidDouble(weight) || isInvalidDouble(rate) || isInvalidDouble(fare) || isInvalidDouble(advPayment)) {
+        if (isInvalidDouble(weight, "Ledger Entry") || isInvalidDouble(rate, "Ledger Entry") || isInvalidDouble(fare, "Ledger Entry") || isInvalidDouble(advPayment, "Ledger Entry")) {
             Log.e("SyncManager", "Refusing to upload corrupted entry: ${entry.syncId}")
             return
         }
@@ -814,7 +823,7 @@ class SyncManager(
     }
 
     private suspend fun uploadPaymentInternal(userId: String, payment: Payment, party: Party) {
-        if (isInvalidDouble(payment.amount)) {
+        if (isInvalidDouble(payment.amount, "Payment")) {
             Log.e("SyncManager", "Refusing to upload corrupted payment: ${payment.syncId}")
             return
         }
@@ -826,7 +835,7 @@ class SyncManager(
     }
 
     private suspend fun uploadExpenseInternal(userId: String, expense: Expense) {
-        if (isInvalidDouble(expense.amount)) return
+        if (isInvalidDouble(expense.amount, "Expense")) return
         uploadEntity(userId, "expenses", expense.syncId, mapOf<String, Any>("schemaVersion" to 1, "isDeleted" to expense.isDeleted, 
             "amount" to expense.amount, "category" to expense.category.name,
             "date" to expense.date, "note" to (expense.note ?: ""),
@@ -864,7 +873,7 @@ class SyncManager(
     }
 
     private suspend fun uploadFuelEntryInternal(userId: String, entry: FuelEntry) {
-        if (isInvalidDouble(entry.mileage) || isInvalidDouble(entry.liters) || isInvalidDouble(entry.amount)) return
+        if (isInvalidDouble(entry.mileage, "Fuel Entry") || isInvalidDouble(entry.liters, "Fuel Entry") || isInvalidDouble(entry.amount, "Fuel Entry")) return
         val vehicleSyncId = dao.getVehicleById(entry.vehicleId)?.syncId ?: ""
         uploadEntity(userId, "fuel_entries", entry.syncId, mapOf<String, Any>("schemaVersion" to 1, "isDeleted" to entry.isDeleted, 
             "vehicleSyncId" to vehicleSyncId,
@@ -874,7 +883,7 @@ class SyncManager(
     }
 
     private suspend fun uploadMaintenanceEntryInternal(userId: String, entry: MaintenanceEntry) {
-        if (isInvalidDouble(entry.mileage) || isInvalidDouble(entry.cost)) return
+        if (isInvalidDouble(entry.mileage, "Maintenance") || isInvalidDouble(entry.cost, "Maintenance")) return
         val vehicleSyncId = dao.getVehicleById(entry.vehicleId)?.syncId ?: ""
         uploadEntity(userId, "maintenance_entries", entry.syncId, mapOf<String, Any>("schemaVersion" to 1, "isDeleted" to entry.isDeleted, 
             "vehicleSyncId" to vehicleSyncId,

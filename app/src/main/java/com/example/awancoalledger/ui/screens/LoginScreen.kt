@@ -180,7 +180,13 @@ fun LoginDialog(
                                     onDismiss()
                                     onAuthSuccess(isNewUser)
                                 } else {
-                                    error = msg
+                                    if (msg == "VERIFICATION_REQUIRED") {
+                                        error = "Account created! Please check your email to verify before logging in."
+                                        isSignUp = false
+                                        password = ""
+                                    } else {
+                                        error = msg
+                                    }
                                 }
                             }
                         } else {

@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.awancoalledger.data.Party
 import com.example.awancoalledger.data.PartyType
+import com.example.awancoalledger.data.getBalance
 import com.example.awancoalledger.ui.components.*
 import com.example.awancoalledger.ui.components.bounceClick
 import com.example.awancoalledger.ui.theme.*
@@ -90,8 +91,8 @@ fun PartiesScreen(viewModel: PartiesViewModel, onNavigateToLedger: (Int) -> Unit
                                             .lowercase()
                                             .compareTo(b.party.name.lowercase())
                             PartySortOrder.BALANCE -> {
-                                val balA = viewModel.getBalance(a).absoluteValue
-                                val balB = viewModel.getBalance(b).absoluteValue
+                                val balA = a.getBalance().absoluteValue
+                                val balB = b.getBalance().absoluteValue
                                 balB.compareTo(balA) // Descending absolute balance
                             }
                             PartySortOrder.TYPE ->
@@ -126,7 +127,7 @@ fun PartiesScreen(viewModel: PartiesViewModel, onNavigateToLedger: (Int) -> Unit
                 items(filteredAndSortedParties, key = { it.party.id }) { details ->
                     PartyGridItem(
                             party = details.party,
-                            balance = viewModel.getBalance(details),
+                            balance = details.getBalance(),
                             onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 onNavigateToLedger(details.party.id)
@@ -177,7 +178,7 @@ fun PartiesScreen(viewModel: PartiesViewModel, onNavigateToLedger: (Int) -> Unit
                         }
 
                         Box(modifier = Modifier.padding(horizontal = 16.dp)) {
-                            val balance = remember(details) { viewModel.getBalance(details) }
+                            val balance = remember(details) { details.getBalance() }
                             SwipeableItem(
                                     onEdit = { editingParty = details.party },
                                     onDelete = { partyToDelete = details.party },

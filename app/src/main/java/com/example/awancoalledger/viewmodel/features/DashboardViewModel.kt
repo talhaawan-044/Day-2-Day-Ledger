@@ -3,21 +3,14 @@ package com.example.awancoalledger.viewmodel.features
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.awancoalledger.data.*
+import com.example.awancoalledger.viewmodel.SyncStatus
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.*
 import java.util.Calendar
 import kotlin.math.absoluteValue
 
-data class RecentActivity(
-    val id: String = java.util.UUID.randomUUID().toString(),
-    val partyName: String,
-    val partyType: PartyType,
-    val amount: Double,
-    val date: Long,
-    val isPayment: Boolean,
-    val entry: LedgerEntry? = null,
-    val payment: Payment? = null
-)
+
 
 class DashboardViewModel(
     private val repository: LedgerRepository,
@@ -26,31 +19,57 @@ class DashboardViewModel(
     private val firebaseManager: FirebaseManager
 ) : ViewModel() {
     
-    val ownerName = settingsRepository.getSettingsFlow()
-        .map { settingsRepository.getOwnerName() }
+    val ownerName = settingsRepository.getOwnerNameFlow()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), settingsRepository.getOwnerName())
 
     // Meta / Sync Status
-    val syncStatus = MutableStateFlow(SyncStatus.LocalOnly) // simplify for now
-    val lastSyncTime = MutableStateFlow<Long?>(null)
+    private val _syncStatus = MutableStateFlow(SyncStatus.LocalOnly)
+    val syncStatus = _syncStatus.asStateFlow()
+
+    val syncErrorMessage = MutableStateFlow<String?>(null)
+
+    private val _lastSyncTime = MutableStateFlow<Long?>(null)
+    val lastSyncTime = _lastSyncTime.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            syncManager.syncErrors.collect { error ->
+                syncErrorMessage.value = error
+                _syncStatus.value = SyncStatus.Error
+            }
+        }
+        
+        viewModelScope.launch {
+            firebaseManager.currentUser.collect { user ->
+                if (user != null) {
+                    _syncStatus.value = SyncStatus.Synced
+                } else {
+                    _syncStatus.value = SyncStatus.LocalOnly
+                }
+            }
+        }
+    }
 
     fun forceSync() {
-        syncManager.startSync()
+        if (firebaseManager.currentUser.value == null) {
+            _syncStatus.value = SyncStatus.LocalOnly
+            syncErrorMessage.value = null
+            return
+        }
+        viewModelScope.launch {
+            _syncStatus.value = SyncStatus.Syncing
+            syncErrorMessage.value = null
+            try {
+                syncManager.uploadAll()
+                _syncStatus.value = SyncStatus.Synced
+                _lastSyncTime.value = System.currentTimeMillis()
+            } catch (e: Exception) {
+                android.util.Log.e("DashboardViewModel", "Sync failed", e)
+                _syncStatus.value = SyncStatus.Error
+            }
+        }
     }
 
-    private fun getBalance(details: PartyWithDetails): Double {
-        val totalTruckValue = details.entries.sumOf {
-            ((it.weight ?: 0.0) * (it.rate ?: 0.0)) + (it.fare ?: 0.0)
-        }
-        val totalTheyPaid = details.payments.filter { it.type == PaymentType.THEY_PAID }.sumOf { it.amount }
-        val totalIPaid = details.payments.filter { it.type == PaymentType.I_PAID }.sumOf { it.amount }
-
-        return if (details.party.type == PartyType.BUYER) {
-            totalTruckValue - totalTheyPaid + totalIPaid
-        } else {
-            totalTruckValue - totalIPaid + totalTheyPaid
-        }
-    }
 
     val allPartiesWithDetails = repository.getAllPartiesWithDetails()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -60,7 +79,7 @@ class DashboardViewModel(
 
     val totalReceivable = allPartiesWithDetails.map { detailsList ->
         detailsList.sumOf { details ->
-            val balance = getBalance(details)
+            val balance = details.getBalance()
             if (details.party.type == PartyType.BUYER) {
                 if (balance > 0) balance else 0.0 
             } else {
@@ -71,7 +90,7 @@ class DashboardViewModel(
 
     val totalPayable = allPartiesWithDetails.map { detailsList ->
         detailsList.sumOf { details ->
-            val balance = getBalance(details)
+            val balance = details.getBalance()
             if (details.party.type == PartyType.BUYER) {
                 if (balance < 0) balance.absoluteValue else 0.0 
             } else {
@@ -147,5 +166,3 @@ class DashboardViewModel(
     val kmsRemainingPrimary = MutableStateFlow(0.0)
     val nextOilChangePrimary = MutableStateFlow(0.0)
 }
-
-enum class SyncStatus { LocalOnly, Syncing, Synced, Error }

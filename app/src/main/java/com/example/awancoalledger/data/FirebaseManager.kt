@@ -48,7 +48,12 @@ class FirebaseManager {
     suspend fun signInWithEmail(email: String, password: String): Result<FirebaseUser?> {
         return try {
             val result = auth.signInWithEmailAndPassword(email, password).await()
-            Result.success(result.user)
+            val user = result.user
+            if (user != null && !user.isEmailVerified) {
+                auth.signOut()
+                return Result.failure(Exception("Please verify your email address. Check your inbox for the link."))
+            }
+            Result.success(user)
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -63,6 +68,9 @@ class FirebaseManager {
                     displayName = name
                 }
                 user.updateProfile(profileUpdates).await()
+                user.sendEmailVerification().await()
+                auth.signOut()
+                return Result.failure(Exception("VERIFICATION_REQUIRED"))
             }
             Result.success(user)
         } catch (e: Exception) {
@@ -92,6 +100,9 @@ class FirebaseManager {
         val user = auth.currentUser ?: return Result.failure(Exception("No user logged in"))
         return try {
             val result = user.linkWithCredential(credential).await()
+            if (credential.provider == "password") {
+                result.user?.sendEmailVerification()?.await()
+            }
             Result.success(result.user)
         } catch (e: com.google.firebase.auth.FirebaseAuthUserCollisionException) {
             Result.failure(e)

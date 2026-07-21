@@ -248,7 +248,7 @@ fun SettingsScreen(
                 if (unusedModules.isNotEmpty()) {
                     SettingsSection(title = "SHORTCUTS") {
                         unusedModules.forEachIndexed { index, tab ->
-                            SettingsRow(icon = tab.icon, title = tab.title, value = "ntss " + tab.title, color = MaterialTheme.colorScheme.primary, isLast = index == unusedModules.size - 1) {
+                            SettingsRow(icon = tab.icon, title = tab.title, value = "", color = MaterialTheme.colorScheme.primary, isLast = index == unusedModules.size - 1) {
                                 val currentTime = System.currentTimeMillis()
                                 if (currentTime - lastClickTime > 1000) {
                                     lastClickTime = currentTime

@@ -283,3 +283,30 @@ data class MaintenanceEntry(
     val lastUpdated: Long = System.currentTimeMillis(),
     val isDeleted: Boolean = false
 )
+
+data class RecentActivity(
+    val id: String = java.util.UUID.randomUUID().toString(),
+    val partyName: String,
+    val partyType: PartyType,
+    val amount: Double,
+    val date: Long,
+    val isPayment: Boolean,
+    val entry: LedgerEntry? = null,
+    val payment: Payment? = null
+)
+
+fun PartyWithDetails.getBalance(): Double {
+    val totalTruckValue = entries.sumOf {
+        ((it.weight ?: 0.0) * (it.rate ?: 0.0)) + (it.fare ?: 0.0)
+    }
+    val totalTheyPaid = payments.filter { it.type == PaymentType.THEY_PAID }.sumOf { it.amount }
+    val totalIPaid = payments.filter { it.type == PaymentType.I_PAID }.sumOf { it.amount }
+
+    return if (party.type == PartyType.BUYER) {
+        // Buyer: He owes for coal (+), he pays me (-), I give him money (+)
+        totalTruckValue - totalTheyPaid + totalIPaid
+    } else {
+        // Supplier: I owe him for coal (+), I pay him (-), he gives me money (+)
+        totalTruckValue - totalIPaid + totalTheyPaid
+    }
+}

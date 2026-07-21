@@ -35,8 +35,8 @@ class SettingsViewModel(
     val isAppLockEnabled = settingsRepository.getSettingsFlow()
         .map { settingsRepository.isAppLockEnabled() }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), settingsRepository.isAppLockEnabled())
 
-    val ownerName = settingsRepository.getSettingsFlow()
-        .map { settingsRepository.getOwnerName() }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), settingsRepository.getOwnerName())
+    val ownerName = settingsRepository.getOwnerNameFlow()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), settingsRepository.getOwnerName())
 
     val businessName = settingsRepository.getSettingsFlow()
         .map { settingsRepository.getBusinessName() }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), settingsRepository.getBusinessName())
@@ -48,11 +48,8 @@ class SettingsViewModel(
         .map { settingsRepository.getBusinessAddress() }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), settingsRepository.getBusinessAddress())
 
     val oilChangeInterval = settingsRepository.getSettingsFlow().map { settingsRepository.getOilChangeInterval() }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), settingsRepository.getOilChangeInterval())
-    val countryConfig = settingsRepository.getSettingsFlow()
-        .map { 
-            val code = settingsRepository.getDefaultCountryCode()
-            SUPPORTED_COUNTRIES.find { it.code == code } ?: CountryConfig("Custom", code, 15)
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SUPPORTED_COUNTRIES.find { it.code == settingsRepository.getDefaultCountryCode() } ?: CountryConfig("Custom", settingsRepository.getDefaultCountryCode(), 15))
+    val countryConfig = settingsRepository.getCountryConfigFlow()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SUPPORTED_COUNTRIES.find { it.code == settingsRepository.getDefaultCountryCode() } ?: CountryConfig("Custom", settingsRepository.getDefaultCountryCode(), 15))
 
     val isBiometricsEnabled = settingsRepository.getSettingsFlow()
         .map { settingsRepository.isBiometricsEnabled() }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), settingsRepository.isBiometricsEnabled())

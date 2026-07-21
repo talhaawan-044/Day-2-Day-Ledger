@@ -38,6 +38,7 @@ import com.example.awancoalledger.data.PartyType
 import com.example.awancoalledger.data.LedgerEntry
 import com.example.awancoalledger.data.Payment
 import com.example.awancoalledger.data.PaymentType
+import com.example.awancoalledger.data.getBalance
 import com.example.awancoalledger.ui.components.*
 import com.example.awancoalledger.ui.theme.*
 import com.example.awancoalledger.viewmodel.features.LedgerDetailViewModel
@@ -101,7 +102,7 @@ fun LedgerDetailScreen(
         return
     }
 
-    val balance = viewModel.getBalance(details)
+    val balance = details.getBalance()
     val isBuyer = details.party.type == PartyType.BUYER
     
     // For Buyer, positive balance means they owe us (Receivable)

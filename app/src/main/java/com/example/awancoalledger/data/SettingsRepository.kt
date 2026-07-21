@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.Flow
 
 class SettingsRepository(context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences("awan_ledger_settings", Context.MODE_PRIVATE)
@@ -93,5 +95,16 @@ class SettingsRepository(context: Context) {
         prefs.registerOnSharedPreferenceChangeListener(listener)
         trySend(Unit)
         awaitClose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
+    }
+
+    fun getCountryConfigFlow(): Flow<CountryConfig> {
+        return getSettingsFlow().map {
+            val code = getDefaultCountryCode()
+            SUPPORTED_COUNTRIES.find { it.code == code } ?: CountryConfig("Custom", code, 15)
+        }
+    }
+
+    fun getOwnerNameFlow(): Flow<String> {
+        return getSettingsFlow().map { getOwnerName() }
     }
 }
