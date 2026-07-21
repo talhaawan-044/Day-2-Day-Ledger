@@ -299,4 +299,23 @@ interface LedgerDao {
 
     @Query("SELECT * FROM maintenance_entries WHERE vehicleId = :vehicleId AND isDeleted = 0 ORDER BY date DESC")
     fun getMaintenanceEntriesForVehicle(vehicleId: Int): Flow<List<MaintenanceEntry>>
+
+    // App Notifications
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertNotification(notification: AppNotification)
+
+    @Query("SELECT * FROM app_notifications ORDER BY timestamp DESC")
+    fun getAllNotifications(): Flow<List<AppNotification>>
+
+    @Query("SELECT COUNT(*) FROM app_notifications WHERE isRead = 0")
+    fun getUnreadNotificationCount(): Flow<Int>
+
+    @Query("UPDATE app_notifications SET isRead = 1 WHERE isRead = 0")
+    suspend fun markAllNotificationsAsRead()
+
+    @Query("UPDATE app_notifications SET isRead = 1 WHERE id = :id")
+    suspend fun markNotificationAsRead(id: Int)
+
+    @Query("DELETE FROM app_notifications WHERE id NOT IN (SELECT id FROM app_notifications ORDER BY timestamp DESC LIMIT :limit)")
+    suspend fun trimNotifications(limit: Int = 100)
 }

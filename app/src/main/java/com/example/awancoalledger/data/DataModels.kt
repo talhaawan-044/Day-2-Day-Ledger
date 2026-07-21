@@ -26,6 +26,20 @@ enum class ReminderRecurrence {
     NONE, DAILY, WEEKLY, BI_WEEKLY, MONTHLY, YEARLY, CUSTOM
 }
 
+enum class NotificationType {
+    SYNC, ADD, DELETE, UPDATE, ERROR, INFO
+}
+
+@Entity(tableName = "app_notifications")
+data class AppNotification(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val title: String,
+    val message: String,
+    val timestamp: Long = System.currentTimeMillis(),
+    val type: NotificationType = NotificationType.INFO,
+    val isRead: Boolean = false
+)
+
 data class CountryConfig(val name: String, val code: String, val maxDigits: Int)
 
 val SUPPORTED_COUNTRIES = listOf(

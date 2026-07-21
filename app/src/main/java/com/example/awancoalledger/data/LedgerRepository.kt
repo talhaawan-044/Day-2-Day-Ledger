@@ -23,24 +23,56 @@ class LedgerRepository(private val ledgerDao: LedgerDao) {
         )
     }
     suspend fun getPartyById(id: Int): Party? = ledgerDao.getPartyById(id)
-    suspend fun upsertParty(party: Party) = ledgerDao.upsertParty(party)
-    suspend fun deleteParty(party: Party) = ledgerDao.upsertParty(party.copy(isDeleted = true, lastUpdated = System.currentTimeMillis()))
+    suspend fun upsertParty(party: Party) {
+        ledgerDao.upsertParty(party)
+        val action = if (party.id == 0) "Added" else "Updated"
+        val type = if (party.id == 0) NotificationType.ADD else NotificationType.UPDATE
+        logNotification("$action Party", "$action party ${party.name}", type)
+    }
+    suspend fun deleteParty(party: Party) {
+        ledgerDao.upsertParty(party.copy(isDeleted = true, lastUpdated = System.currentTimeMillis()))
+        logNotification("Deleted Party", "Deleted party ${party.name}", NotificationType.DELETE)
+    }
 
     // Ledger Entries
     fun getEntriesForParty(partyId: Int): Flow<List<LedgerEntry>> = ledgerDao.getEntriesForParty(partyId)
     fun getRecentEntries(): Flow<List<LedgerEntry>> = ledgerDao.getRecentEntries()
-    suspend fun insertEntry(entry: LedgerEntry) = ledgerDao.insertEntry(entry)
-    suspend fun deleteEntry(entry: LedgerEntry) = ledgerDao.insertEntry(entry.copy(isDeleted = true, lastUpdated = System.currentTimeMillis()))
+    suspend fun insertEntry(entry: LedgerEntry) {
+        ledgerDao.insertEntry(entry)
+        val action = if (entry.id == 0) "Added" else "Updated"
+        val type = if (entry.id == 0) NotificationType.ADD else NotificationType.UPDATE
+        logNotification("$action Ledger Entry", "$action entry of ${entry.weight ?: 0.0} tons", type)
+    }
+    suspend fun deleteEntry(entry: LedgerEntry) {
+        ledgerDao.insertEntry(entry.copy(isDeleted = true, lastUpdated = System.currentTimeMillis()))
+        logNotification("Deleted Ledger Entry", "Deleted entry of ${entry.weight ?: 0.0} tons", NotificationType.DELETE)
+    }
 
     // Payments
     fun getPaymentsForParty(partyId: Int): Flow<List<Payment>> = ledgerDao.getPaymentsForParty(partyId)
-    suspend fun insertPayment(payment: Payment) = ledgerDao.insertPayment(payment)
-    suspend fun deletePayment(payment: Payment) = ledgerDao.insertPayment(payment.copy(isDeleted = true, lastUpdated = System.currentTimeMillis()))
+    suspend fun insertPayment(payment: Payment) {
+        ledgerDao.insertPayment(payment)
+        val action = if (payment.id == 0) "Added" else "Updated"
+        val type = if (payment.id == 0) NotificationType.ADD else NotificationType.UPDATE
+        logNotification("$action Payment", "$action payment of PKR ${payment.amount}", type)
+    }
+    suspend fun deletePayment(payment: Payment) {
+        ledgerDao.insertPayment(payment.copy(isDeleted = true, lastUpdated = System.currentTimeMillis()))
+        logNotification("Deleted Payment", "Deleted payment of PKR ${payment.amount}", NotificationType.DELETE)
+    }
 
     // Expenses
     fun getAllExpenses(): Flow<List<Expense>> = ledgerDao.getAllExpenses()
-    suspend fun insertExpense(expense: Expense) = ledgerDao.insertExpense(expense)
-    suspend fun deleteExpense(expense: Expense) = ledgerDao.insertExpense(expense.copy(isDeleted = true, lastUpdated = System.currentTimeMillis()))
+    suspend fun insertExpense(expense: Expense) {
+        ledgerDao.insertExpense(expense)
+        val action = if (expense.id == 0) "Added" else "Updated"
+        val type = if (expense.id == 0) NotificationType.ADD else NotificationType.UPDATE
+        logNotification("$action Expense", "$action expense of PKR ${expense.amount}", type)
+    }
+    suspend fun deleteExpense(expense: Expense) {
+        ledgerDao.insertExpense(expense.copy(isDeleted = true, lastUpdated = System.currentTimeMillis()))
+        logNotification("Deleted Expense", "Deleted expense of PKR ${expense.amount}", NotificationType.DELETE)
+    }
 
     // Reminder Lists
     fun getAllReminderLists(): Flow<List<ReminderList>> = ledgerDao.getAllReminderLists()
@@ -146,4 +178,22 @@ class LedgerRepository(private val ledgerDao: LedgerDao) {
     suspend fun clearAllData() {
         ledgerDao.clearAllData()
     }
+
+    // App Notifications
+    suspend fun insertNotification(notification: AppNotification) {
+        ledgerDao.insertNotification(notification)
+        ledgerDao.trimNotifications(100) // Keep history limited
+    }
+
+    suspend fun logNotification(title: String, message: String, type: NotificationType = NotificationType.INFO) {
+        insertNotification(AppNotification(title = title, message = message, type = type))
+    }
+
+    fun getAllNotifications(): Flow<List<AppNotification>> = ledgerDao.getAllNotifications()
+
+    fun getUnreadNotificationCount(): Flow<Int> = ledgerDao.getUnreadNotificationCount()
+
+    suspend fun markAllNotificationsAsRead() = ledgerDao.markAllNotificationsAsRead()
+
+    suspend fun markNotificationAsRead(id: Int) = ledgerDao.markNotificationAsRead(id)
 }

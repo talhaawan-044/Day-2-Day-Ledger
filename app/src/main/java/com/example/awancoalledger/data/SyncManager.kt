@@ -665,11 +665,18 @@ class SyncManager(
             uploadReminderInternal(userId, reminder, listSyncId)
         }
 
-        dao.getAllFuelEntriesList().forEach { uploadFuelEntryInternal(userId, it) }
-        dao.getAllMaintenanceEntriesList().forEach { uploadMaintenanceEntryInternal(userId, it) }
-        dao.getAllVehiclesList().forEach { uploadVehicleInternal(userId, it) }
+        try {
+            dao.getAllFuelEntriesList().forEach { uploadFuelEntryInternal(userId, it) }
+            dao.getAllMaintenanceEntriesList().forEach { uploadMaintenanceEntryInternal(userId, it) }
+            dao.getAllVehiclesList().forEach { uploadVehicleInternal(userId, it) }
 
-        uploadSettingsInternal(userId)
+            uploadSettingsInternal(userId)
+            
+            repository.logNotification("Sync Completed", "Data synced with cloud successfully", NotificationType.SYNC)
+        } catch (e: Exception) {
+            repository.logNotification("Sync Failed", "Failed to sync data: ${e.message}", NotificationType.ERROR)
+            throw e
+        }
     }
 
     // ── Single-entity upload helpers (called right after local Room insert) ────

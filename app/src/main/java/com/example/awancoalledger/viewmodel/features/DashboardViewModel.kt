@@ -22,6 +22,19 @@ class DashboardViewModel(
     val ownerName = settingsRepository.getOwnerNameFlow()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), settingsRepository.getOwnerName())
 
+    // Notifications
+    val notifications = repository.getAllNotifications()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val unreadNotificationCount = repository.getUnreadNotificationCount()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    fun markAllNotificationsAsRead() {
+        viewModelScope.launch {
+            repository.markAllNotificationsAsRead()
+        }
+    }
+
     // Meta / Sync Status
     private val _syncStatus = MutableStateFlow(SyncStatus.LocalOnly)
     val syncStatus = _syncStatus.asStateFlow()

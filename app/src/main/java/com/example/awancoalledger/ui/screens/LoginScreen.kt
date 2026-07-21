@@ -144,9 +144,9 @@ fun LoginDialog(
                 )
             )
 
-            if (error != null) {
+            error?.let { msg ->
                 Text(
-                    text = error,
+                    text = msg,
                     color = Color(0xFFFF3B30), // iOS Red
                     fontSize = 13.sp,
                     modifier = Modifier.padding(bottom = 16.dp),

@@ -102,10 +102,14 @@ fun HomeScreen(
     val notesCount by viewModel.notesCount.collectAsState()
     val kmsRemaining by viewModel.kmsRemainingPrimary.collectAsState()
     val nextOilChange by viewModel.nextOilChangePrimary.collectAsState()
+    
+    val notifications by viewModel.notifications.collectAsState()
+    val unreadNotificationCount by viewModel.unreadNotificationCount.collectAsState()
 
     var isRefreshing by remember { mutableStateOf(false) }
     val pullRefreshState = rememberPullToRefreshState()
     var showSyncDialog by remember { mutableStateOf(false) }
+    var showNotifications by remember { mutableStateOf(false) }
     var fabExpanded by remember { mutableStateOf(false) }
 
     // Preview State
@@ -140,10 +144,12 @@ fun HomeScreen(
                     currentDate = currentDate,
                     ownerName = ownerName,
                     syncStatus = syncStatus,
+                    unreadCount = unreadNotificationCount,
                     onSyncClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         showSyncDialog = true
-                    }
+                    },
+                    onNotificationsClick = { showNotifications = true }
             )
 
             Spacer(Modifier.height(12.dp))
@@ -224,11 +230,19 @@ fun HomeScreen(
         // ── Sync Detail Dialog ────────────────────────────────────────────────
         if (showSyncDialog) {
             SyncDetailDialog(
-                status = syncStatus,
-                lastSyncTime = lastSyncTime,
-                errorMessage = syncErrorMessage,
-                onDismiss = { showSyncDialog = false },
-                onForceSync = { viewModel.forceSync(); showSyncDialog = false }
+                    status = syncStatus,
+                    lastSyncTime = lastSyncTime,
+                    errorMessage = syncErrorMessage,
+                    onDismiss = { showSyncDialog = false },
+                    onForceSync = onRefresh
+            )
+        }
+        
+        if (showNotifications) {
+            NotificationSheet(
+                notifications = notifications,
+                onDismiss = { showNotifications = false },
+                onMarkAllRead = { viewModel.markAllNotificationsAsRead() }
             )
         }
 
@@ -274,7 +288,9 @@ fun HomeHeader(
         currentDate: String,
         ownerName: String,
         syncStatus: SyncStatus,
-        onSyncClick: () -> Unit
+        unreadCount: Int,
+        onSyncClick: () -> Unit,
+        onNotificationsClick: () -> Unit
 ) {
     val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
     val isDaytime = hour in 6..18
@@ -330,7 +346,35 @@ fun HomeHeader(
                     fontWeight = FontWeight.Bold
             )
         }
-        SyncBadge(status = syncStatus, onClick = onSyncClick)
+        
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            // Notification Bell
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), CircleShape)
+                    .clickable { onNotificationsClick() },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Notifications,
+                    contentDescription = "Notifications",
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(20.dp)
+                )
+                if (unreadCount > 0) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(top = 8.dp, end = 8.dp)
+                            .size(8.dp)
+                            .background(ErrorRed, CircleShape)
+                    )
+                }
+            }
+            Spacer(Modifier.width(8.dp))
+            SyncBadge(status = syncStatus, onClick = onSyncClick)
+        }
     }
 }
 
