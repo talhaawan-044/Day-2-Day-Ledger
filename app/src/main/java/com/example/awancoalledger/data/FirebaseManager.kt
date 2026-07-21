@@ -59,6 +59,34 @@ class FirebaseManager {
         }
     }
 
+    suspend fun applyActionCode(code: String): Result<Unit> {
+        return try {
+            auth.applyActionCode(code).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun resendVerificationEmail(email: String, password: String): Result<Unit> {
+        return try {
+            val result = auth.signInWithEmailAndPassword(email, password).await()
+            val user = result.user
+            if (user != null && !user.isEmailVerified) {
+                user.sendEmailVerification().await()
+                auth.signOut()
+                Result.success(Unit)
+            } else if (user != null && user.isEmailVerified) {
+                auth.signOut()
+                Result.failure(Exception("Email is already verified. You can sign in."))
+            } else {
+                Result.failure(Exception("User not found."))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun signUpWithEmail(email: String, password: String, name: String): Result<FirebaseUser?> {
         return try {
             val result = auth.createUserWithEmailAndPassword(email, password).await()

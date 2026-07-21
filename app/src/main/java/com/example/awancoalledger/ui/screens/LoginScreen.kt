@@ -48,6 +48,7 @@ fun LoginDialog(
     var fullName by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    var pastedLink by remember { mutableStateOf("") }
 
     val context = LocalContext.current
     val isAnonymous by viewModel.isAnonymous.collectAsState(initial = true)
@@ -149,9 +150,86 @@ fun LoginDialog(
                     text = msg,
                     color = Color(0xFFFF3B30), // iOS Red
                     fontSize = 13.sp,
-                    modifier = Modifier.padding(bottom = 16.dp),
+                    modifier = Modifier.padding(bottom = 8.dp),
                     textAlign = TextAlign.Center
                 )
+                if (msg == "Please verify your email address. Check your inbox for the link.") {
+                    Text(
+                        text = "Resend Verification Email",
+                        color = Color(0xFF0A84FF),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable {
+                                if (isLoading) return@clickable
+                                isLoading = true
+                                error = null
+                                viewModel.resendVerificationEmail(email, password) { success, resendMsg ->
+                                    isLoading = false
+                                    if (success) {
+                                        error = "A new verification link has been sent to your inbox."
+                                    } else {
+                                        error = resendMsg ?: "Failed to resend."
+                                    }
+                                }
+                            }
+                            .padding(8.dp)
+                            .padding(bottom = 8.dp)
+                    )
+                    
+                    Text(
+                        text = "Web browser failing? Paste the link here:",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                    OutlinedTextField(
+                        value = pastedLink,
+                        onValueChange = { pastedLink = it },
+                        placeholder = { Text("https://day-2-day...", fontSize = 13.sp) },
+                        modifier = Modifier.fillMaxWidth().height(50.dp),
+                        singleLine = true,
+                        textStyle = androidx.compose.ui.text.TextStyle(fontSize = 13.sp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFF0A84FF),
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                        )
+                    )
+                    if (pastedLink.isNotBlank()) {
+                        Button(
+                            onClick = {
+                                val oobCode = try {
+                                    android.net.Uri.parse(pastedLink).getQueryParameter("oobCode")
+                                } catch (e: Exception) { null }
+                                
+                                if (oobCode != null) {
+                                    isLoading = true
+                                    error = null
+                                    viewModel.applyActionCode(oobCode) { success, msg ->
+                                        isLoading = false
+                                        if (success) {
+                                            error = "Email verified! You can now Sign In."
+                                            pastedLink = ""
+                                        } else {
+                                            error = msg ?: "Verification failed."
+                                        }
+                                    }
+                                } else {
+                                    error = "Invalid link format. Please copy the entire link."
+                                }
+                            },
+                            modifier = Modifier.padding(top = 8.dp).height(40.dp),
+                            shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF34C759)) // iOS Green
+                        ) {
+                            Text("Verify In-App", fontSize = 13.sp)
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                } else {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
             }
 
             // Primary Button

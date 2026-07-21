@@ -115,6 +115,28 @@ class AuthViewModel(
         }
     }
 
+    fun resendVerificationEmail(email: String, psw: String, onResult: (Boolean, String?) -> Unit) {
+        viewModelScope.launch {
+            val result = firebaseManager.resendVerificationEmail(email, psw)
+            if (result.isSuccess) {
+                onResult(true, null)
+            } else {
+                onResult(false, result.exceptionOrNull()?.localizedMessage)
+            }
+        }
+    }
+
+    fun applyActionCode(code: String, onResult: (Boolean, String?) -> Unit) {
+        viewModelScope.launch {
+            val result = firebaseManager.applyActionCode(code)
+            if (result.isSuccess) {
+                onResult(true, null)
+            } else {
+                onResult(false, result.exceptionOrNull()?.localizedMessage)
+            }
+        }
+    }
+
     fun signUpWithEmail(email: String, psw: String, name: String, onResult: (Boolean, Boolean, String?) -> Unit) {
         viewModelScope.launch {
             isPendingLoginConfirmation = true

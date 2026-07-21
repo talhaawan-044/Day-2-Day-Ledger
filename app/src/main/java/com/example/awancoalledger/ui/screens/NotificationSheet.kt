@@ -21,6 +21,8 @@ import com.example.awancoalledger.data.NotificationType
 import com.example.awancoalledger.ui.theme.*
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,6 +31,8 @@ fun NotificationSheet(
     onDismiss: () -> Unit,
     onMarkAllRead: () -> Unit
 ) {
+    var selectedNotification by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<AppNotification?>(null) }
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
@@ -80,16 +84,46 @@ fun NotificationSheet(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(notifications, key = { it.id }) { notification ->
-                        NotificationItem(notification = notification)
+                        NotificationItem(
+                            notification = notification,
+                            onClick = {
+                                if (notification.details != null) {
+                                    selectedNotification = notification
+                                }
+                            }
+                        )
                     }
                 }
             }
         }
     }
+
+    selectedNotification?.let { notification ->
+        AlertDialog(
+            onDismissRequest = { selectedNotification = null },
+            title = {
+                Text(text = notification.title, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            },
+            text = {
+                Text(
+                    text = notification.details ?: "",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { selectedNotification = null }) {
+                    Text("Close", color = MaterialTheme.colorScheme.primary)
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(16.dp)
+        )
+    }
 }
 
 @Composable
-fun NotificationItem(notification: AppNotification) {
+fun NotificationItem(notification: AppNotification, onClick: () -> Unit = {}) {
     val (icon, color) = when (notification.type) {
         NotificationType.SYNC -> Icons.Outlined.CloudSync to SuccessGreen
         NotificationType.ADD -> Icons.Outlined.AddCircleOutline to MaterialTheme.colorScheme.primary
@@ -105,7 +139,8 @@ fun NotificationItem(notification: AppNotification) {
         color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(16.dp),
         tonalElevation = 2.dp,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick
     ) {
         Row(
             modifier = Modifier.padding(16.dp),

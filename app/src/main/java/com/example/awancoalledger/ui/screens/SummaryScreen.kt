@@ -304,7 +304,7 @@ fun HomeHeader(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Bottom
     ) {
-        Column {
+        Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
             // Date chip
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
@@ -325,13 +325,13 @@ fun HomeHeader(
             Spacer(Modifier.height(6.dp))
             // Greeting + name
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
+               /* Icon(
                         greetIcon,
                         contentDescription = null,
                         tint = iconTint,
                         modifier = Modifier.size(26.dp)
                 )
-                Spacer(Modifier.width(8.dp))
+                Spacer(Modifier.width(8.dp)) */
                 Text(
                         timeGreeting(),
                         color = MaterialTheme.colorScheme.onSurface,
@@ -425,7 +425,9 @@ fun SyncBadge(status: SyncStatus, onClick: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = 0.5.sp
+                    letterSpacing = 0.5.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
             )
         }
     }

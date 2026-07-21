@@ -621,21 +621,26 @@ class SyncManager(
     suspend fun uploadAll() {
         val userId = firebaseManager.getUserId() ?: return
 
-        dao.getAllPartiesList().forEach { uploadPartyInternal(userId, it) }
+        val allParties = dao.getAllPartiesList()
+        allParties.forEach { uploadPartyInternal(userId, it) }
 
-        dao.getAllEntriesList().forEach { entry ->
-            val party = dao.getPartyById(entry.partyId) ?: return@forEach
+        val allEntries = dao.getAllEntriesList()
+        allEntries.forEach { entry ->
+            val party = allParties.find { it.id == entry.partyId } ?: return@forEach
             uploadEntryInternal(userId, entry, party)
         }
 
-        dao.getAllPaymentsList().forEach { payment ->
-            val party = dao.getPartyById(payment.partyId) ?: return@forEach
+        val allPayments = dao.getAllPaymentsList()
+        allPayments.forEach { payment ->
+            val party = allParties.find { it.id == payment.partyId } ?: return@forEach
             uploadPaymentInternal(userId, payment, party)
         }
 
-        dao.getAllExpensesList().forEach { uploadExpenseInternal(userId, it) }
+        val allExpenses = dao.getAllExpensesList()
+        allExpenses.forEach { uploadExpenseInternal(userId, it) }
 
-        dao.getAllStocksList().forEach { stock ->
+        val allStocks = dao.getAllStocksList()
+        allStocks.forEach { stock ->
             uploadEntity(userId, "stocks", stock.syncId, mapOf<String, Any>("schemaVersion" to 1, "isDeleted" to stock.isDeleted, 
                 "mineName" to stock.mineName, "totalWeight" to stock.totalWeight,
                 "peakWeight" to stock.peakWeight, "lastWarehouse" to (stock.lastWarehouse ?: ""),
@@ -643,10 +648,11 @@ class SyncManager(
             ))
         }
 
-        dao.getAllFoldersList().forEach { uploadFolderInternal(userId, it) }
-
         val allFolders = dao.getAllFoldersList()
-        dao.getAllNotesList().forEach { note ->
+        allFolders.forEach { uploadFolderInternal(userId, it) }
+
+        val allNotes = dao.getAllNotesList()
+        allNotes.forEach { note ->
             val folderSyncId = if (note.folderId != null) allFolders.find { it.id == note.folderId }?.syncId else null
             uploadNoteInternal(userId, note, folderSyncId)
         }
@@ -660,19 +666,41 @@ class SyncManager(
             ))
         }
 
-        dao.getAllRemindersList().forEach { reminder ->
+        val allReminders = dao.getAllRemindersList()
+        allReminders.forEach { reminder ->
             val listSyncId = allLists.find { it.id == reminder.listId }?.syncId ?: return@forEach
             uploadReminderInternal(userId, reminder, listSyncId)
         }
 
         try {
-            dao.getAllFuelEntriesList().forEach { uploadFuelEntryInternal(userId, it) }
-            dao.getAllMaintenanceEntriesList().forEach { uploadMaintenanceEntryInternal(userId, it) }
-            dao.getAllVehiclesList().forEach { uploadVehicleInternal(userId, it) }
+            val allFuel = dao.getAllFuelEntriesList()
+            allFuel.forEach { uploadFuelEntryInternal(userId, it) }
+            
+            val allMaintenance = dao.getAllMaintenanceEntriesList()
+            allMaintenance.forEach { uploadMaintenanceEntryInternal(userId, it) }
+            
+            val allVehicles = dao.getAllVehiclesList()
+            allVehicles.forEach { uploadVehicleInternal(userId, it) }
 
             uploadSettingsInternal(userId)
             
-            repository.logNotification("Sync Completed", "Data synced with cloud successfully", NotificationType.SYNC)
+            val details = StringBuilder().apply {
+                append("Items Synced to Cloud:\n\n")
+                append("• Parties: ${allParties.size}\n")
+                append("• Ledger Entries: ${allEntries.size}\n")
+                append("• Payments: ${allPayments.size}\n")
+                append("• Expenses: ${allExpenses.size}\n")
+                append("• Stocks: ${allStocks.size}\n")
+                append("• Folders: ${allFolders.size}\n")
+                append("• Notes: ${allNotes.size}\n")
+                append("• Reminder Lists: ${allLists.size}\n")
+                append("• Reminders: ${allReminders.size}\n")
+                append("• Vehicles: ${allVehicles.size}\n")
+                append("• Fuel Entries: ${allFuel.size}\n")
+                append("• Maintenance: ${allMaintenance.size}")
+            }.toString()
+            
+            repository.logNotification("Sync Completed", "Data synced with cloud successfully", NotificationType.SYNC, details)
         } catch (e: Exception) {
             repository.logNotification("Sync Failed", "Failed to sync data: ${e.message}", NotificationType.ERROR)
             throw e

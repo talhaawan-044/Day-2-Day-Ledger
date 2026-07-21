@@ -185,8 +185,8 @@ class LedgerRepository(private val ledgerDao: LedgerDao) {
         ledgerDao.trimNotifications(100) // Keep history limited
     }
 
-    suspend fun logNotification(title: String, message: String, type: NotificationType = NotificationType.INFO) {
-        insertNotification(AppNotification(title = title, message = message, type = type))
+    suspend fun logNotification(title: String, message: String, type: NotificationType = NotificationType.INFO, details: String? = null) {
+        insertNotification(AppNotification(title = title, message = message, type = type, details = details))
     }
 
     fun getAllNotifications(): Flow<List<AppNotification>> = ledgerDao.getAllNotifications()

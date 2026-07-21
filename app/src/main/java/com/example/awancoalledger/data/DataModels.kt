@@ -37,7 +37,8 @@ data class AppNotification(
     val message: String,
     val timestamp: Long = System.currentTimeMillis(),
     val type: NotificationType = NotificationType.INFO,
-    val isRead: Boolean = false
+    val isRead: Boolean = false,
+    val details: String? = null
 )
 
 data class CountryConfig(val name: String, val code: String, val maxDigits: Int)

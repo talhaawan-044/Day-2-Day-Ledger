@@ -3,7 +3,7 @@ package com.example.awancoalledger.data
 import android.content.Context
 import androidx.room.*
 
-@Database(entities = [Party::class, LedgerEntry::class, Payment::class, Expense::class, Reminder::class, ReminderList::class, Stock::class, StockEntry::class, Note::class, Folder::class, FuelEntry::class, MaintenanceEntry::class, Vehicle::class, AppNotification::class], version = 19, exportSchema = false)
+@Database(entities = [Party::class, LedgerEntry::class, Payment::class, Expense::class, Reminder::class, ReminderList::class, Stock::class, StockEntry::class, Note::class, Folder::class, FuelEntry::class, MaintenanceEntry::class, Vehicle::class, AppNotification::class], version = 20, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class LedgerDatabase : RoomDatabase() {
     abstract fun ledgerDao(): LedgerDao
@@ -50,6 +50,12 @@ abstract class LedgerDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_19_20 = object : androidx.room.migration.Migration(19, 20) {
+            override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE app_notifications ADD COLUMN details TEXT")
+            }
+        }
+
         fun getDatabase(context: Context): LedgerDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -57,7 +63,7 @@ abstract class LedgerDatabase : RoomDatabase() {
                     LedgerDatabase::class.java,
                     "ledger_database"
                 )
-                .addMigrations(MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19)
+                .addMigrations(MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20)
                 .build()
                 INSTANCE = instance
                 instance
